@@ -1,0 +1,7 @@
+citation_keys
+default.profraw
+*.aux
+*.bbl
+*.blg
+*.out
+*.synctex.gz

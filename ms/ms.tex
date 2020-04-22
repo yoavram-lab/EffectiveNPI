@@ -1,0 +1,206 @@
+\documentclass[12pt]{extarticle}
+\usepackage{geometry}
+\geometry{
+a4paper,
+total={170mm,257mm},
+left=20mm,
+top=20mm,
+headheight=12pt
+}
+
+%\usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+\usepackage{graphicx} % Use pdf, png, jpg, or eps§ with pdflatex; use eps in DVI mode
+% TeX will automatically convert eps --> pdf in pdflatex		
+
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{commath}
+\usepackage{longtable}
+\usepackage[hyphens]{url}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[unicode=true,colorlinks=true,urlcolor=CadetBlue,citecolor=black,linkcolor=black]{hyperref}
+\PassOptionsToPackage{hyphens}{url} % url is loaded by hyperref
+\usepackage{authblk}
+\usepackage{lipsum}
+\usepackage{multicol}
+\usepackage{titlesec}	
+\usepackage{caption}
+\usepackage{enumitem}
+      
+%SetFonts
+% newtxtext+newtxmath
+\usepackage{newtxtext} %loads helv for ss, txtt for tt
+\usepackage{amsmath}
+\usepackage[bigdelims]{newtxmath}
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+%SetFonts
+
+% less space before sections 
+% \@startsection {NAME}{LEVEL}{INDENT}{BEFORESKIP}{AFTERSKIP}{STYLE} 
+%            optional * [ALTHEADING]{HEADING} 
+\makeatletter
+ \renewcommand\section{\@startsection {section}{1}{\z@}%
+     {-2.5ex \@plus -1ex \@minus -.2ex}%
+     {1.3ex \@plus.2ex}%
+    {\Large\bfseries}}
+    
+% Species names
+%% Meta-Command for defining new species macros
+\usepackage{xspace}
+
+\newcommand{\species}[3]{%
+  \newcommand{#1}{\gdef#1{\textit{#3}\xspace}\textit{#2}\xspace}}
+  
+\species{\yeast}{Saccharomyces cerevisiae}{S.~cerevisiae}
+\species{\calbicans}{Candida albicans}{C.~albicans}
+\species{\cneoformans}{Cryptococcus neoformans}{C.~neoformans}
+
+% line numbers
+ \usepackage[displaymath, mathlines]{lineno}
+ \renewcommand\linenumberfont{\normalfont\small\sffamily}
+\linenumbers
+% \modulolinenumbers[2]
+
+% Yoav & Lee commands
+\newcommand*{\tr}{^\intercal}
+\let\vec\mathbf
+\newcommand{\matrx}[1]{{\left[ \stackrel{}{#1}\right]}}
+\newcommand{\diag}[1]{\mbox{diag}\matrx{#1}}
+\newcommand{\goesto}{\rightarrow}
+\newcommand{\dspfrac}[2]{\frac{\displaystyle #1}{\displaystyle #2} }
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{lemma}{Lemma}
+\newtheorem{remark}{Remark}
+\newtheorem{result}{Result}
+\renewcommand\qedsymbol{} % no square at end of proof
+\newcommand{\cl}{\mathbf{L}}
+\newcommand{\cj}{\mathbf{J}}
+\newcommand{\ci}{I}
+
+% NatBib
+\usepackage[super,comma,sort&compress]{natbib}
+%\usepackage[round,colon,authoryear]{natbib}
+\renewcommand{\bibsection}{}
+\renewcommand{\bibfont}{\small}
+
+% unbreakable dashes
+\usepackage[shortcuts]{extdash}
+
+% Title page
+% Chromosomal duplication is a transient evolutionary solution to stress
+\title{TITLE}
+
+% Authors
+\renewcommand\Affilfont{\small}
+
+\author[a]{Ilia Kohanovski}
+\author[b,c]{Uri Obolski}
+\author[a,*]{Yoav Ram}
+
+\affil[a]{School of Computer Science, Interdisciplinary Center Herzliya, Herzliya 4610101, Israel}
+\affil[b]{School of Public Health, Tel Aviv University, Tel Aviv 6997801, Israel}{
+\affil[c]{Porter School of the Environment and Earth Sciences, Tel Aviv University, Tel Aviv 6997801, Israel}
+\affil[*]{Corresponding author: yoav@yoavram.com}
+
+% Document
+\begin{document}
+\maketitle
+
+% Abstract
+\begin{abstract}
+\lipsum[1-1]
+\end{abstract}
+
+\pagebreak
+% Introduction
+\section*{Introduction}
+
+\lipsum[2-4]
+
+\pagebreak
+% Models and Methods
+\section*{Models and Methods}
+
+\paragraph*{Model.}
+We model SARS\=/CoV\=/2 infection dynamics by following the number of susceptible $S$, exposed $E$, reported infected $I_r$, and unreported infected $I_u$ individuals in a population of size $N$.
+This model distinguishes between reported and unreported infected individuals: the reported infected are those that have enough symptoms to eventually be tested and thus appear in daily case reports, to which we fit the model.
+
+Susceptible ($S$) individuals become exposed due to contact with reported or unreported infected individuals ($I_r$ or $I_u$) at a rate $\beta_t$ or $\mu \beta_t$.
+The parameter $0 < \mu < 1$ represents the decreased transmission rate from unreported infected individuals, who are often subclinical or even asymptomatic.
+The transmission rate $\beta_t$ may change over  time $t$ due to behavioral changes of both susceptible and infected individuals.
+Exposed individuals, after an average incubation period of $Z$ days, become reported infected with probability $\alpha_t$ or unreported infected with probability $(1-\alpha_t)$.
+The reporting rate $\alpha_t$ may also change over time due to changes in human behavior.
+Infected individuals remain infectious for an average period of $D$ days, after which they either recover, or becomes ill enough to be quarantined.
+They therefore no longer infect other individuals, and therefore the model does not track their frequency.
+The model is described by the following equations:
+
+\begin{equation}
+\begin{aligned}
+\frac{dS}{dt} & = -\beta_t S \frac{I_p}{N} - \mu \beta_t S \frac{I_s}{N} \\
+\frac{dE}{dt} & = \beta_t S \frac{I_p}{N} + \mu \beta_t S \frac{I_s}{N}  - \frac{E}{Z} \\
+\frac{dI_r}{dt} & = \alpha_t \frac{E}{Z} - \frac{I_r}{D} \\
+\frac{dI_u}{dt} & = (1-\alpha_t) \frac{E}{Z} - \frac{I_r}{D} .
+\end{aligned}
+\end{equation}
+
+This model is inspired by \citet{Li2020} and \citet{Pei2020}, who used a similar model with multiple regions and constant transmission $\beta$ and reporting rate $\alpha$ to infer COVID-19 dynamics in China and the continental US, respectively.
+
+\paragraph*{Likelihood function.}
+In this model, $Y_t= \alpha_t E(t)/Z$ is the \emph{expected} number of new reported infected individuals on day $t$.
+We also define $\tilde{Y}_t$ to be the expected cumulative number of reported infected individuals up to day $t$,
+$$
+\tilde{Y}_t = \sum_{i=1}^{t}{Y_i}
+$$
+We denote by $X_t$ the number of reported cases in day $t$ and by 
+$$
+\tilde{X}_t=\sum_{i=1}^{t}X_i,
+$$
+the cumulative number of reported cases until day $t$ (with $X_0=0$).
+We assume that reported infected individuals yet to be reported, i.e. individuals in $\tilde{Y}_t$, are reported in the daily case report of day $t$ with probability $p_t$, which may change over time (note that $t$ is a specific date, and not the elapsed time since infection).
+Therefore, the number of reported cases in day $t$ is
+$$
+X_t \sim \mathit{Bin}\big(n_t, p_t\big),
+$$
+where $n_t$ the \emph{realized} number of reported infected individuals yet to appear in daily reports by day $t$.
+Given $\tilde{X}_{t-1}$, we assume $n_t$ is Poisson distributed
+$$
+\big(n_t \mid \tilde{X}_{t-1}\big) \sim \mathit{Poi}\Big( \tilde{Y}_t - \tilde{X}_{t-1} \Big), \quad n_1 \sim \mathit{Poi}(Y_1).
+$$ 
+Therefore, $\big(X_t \mid \tilde{X}_{t-1} \big)$ is a binomial conditioned on a Poisson, which reduces to a Poisson with
+$$
+\big(X_t \mid \tilde{X}_{t-1} \big) \sim \mathit{Poi}\Big( \big( \tilde{Y}_t - \tilde{X}_{t-1} \big)p_t \Big), \quad X_1 \sim \mathit{Poi}(Y_1 p_1).
+$$
+Therefore, for given model parameters $\theta=(Z, D, \mu, \{\beta_t\}, \{\alpha_t\}, \{p_t\}, S(0), E(0), I_r(0), I_u(0))$, which also include the initial conditions, it is possible to compute $\{E(t)\}_{t=1}^{T}$ and $\{Y_t\}_{t=1}^{T}$. Then, since $\tilde{X}_{t-1}$ is a function of $X_1, \ldots, X_{t-1}$, we can write the probability of a observed daily case reports $\vec{X} = (X_1, \ldots, X_T)$ as 
+\begin{equation} \label{eq:likelihood}
+\mathbb{L}(\theta \mid \vec{X}) = P(\vec{X} \mid \theta) = P(X_1 \mid \theta) P(X_2 \mid X_1, \theta) \ldots P(X_T \mid X_1, \ldots X_{T-1}, \theta),
+\end{equation}
+which is a \emph{likelihood function}.
+
+\pagebreak
+% Results
+\section*{Results}
+
+\pagebreak
+% Discussion
+\section*{Discussion}
+
+\lipsum[4-6]
+
+\pagebreak
+% Acknowledgements
+{\small
+\section*{Acknowledgements}
+%We thank XXX for discussions and comments.
+This work was supported in part by the Israel Science Foundation 552/19 (YR) and XXX/XX (Alon Rosen)
+}
+
+\pagebreak
+\begin{multicols}{2}[\section*{References}]
+\nolinenumbers
+\bibliographystyle{agsm}
+%\bibliography{/Users/yoavram/Documents/library}
+\bibliography{ms}
+\end{multicols}
+
+\end{document}  
