@@ -25,6 +25,7 @@ headheight=12pt
 \usepackage{titlesec}	
 \usepackage{caption}
 \usepackage{enumitem}
+\usepackage{soul}
       
 %SetFonts
 % newtxtext+newtxmath
@@ -122,7 +123,13 @@ headheight=12pt
 % Models and Methods
 \section*{Models and Methods}
 
-\paragraph*{Model.}
+%%% Data %%%%
+\paragraph*{Data.} 
+We use daily incidence data $X_t$ from several different countries. These incidence data summarize the number of individuals tested positive for SARS\=/CoV\=/2 RNA using RT-qPCR at each day.
+Data was retrieved from \hl{REFS} for the following regions: Wuhan, China; Austria; \hl{$\ldots$}.
+
+%%% SEIR model %%%%
+\paragraph*{SEIR model.}
 We model SARS\=/CoV\=/2 infection dynamics by following the number of susceptible $S$, exposed $E$, reported infected $I_r$, and unreported infected $I_u$ individuals in a population of size $N$.
 This model distinguishes between reported and unreported infected individuals: the reported infected are those that have enough symptoms to eventually be tested and thus appear in daily case reports, to which we fit the model.
 
@@ -146,9 +153,10 @@ The model is described by the following equations:
 
 This model is inspired by \citet{Li2020} and \citet{Pei2020}, who used a similar model with multiple regions and constant transmission $\beta$ and reporting rate $\alpha$ to infer COVID-19 dynamics in China and the continental US, respectively.
 
+%%% Likelihood %%%
 \paragraph*{Likelihood function.}
-In this model, $Y_t= \alpha_t E(t)/Z$ is the \emph{expected} number of new reported infected individuals on day $t$.
-We also define $\tilde{Y}_t$ to be the expected cumulative number of reported infected individuals up to day $t$,
+The \emph{expected} number of new reported infected individuals on day $t$ is $Y_t= \alpha_t E(t)/Z$.
+We define $\tilde{Y}_t$ to be the expected cumulative number of reported infected individuals up to day $t$,
 $$
 \tilde{Y}_t = \sum_{i=1}^{t}{Y_i}
 $$
