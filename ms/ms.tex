@@ -18,6 +18,7 @@ headheight=12pt
 \usepackage[hyphens]{url}
 \usepackage[dvipsnames]{xcolor}
 \usepackage[unicode=true,colorlinks=true,urlcolor=CadetBlue,citecolor=black,linkcolor=black]{hyperref}
+\def\equationautorefname~#1\null{Eq.~(#1)\null}
 \PassOptionsToPackage{hyphens}{url} % url is loaded by hyperref
 \usepackage{authblk}
 \usepackage{lipsum}
@@ -125,8 +126,8 @@ headheight=12pt
 
 %%% Data %%%%
 \paragraph*{Data.} 
-We use daily incidence data $X_t$ from several different countries. These incidence data summarize the number of individuals tested positive for SARS\=/CoV\=/2 RNA using RT-qPCR at each day.
-Data was retrieved from \hl{REFS} for the following regions: Wuhan, China; Austria; \hl{$\ldots$}.
+We use daily confirmed case data $\vec{X}=(X_1, \ldots, X_T)$ from several different countries. These incidence data summarize the number of individuals $X_t$ tested positive for SARS\=/CoV\=/2 RNA (using RT-qPCR) at each day $t$.
+Data was retrieved from \hl{REFS} for the following regions: Wuhan, China; Austria; \hl{$\ldots$}. % maybe use a table?
 
 %%% SEIR model %%%%
 \paragraph*{SEIR model.}
@@ -155,35 +156,42 @@ This model is inspired by \citet{Li2020} and \citet{Pei2020}, who used a similar
 
 %%% Likelihood %%%
 \paragraph*{Likelihood function.}
-The \emph{expected} number of new reported infected individuals on day $t$ is $Y_t= \alpha_t E(t)/Z$.
-We define $\tilde{Y}_t$ to be the expected cumulative number of reported infected individuals up to day $t$,
+The \emph{expected} number of new reported infected individuals on day $t$ is 
+$$
+Y_t=\alpha_t E(t)/Z.
+$$
+We define $\tilde{Y}_t$ to be the cumulative expected number of reported infected individuals up to day $t$,
 $$
 \tilde{Y}_t = \sum_{i=1}^{t}{Y_i}
 $$
-We denote by $X_t$ the number of reported cases in day $t$ and by 
+As mentioned above, $X_t$ is the number of confirmed cases in day $t$. Then, 
 $$
-\tilde{X}_t=\sum_{i=1}^{t}X_i,
+\tilde{X}_t=\sum_{i=1}^{t}X_i
 $$
-the cumulative number of reported cases until day $t$ (with $X_0=0$).
-We assume that reported infected individuals yet to be reported, i.e. individuals in $\tilde{Y}_t$, are reported in the daily case report of day $t$ with probability $p_t$, which may change over time (note that $t$ is a specific date, and not the elapsed time since infection).
-Therefore, the number of reported cases in day $t$ is
+is the cumulative number of confirmed cases until day $t$ (with $X_0=0$).
+We assume that reported infected individuals yet to be confirmed, i.e. individuals in $\tilde{Y}_t$, are confirmed and therefore appear in the daily case report of day $t$ with probability $p_t$, which may change over time (note that $t$ is a specific date, and not the elapsed time since infection).
+Therefore, we assume that the number of confirmed cases in day $t$ is binomially distributed,
 $$
 X_t \sim \mathit{Bin}\big(n_t, p_t\big),
 $$
-where $n_t$ the \emph{realized} number of reported infected individuals yet to appear in daily reports by day $t$.
-Given $\tilde{X}_{t-1}$, we assume $n_t$ is Poisson distributed
+where $n_t$ is the \emph{realized} number of reported infected individuals yet to appear in daily reports by day~$t$.
+Given $\tilde{X}_{t-1}$, we assume $n_t$ is Poisson distributed,
 $$
 \big(n_t \mid \tilde{X}_{t-1}\big) \sim \mathit{Poi}\Big( \tilde{Y}_t - \tilde{X}_{t-1} \Big), \quad n_1 \sim \mathit{Poi}(Y_1).
 $$ 
 Therefore, $\big(X_t \mid \tilde{X}_{t-1} \big)$ is a binomial conditioned on a Poisson, which reduces to a Poisson with
-$$
+\begin{equation} \label{eq:P(Xt|Xt-1)}
 \big(X_t \mid \tilde{X}_{t-1} \big) \sim \mathit{Poi}\Big( \big( \tilde{Y}_t - \tilde{X}_{t-1} \big)p_t \Big), \quad X_1 \sim \mathit{Poi}(Y_1 p_1).
-$$
-Therefore, for given model parameters $\theta=(Z, D, \mu, \{\beta_t\}, \{\alpha_t\}, \{p_t\}, S(0), E(0), I_r(0), I_u(0))$, which also include the initial conditions, it is possible to compute $\{E(t)\}_{t=1}^{T}$ and $\{Y_t\}_{t=1}^{T}$. Then, since $\tilde{X}_{t-1}$ is a function of $X_1, \ldots, X_{t-1}$, we can write the probability of a observed daily case reports $\vec{X} = (X_1, \ldots, X_T)$ as 
-\begin{equation} \label{eq:likelihood}
-\mathbb{L}(\theta \mid \vec{X}) = P(\vec{X} \mid \theta) = P(X_1 \mid \theta) P(X_2 \mid X_1, \theta) \ldots P(X_T \mid X_1, \ldots X_{T-1}, \theta),
 \end{equation}
-which is a \emph{likelihood function}.
+Therefore, for given vector $\theta$ of model parameters 
+$$
+\theta=\Big(Z, D, \mu, \{\beta_t\}, \{\alpha_t\}, \{p_t\}, S(0), E(0), I_r(0), I_u(0)\Big),
+$$
+which also includes the initial conditions (state at $t=0$), it is possible to compute the expected number of exposed $\{E(t)\}_{t=1}^{T}$ and number of new infections $\{Y_t\}_{t=1}^{T}$ for each day. Then, since $\tilde{X}_{t-1}$ is a function of $X_1, \ldots, X_{t-1}$, we can use \autoref{eq:P(Xt|Xt-1)} to write the probability of the confirmed case data $\vec{X} = (X_1, \ldots, X_T)$ as 
+\begin{equation} \label{eq:likelihood}
+\mathbb{L}(\theta \mid \vec{X}) = P(\vec{X} \mid \theta) = P(X_1 \mid \theta) P(X_2 \mid X_1, \theta) \cdots P(X_T \mid X_1, \ldots X_{T-1}, \theta).
+\end{equation}
+This defines our \emph{likelihood function} for the parameter vector $\theta$ given the data $\vec{X}$.
 
 \pagebreak
 % Results
