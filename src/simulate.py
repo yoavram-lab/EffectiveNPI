@@ -28,14 +28,21 @@ def find_start_day(cases_and_dates):
 def tau_to_string(tau):
     return (pd.to_datetime(start_date)+timedelta(days=tau)).strftime('%B %d')
 
-url = 'https://github.com/ImperialCollegeLondon/covid19model/raw/v1.0/data/COVID-19-up-to-date.csv'
-fname = '../data/COVID-19-up-to-date'
-if not os.path.exists(fname):
-    urllib.request.urlretrieve(url, fname)
-df = pd.read_csv(fname, encoding='iso-8859-1')
-df['date'] = pd.to_datetime(df['dateRep'], format='%d/%m/%Y')
-df = df[df['countriesAndTerritories']==country]
-N = df.iloc[0]['popData2018']
+if country=='Wuhan':
+    df = pd.read_csv('../data/Incidence.csv')
+    df['date'] = pd.to_datetime(df['Date'], dayfirst=True)
+    df['cases'] = df['Wuhan']
+    df = df[::-1]
+    N = pd.read_csv('../data/pop.csv', index_col='City').loc['Wuhan'].values[0]
+else:
+    url = 'https://github.com/ImperialCollegeLondon/covid19model/raw/v1.0/data/COVID-19-up-to-date.csv'
+    fname = '../data/COVID-19-up-to-date'
+    if not os.path.exists(fname):
+        urllib.request.urlretrieve(url, fname)
+    df = pd.read_csv(fname, encoding='iso-8859-1')
+    df['date'] = pd.to_datetime(df['dateRep'], format='%d/%m/%Y')
+    df = df[df['countriesAndTerritories']==country]
+    N = df.iloc[0]['popData2018']
 Td1 = 9
 Td2 = 6
 seed_max = 3000
