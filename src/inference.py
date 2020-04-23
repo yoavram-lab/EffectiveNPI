@@ -12,6 +12,7 @@ from scipy.integrate import odeint
 import scipy.stats
 import emcee
 import argparse
+from shutil import copyfile
 
 
 Td1 = 9
@@ -20,19 +21,7 @@ seed_max = 3000
 
 
 def find_start_day(cases_and_dates):
-    last_date = None
-    last_is_not_zero = False
-    for r in cases_and_dates.iterrows():
-        curr_cases = r[1]['cases']
-        if last_is_not_zero and curr_cases != 0:
-            break
-        last_is_not_zero = False if curr_cases == 0 else True
-        if curr_cases == 0:
-            last_date = r[1]['date']
-            last_is_not_zero = False
-        else:
-            last_is_not_zero = True
-    return last_date
+    return cases_and_dates[cases_and_dates['cases']==0].iloc[-1]['date']
 
 
 def prior():
@@ -119,8 +108,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('country_name')
     parser.add_argument('-s', '--steps',type=int,help='you can provide number of iteration steps, othewise the default is taken')
+    parser.add_argument('-c', '--cores',type=int,help='by default 1 core')
     args = parser.parse_args()
     country = args.country_name
+    cores = args.cores
 
     if country=='Wuhan':
         df = pd.read_csv('../data/Incidence.csv')
@@ -154,17 +145,23 @@ if __name__ == '__main__':
     guesses = np.array([prior() for _ in range(nwalkers)])
 
     np.random.seed(10)
-    with Pool() as pool:
+
+    if cores:
+        with Pool(cores) as pool:
+            sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X],pool=pool)
+            sampler.run_mcmc(guesses, nsteps, progress=True);
+    else:
         sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X])
         sampler.run_mcmc(guesses, nsteps, progress=True);
 
     params = [nsteps, ndim, int(N), Td1, Td2]
     np.savez_compressed(
-        './output/test/data/{}.npz'.format(country), #we copy the results to the production dir after
+        './output/test/result-data/{}.npz'.format(country), #we copy the results to the production dir after
         chain=sampler.chain,
         incidences=X, # TODO maybe save as X=X
         params=params, 
         var_names=var_names,
         start_date=str(start_date)
     )
+    copyfile(sys.argv[0], './output/test/'+sys.argv[0]) # we copy the source code of the current file for each experiment
 
