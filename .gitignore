@@ -1,6 +1,6 @@
-src/outputs/
+output
+src/output/
 **/.DS_Store
-src/outputs
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
