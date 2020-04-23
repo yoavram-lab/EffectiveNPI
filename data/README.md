@@ -1,0 +1,1 @@
+- `pop.csv` and `Incidence.csv` from [Li et al. 2020](https://www.sciencemag.org/lookup/doi/10.1126/science.abb3221), retrieved from [github](https://github.com/SenPei-CU/COVID-19)
