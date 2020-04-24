@@ -140,7 +140,7 @@ The transmission rate $\beta_t \ge 0$ may change over  time $t$ due to behaviora
 Exposed individuals, after an average incubation period of $Z$ days, become reported infected with probability $\alpha_t$ or unreported infected with probability $(1-\alpha_t)$.
 The reporting rate $0 < \alpha_t < 1$ may also change over time due to changes in human behavior.
 Infected individuals remain infectious for an average period of $D$ days, after which they either recover, or becomes ill enough to be quarantined.
-They therefore no longer infect other individuals, and therefore the model does not track their frequency.
+They therefore no longer infect other individuals, and the model does not track their frequency.
 The model is described by the following equations:
 
 \begin{equation} \label{eq:model}
@@ -151,7 +151,11 @@ The model is described by the following equations:
 \frac{dI_u}{dt} & = (1-\alpha_t) \frac{E}{Z} - \frac{I_r}{D} .
 \end{aligned}
 \end{equation}
-
+The initial numbers of exposed $E(0)$ and unreported infected $I_u(0)$ are considered model parameters, whereas the initial number of reported infected is assumed to be zero $I_r(0)=0$, and the number of susceptible is $S(0)=N-E(0)-I_u(0)$.
+The vector $\theta$ of model parameters is
+$$
+\theta=\Big(Z, D, \mu, \{\beta_t\}, \{\alpha_t\}, \{p_t\}, E(0), I_u(0)\Big).
+$$
 This model is inspired by \citet{Li2020} and \citet{Pei2020}, who used a similar model with multiple regions and constant transmission $\beta$ and reporting rate $\alpha$ to infer COVID-19 dynamics in China and the continental US, respectively.
 
 %%% Likelihood %%%
@@ -184,11 +188,7 @@ Therefore, $\big(X_t \mid \tilde{X}_{t-1} \big)$ is a binomial conditioned on a 
 \begin{equation} \label{eq:P(Xt|Xt-1)}
 \big(X_t \mid \tilde{X}_{t-1} \big) \sim \mathit{Poi}\Big( \big( \tilde{Y}_t - \tilde{X}_{t-1} \big)p_t \Big), \quad X_1 \sim \mathit{Poi}(Y_1 p_1).
 \end{equation}
-Therefore, for given vector $\theta$ of model parameters 
-$$
-\theta=\Big(Z, D, \mu, \{\beta_t\}, \{\alpha_t\}, \{p_t\}, S(0), E(0), I_r(0), I_u(0)\Big),
-$$ % TODO should p_t be a constant rather than a parameter? Same for S(0) and I_r(0).
-which also includes the initial conditions (state at $t=0$), it is possible to compute the expected number of exposed $\{E(t)\}_{t=1}^{T}$ and number of new infections $\{Y_t\}_{t=1}^{T}$ for each day. Then, since $\tilde{X}_{t-1}$ is a function of $X_1, \ldots, X_{t-1}$, we can use \autoref{eq:P(Xt|Xt-1)} to write the probability of the confirmed case data $\vec{X} = (X_1, \ldots, X_T)$ as 
+Therefore, for given vector $\theta$ of model parameters it is possible to compute the expected number of exposed $\{E(t)\}_{t=1}^{T}$ and number of new infections $\{Y_t\}_{t=1}^{T}$ for each day. Then, since $\tilde{X}_{t-1}$ is a function of $X_1, \ldots, X_{t-1}$, we can use \autoref{eq:P(Xt|Xt-1)} to write the probability of the confirmed case data $\vec{X} = (X_1, \ldots, X_T)$ as 
 \begin{equation} \label{eq:likelihood}
 \mathbb{L}(\theta \mid \vec{X}) = P(\vec{X} \mid \theta) = P(X_1 \mid \theta) P(X_2 \mid X_1, \theta) \cdots P(X_T \mid X_1, \ldots X_{T-1}, \theta).
 \end{equation}
