@@ -59,9 +59,9 @@ def ode(y, t, Z, D, α, β, μ):
 
 
 def simulate_one(Z, D, μ, β, α, y0, ndays):
-        sol = odeint(ode, y0, np.arange(ndays), args=(Z, D, μ, β, α))
-        S, E, Ir, Iu = sol.T
-        return S, E, Ir, Iu
+    sol = odeint(ode, y0, np.arange(ndays), args=(Z, D, μ, β, α))
+    S, E, Ir, Iu = sol.T
+    return S, E, Ir, Iu
 
 
 def simulate(Z, D, μ, β, α1, λ, α2, E0, Iu0, τ):
