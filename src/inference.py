@@ -110,9 +110,11 @@ if __name__ == '__main__':
     parser.add_argument('country_name')
     parser.add_argument('-s', '--steps',type=int,help='you can provide number of iteration steps, othewise the default is taken')
     parser.add_argument('-c', '--cores',type=int,help='by default 1 core')
+    parser.add_argument('-d', '--dir',type=str)
     args = parser.parse_args()
     country = args.country_name
     cores = args.cores
+    dir_name = args.dir if args.dir else 'test'
 
     if country=='Wuhan':
         df = pd.read_csv('../data/Incidence.csv')
@@ -154,13 +156,14 @@ if __name__ == '__main__':
         sampler.run_mcmc(guesses, nsteps, progress=True);
 
     params = [nsteps, ndim, int(N), Td1, Td2]
+    ##TODO create the dir if not exist
     np.savez_compressed(
-        './output/test/result-data/{}.npz'.format(country), #we copy the results to the production dir after
+        '../output-tmp/{}/result/{}.npz'.format(dir_name,country), #we copy the results to the production dir after
         chain=sampler.chain,
         incidences=X, # TODO maybe save as X=X
         params=params, 
         var_names=var_names,
         start_date=str(start_date)
     )
-    copyfile(sys.argv[0], './output/test/'+sys.argv[0]) # we copy the source code of the current file for each experiment
+    copyfile(sys.argv[0], '../output-tmp/{}/{}'.format(dir_name,sys.argv[0])) # we persist the source code of the current file for each experiment
 
