@@ -14,6 +14,7 @@ import emcee
 import argparse
 from shutil import copyfile
 
+np.random.seed(10)
 
 Td1 = 9
 Td2 = 6
@@ -143,8 +144,6 @@ if __name__ == '__main__':
 
     # nsteps = 10 * 50 # TODO remove this line or the former
     guesses = np.array([prior() for _ in range(nwalkers)])
-
-    np.random.seed(10)
 
     if cores:
         with Pool(cores) as pool:
