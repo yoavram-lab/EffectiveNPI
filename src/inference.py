@@ -120,11 +120,9 @@ if __name__ == '__main__':
     parser.add_argument('country_name')
     parser.add_argument('-s', '--steps',type=int,help='you can provide number of iteration steps, othewise the default is taken')
     args = parser.parse_args()
-    country_name = args.country_name
+    country = args.country_name
 
-    if not os.path.exists('../data'):
-        os.mkdir('../data')
-    if country_name == 'Wuhan':
+    if country=='Wuhan':
         df = pd.read_csv('../data/Incidence.csv')
         df['date'] = pd.to_datetime(df['Date'], dayfirst=True)
         df['cases'] = df['Wuhan']
@@ -137,7 +135,7 @@ if __name__ == '__main__':
             urllib.request.urlretrieve(url, fname)
         df = pd.read_csv(fname, encoding='iso-8859-1')
         df['date'] = pd.to_datetime(df['dateRep'], format='%d/%m/%Y')
-        df = df[df['countriesAndTerritories'] == country_name]
+        df = df[df['countriesAndTerritories']==country]
         N = df.iloc[0]['popData2018']
 
     cases_and_dates = df.iloc[::-1][['cases','date']]
@@ -161,19 +159,12 @@ if __name__ == '__main__':
         sampler.run_mcmc(guesses, nsteps, progress=True);
 
     params = [nsteps, ndim, int(N), Td1, Td2]
-    output_folder = '../output/inference'
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
-    now = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    filename =  '{}_{}.npz'.format(country_name, now)
-    filename = os.path.join(output_folder, filename)
     np.savez_compressed(
-        filename,
+        './output/test/data/{}.npz'.format(country), #we copy the results to the production dir after
         chain=sampler.chain,
-        incidences=X,
+        incidences=X, # TODO maybe save as X=X
         params=params, 
         var_names=var_names,
         start_date=str(start_date)
     )
-    print("Saved results to {}".format(filename))
 
