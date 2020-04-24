@@ -59,9 +59,9 @@ def ode(y, t, Z, D, α, β, μ):
 
 
 def simulate_one(Z, D, μ, β, α, y0, ndays):
-        sol = odeint(ode, y0, np.arange(ndays), args=(Z, D, μ, β, α))
-        S, E, Ir, Iu = sol.T
-        return S, E, Ir, Iu
+    sol = odeint(ode, y0, np.arange(ndays), args=(Z, D, μ, β, α))
+    S, E, Ir, Iu = sol.T
+    return S, E, Ir, Iu
 
 
 def simulate(Z, D, μ, β, α1, λ, α2, E0, Iu0, τ):
@@ -120,9 +120,11 @@ if __name__ == '__main__':
     parser.add_argument('country_name')
     parser.add_argument('-s', '--steps',type=int,help='you can provide number of iteration steps, othewise the default is taken')
     args = parser.parse_args()
-    country = args.country_name
+    country_name = args.country_name
 
-    if country=='Wuhan':
+    if not os.path.exists('../data'):
+        os.mkdir('../data')
+    if country_name == 'Wuhan':
         df = pd.read_csv('../data/Incidence.csv')
         df['date'] = pd.to_datetime(df['Date'], dayfirst=True)
         df['cases'] = df['Wuhan']
@@ -135,7 +137,7 @@ if __name__ == '__main__':
             urllib.request.urlretrieve(url, fname)
         df = pd.read_csv(fname, encoding='iso-8859-1')
         df['date'] = pd.to_datetime(df['dateRep'], format='%d/%m/%Y')
-        df = df[df['countriesAndTerritories']==country]
+        df = df[df['countriesAndTerritories'] == country_name]
         N = df.iloc[0]['popData2018']
 
     cases_and_dates = df.iloc[::-1][['cases','date']]
@@ -159,12 +161,19 @@ if __name__ == '__main__':
         sampler.run_mcmc(guesses, nsteps, progress=True);
 
     params = [nsteps, ndim, int(N), Td1, Td2]
+    output_folder = '../output/inference'
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+    now = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    filename =  '{}_{}.npz'.format(country_name, now)
+    filename = os.path.join(output_folder, filename)
     np.savez_compressed(
-        './output/test/data/{}.npz'.format(country), #we copy the results to the production dir after
+        filename,
         chain=sampler.chain,
-        incidences=X, # TODO maybe save as X=X
+        incidences=X,
         params=params, 
         var_names=var_names,
         start_date=str(start_date)
     )
+    print("Saved results to {}".format(filename))
 
