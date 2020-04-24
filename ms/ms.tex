@@ -157,6 +157,8 @@ This model is inspired by \citet{Li2020} and \citet{Pei2020}, who used a similar
 %%% Likelihood %%%
 \paragraph*{Likelihood function.}
 The \emph{expected} number of new reported infected individuals on day $t$ is 
+% UO:   "The expected number of new reported infected individuals on day t is Yt = αtE(t)/Z " I think that this is the new reported cases at time t. Isn't the number of infected something like the integral of the between t-1 and t?
+
 $$
 Y_t=\alpha_t E(t)/Z.
 $$
@@ -169,6 +171,7 @@ $$
 \tilde{X}_t=\sum_{i=1}^{t}X_i
 $$
 is the cumulative number of confirmed cases until day $t$ (with $X_0=0$).
+% TODO rephrase next sentence
 We assume that reported infected individuals yet to be confirmed, i.e. individuals in $\tilde{Y}_t$, are confirmed and therefore appear in the daily case report of day $t$ with probability $p_t$, which may change over time (note that $t$ is a specific date, and not the elapsed time since infection).
 Therefore, we assume that the number of confirmed cases in day $t$ is binomially distributed,
 $$
