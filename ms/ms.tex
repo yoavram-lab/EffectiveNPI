@@ -1,0 +1,268 @@
+\documentclass[12pt]{extarticle}
+\usepackage{geometry}
+\geometry{
+a4paper,
+total={170mm,257mm},
+left=20mm,
+top=20mm,
+headheight=12pt
+}
+
+%\usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+\usepackage{graphicx} % Use pdf, png, jpg, or eps§ with pdflatex; use eps in DVI mode
+% TeX will automatically convert eps --> pdf in pdflatex		
+
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{commath}
+\usepackage{longtable}
+\usepackage[hyphens]{url}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[unicode=true,colorlinks=true,urlcolor=CadetBlue,citecolor=black,linkcolor=black]{hyperref}
+\def\equationautorefname~#1\null{Eq.~(#1)\null}
+\PassOptionsToPackage{hyphens}{url} % url is loaded by hyperref
+\usepackage{authblk}
+\usepackage{lipsum}
+\usepackage{multicol}
+\usepackage{titlesec}	
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage{soul}
+      
+%SetFonts
+% newtxtext+newtxmath
+\usepackage{newtxtext} %loads helv for ss, txtt for tt
+\usepackage{amsmath}
+\usepackage[bigdelims]{newtxmath}
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+%SetFonts
+
+% less space before sections 
+% \@startsection {NAME}{LEVEL}{INDENT}{BEFORESKIP}{AFTERSKIP}{STYLE} 
+%            optional * [ALTHEADING]{HEADING} 
+\makeatletter
+ \renewcommand\section{\@startsection {section}{1}{\z@}%
+     {-2.5ex \@plus -1ex \@minus -.2ex}%
+     {1.3ex \@plus.2ex}%
+    {\Large\bfseries}}
+    
+% Species names
+%% Meta-Command for defining new species macros
+\usepackage{xspace}
+
+\newcommand{\species}[3]{%
+  \newcommand{#1}{\gdef#1{\textit{#3}\xspace}\textit{#2}\xspace}}
+  
+\species{\yeast}{Saccharomyces cerevisiae}{S.~cerevisiae}
+\species{\calbicans}{Candida albicans}{C.~albicans}
+\species{\cneoformans}{Cryptococcus neoformans}{C.~neoformans}
+
+% line numbers
+ \usepackage[displaymath, mathlines]{lineno}
+ \renewcommand\linenumberfont{\normalfont\small\sffamily}
+\linenumbers
+% \modulolinenumbers[2]
+
+% Yoav & Lee commands
+\newcommand*{\tr}{^\intercal}
+\let\vec\mathbf
+\newcommand{\matrx}[1]{{\left[ \stackrel{}{#1}\right]}}
+\newcommand{\diag}[1]{\mbox{diag}\matrx{#1}}
+\newcommand{\goesto}{\rightarrow}
+\newcommand{\dspfrac}[2]{\frac{\displaystyle #1}{\displaystyle #2} }
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{lemma}{Lemma}
+\newtheorem{remark}{Remark}
+\newtheorem{result}{Result}
+\renewcommand\qedsymbol{} % no square at end of proof
+\newcommand{\cl}{\mathbf{L}}
+\newcommand{\cj}{\mathbf{J}}
+\newcommand{\ci}{I}
+
+% NatBib
+\usepackage{natbib}
+%\usepackage[round,colon,authoryear]{natbib}
+\renewcommand{\bibsection}{}
+\renewcommand{\bibfont}{\small}
+
+% unbreakable dashes
+\usepackage[shortcuts]{extdash}
+
+% Title page
+% Chromosomal duplication is a transient evolutionary solution to stress
+\title{TITLE}
+
+% Authors
+\renewcommand\Affilfont{\small}
+
+\author[a]{Ilia Kohanovski}
+\author[b,c]{Uri Obolski}
+\author[a,*]{Yoav Ram}
+
+\affil[a]{School of Computer Science, Interdisciplinary Center Herzliya, Herzliya 4610101, Israel}
+\affil[b]{School of Public Health, Tel Aviv University, Tel Aviv 6997801, Israel}{
+\affil[c]{Porter School of the Environment and Earth Sciences, Tel Aviv University, Tel Aviv 6997801, Israel}
+\affil[*]{Corresponding author: yoav@yoavram.com}
+
+% Document
+\begin{document}
+\maketitle
+
+% Abstract
+\begin{abstract}
+\lipsum[1-1]
+\end{abstract}
+
+\pagebreak
+% Introduction
+\section*{Introduction}
+
+\lipsum[2-4]
+
+\pagebreak
+% Models and Methods
+\section*{Models and Methods}
+
+%%% Data %%%%
+\paragraph*{Data.} 
+We use daily confirmed case data $\vec{X}=(X_1, \ldots, X_T)$ from several different countries. These incidence data summarize the number of individuals $X_t$ tested positive for SARS\=/CoV\=/2 RNA (using RT-qPCR) at each day $t$.
+Data was retrieved from \hl{REFS} for the following regions: Wuhan, China; Austria; \hl{$\ldots$}. % maybe use a table?
+
+%%% SEIR model %%%%
+\paragraph*{SEIR model.}
+We model SARS\=/CoV\=/2 infection dynamics by following the number of susceptible $S$, exposed $E$, reported infected $I_r$, and unreported infected $I_u$ individuals in a population of size $N$.
+This model distinguishes between reported and unreported infected individuals: the reported infected are those that have enough symptoms to eventually be tested and thus appear in daily case reports, to which we fit the model.
+
+Susceptible ($S$) individuals become exposed due to contact with reported or unreported infected individuals ($I_r$ or $I_u$) at a rate $\beta_t$ or $\mu \beta_t$.
+The parameter $0 < \mu < 1$ represents the decreased transmission rate from unreported infected individuals, who are often subclinical or even asymptomatic.
+The transmission rate $\beta_t \ge 0$ may change over  time $t$ due to behavioral changes of both susceptible and infected individuals.
+Exposed individuals, after an average incubation period of $Z$ days, become reported infected with probability $\alpha_t$ or unreported infected with probability $(1-\alpha_t)$.
+The reporting rate $0 < \alpha_t < 1$ may also change over time due to changes in human behavior.
+Infected individuals remain infectious for an average period of $D$ days, after which they either recover, or becomes ill enough to be quarantined.
+They therefore no longer infect other individuals, and the model does not track their frequency.
+The model is described by the following equations:
+
+\begin{equation} \label{eq:model}
+\begin{aligned}
+\frac{dS}{dt} & = -\beta_t S \frac{I_p}{N} - \mu \beta_t S \frac{I_s}{N} \\
+\frac{dE}{dt} & = \beta_t S \frac{I_p}{N} + \mu \beta_t S \frac{I_s}{N}  - \frac{E}{Z} \\
+\frac{dI_r}{dt} & = \alpha_t \frac{E}{Z} - \frac{I_r}{D} \\
+\frac{dI_u}{dt} & = (1-\alpha_t) \frac{E}{Z} - \frac{I_r}{D} .
+\end{aligned}
+\end{equation}
+The initial numbers of exposed $E(0)$ and unreported infected $I_u(0)$ are considered model parameters, whereas the initial number of reported infected is assumed to be zero $I_r(0)=0$, and the number of susceptible is $S(0)=N-E(0)-I_u(0)$.
+The vector $\theta$ of model parameters is
+\begin{equation} \label{eq:theta}
+\theta=\Big(Z, D, \mu, \{\beta_t\}, \{\alpha_t\}, \{p_t\}, E(0), I_u(0)\Big).
+\end{equation}
+This model is inspired by \citet{Li2020} and \citet{Pei2020}, who used a similar model with multiple regions and constant transmission $\beta$ and reporting rate $\alpha$ to infer COVID-19 dynamics in China and the continental US, respectively.
+
+%%% Likelihood %%%
+\paragraph*{Likelihood function.}
+The \emph{expected} cumulative number of reported infected individuals until day $t$ is 
+\begin{equation} \label{eq:Yt}
+Y_t=\int_{0}^{t}{\alpha_s \frac{E(s)}{Z} \; ds}, \quad Y_0 = 0.
+\end{equation}
+We assume that reported infected individuals are confirmed and therefore observed in the daily case report of day $t$ with probability $p_t$ (note that an individual can only be observed once, and that $p_t$ may change over time, but $t$ is a specific date rather than the time elapsed since the individual was infected).
+Hence, we assume that the number of confirmed cases in day $t$ is binomially distributed,
+$$
+X_t \sim \mathit{Bin}\big(n_t, p_t\big),
+$$
+where $n_t$ is the \emph{realized} (rather than expected) number of reported infected individuals yet to appear in daily reports by day~$t$.
+The cumulative number of confirmed cases until day $t$ is
+$$
+\tilde{X}_t=\sum_{i=1}^{t}X_i, \quad X_0=0.
+$$
+Given $\tilde{X}_{t-1}$, we assume $n_t$ is Poisson distributed,
+$$
+\big(n_t \mid \tilde{X}_{t-1}\big) \sim \mathit{Poi}\Big( Y_t - \tilde{X}_{t-1} \Big), 
+\quad n_1 \sim \mathit{Poi}(Y_1).
+$$ 
+Therefore, $\big(X_t \mid \tilde{X}_{t-1} \big)$ is a binomial conditioned on a Poisson, which reduces to a Poisson with
+\begin{equation} \label{eq:P(Xt|Xt-1)}
+\big(X_t \mid \tilde{X}_{t-1} \big) \sim \mathit{Poi}\Big( \big( Y_t - \tilde{X}_{t-1} \big) \cdot p_t \Big), 
+\quad X_1 \sim \mathit{Poi}(Y_1 \cdot p_1).
+\end{equation}
+
+For given vector $\theta$ of model parameters (\autoref{eq:theta}), we compute the expected cumulative number of reported infected individuals $\{Y_t\}_{t=1}^{T}$ for each day (\autoref{eq:Yt}). Then, since $\tilde{X}_{t-1}$ is a function of $X_1, \ldots, X_{t-1}$, we can use \autoref{eq:P(Xt|Xt-1)} to write the probability to observe the confirmed case data $\vec{X} = (X_1, \ldots, X_T)$ as 
+\begin{equation} \label{eq:likelihood}
+\mathbb{L}(\theta \mid \vec{X}) = P(\vec{X} \mid \theta) = P(X_1 \mid \theta) P(X_2 \mid \tilde{X_1}, \theta) \cdots P(X_T \mid \tilde{X}_{T-1}, \theta).
+\end{equation}
+This defines a \emph{likelihood function} $\mathbb{L}(\theta \mid \vec{X})$ for the parameter vector $\theta$ given the data $\vec{X}$.
+
+%%% NPI %%%
+\paragraph*{NPI model.}
+To model non-pharmaceutical interventions (NPIs), we set the beginning of the NPIs to day $\tau$ and define
+$$
+\beta_t = \begin{cases} 
+  \beta, & t < \tau \\ % TODO make sure < and not \le, and the next line \ge and not >
+  \beta \lambda, & t \ge \tau
+\end{cases},
+\quad
+\alpha_t = \begin{cases} 
+  \alpha_1, & t < \tau \\ % TODO make sure < and not \le, and the next line \ge and not >
+  \alpha_2, & t \ge \tau
+\end{cases},
+\quad
+p_t = \begin{cases} 
+  1/9, & t < \tau \\ % TODO make sure < and not \le, and the next line \ge and not >
+  1/6, & t \ge \tau
+\end{cases},
+$$
+where $0 < \lambda < 1$.
+The values for $p_t$ follow \citet{Li2020}, who estimated the average time between infection and reporting in Wuhan, China, at 9 days before the start of NPIs (Jan 23, 2020) and 6 days after start of NPIs.
+The parameter $\tau$ is then added to the parameter vector $\theta$ (\autoref{eq:theta}).
+
+%%% Model fitting %%%
+\paragraph*{Model fitting.}
+To fit our model (\autoref{eq:model}) to the data $\vec{X}$ and estimate the model parameters $\theta$, we apply a Bayesian inference approach.
+We define the following flat priors on the model parameters $P(\theta)$:
+\begin{equation} \label{eq:priors}
+\begin{aligned} % TODO verify before submitting
+Z & \sim \mathit{Uniform}(2, 5) \\
+D & \sim \mathit{Uniform}(2, 5) \\
+\mu & \sim \mathit{Uniform}(0.2, 1) \\
+\beta & \sim \mathit{Uniform}(0.8, 1.5) \\
+\lambda & \sim \mathit{Uniform}(0, 1) \\
+\alpha_1, \alpha_2 & \sim \mathit{Uniform}(0.02, 1)\\
+E(0) & \sim \mathit{Uniform}(0, 3000) \\
+I_u(0) & \sim \mathit{Uniform}(0, 3000) \\
+\tau &\sim \mathit{Uniform}(1, T-1),
+\end{aligned}
+\end{equation}
+where $T$ is the number of days in the data $\vec{X}$.
+Most priors follow \citet{Li2020}, except $\lambda$, which is used to enforce that the transmission rates are lower after the start of the NPIs ($\lambda < 1$).
+The likelihood function is defined in \autoref{eq:likelihood}.
+The posterior distribution on the model parameters $P(\theta \mid \vec{X})$ is then estimated using an affine-invariant ensemble sampler for Markov chain Monte Carlo (MCMC) implemented in the \texttt{emcee} Python package~\citep{Foreman-Mackey2013}.
+
+\pagebreak
+% Results
+\section*{Results}
+
+\pagebreak
+% Discussion
+\section*{Discussion}
+
+\lipsum[4-6]
+
+As several countries (e.g. Austria, Israel) begin to relieve lockdowns and ease restrictions, we expect similar delays and advances to occur: in some countries people will begin to behave as if restrictions were eased before the official date, and in some countries people will continue to self-restrict even after restrictions are officially removed.
+Such delays and advances could confuse analyses and lead to wrong conclusions about the effects of NPI removals.
+
+\pagebreak
+% Acknowledgements
+{\small
+\section*{Acknowledgements}
+%We thank XXX for discussions and comments.
+This work was supported in part by the Israel Science Foundation 552/19 (YR) and XXX/XX (Alon Rosen)
+}
+
+\pagebreak
+\begin{multicols}{2}[\section*{References}]
+\nolinenumbers
+\bibliographystyle{agsm}
+\bibliography{/Users/yoavram/Documents/library}
+%\bibliography{ms}
+\end{multicols}
+
+\end{document}  

@@ -38,33 +38,35 @@ def prior():
     return Z, D, μ, β, α1, λ, α2, E0, Iu0, τ
 
 
-def ode(y, t, Z, D, α, β, μ):
-    S, E, Ir, Iu = y
+def ode(v, t, Z, D, α, β, μ):
+    S, E, Ir, Iu, Y = v
     return [
         -β * S * Ir / N - μ * β * S * Iu / N,
         +β * S * Ir / N + μ * β * S * Iu / N - E / Z,
          α * E / Z - Ir / D,
-        (1-α) * E / Z - Iu / D
+        (1-α) * E / Z - Iu / D,
+         α * E / Z # accumulated reported infections
     ]
 
 
 def simulate_one(Z, D, μ, β, α, y0, ndays):
-        sol = odeint(ode, y0, np.arange(ndays), args=(Z, D, μ, β, α))
-        S, E, Ir, Iu = sol.T
-        return S, E, Ir, Iu
+    sol = odeint(ode, y0, np.arange(ndays), args=(Z, D, μ, β, α))
+    S, E, Ir, Iu, Y = sol.T
+    return S, E, Ir, Iu, Y
 
 
 def simulate(Z, D, μ, β, α1, λ, α2, E0, Iu0, τ):
     τ = int(τ)
     Ir0 = 0
     S0 = N - E0 - Ir0 - Iu0
-    y0 = [S0, E0, Ir0, Iu0]
-    y1 = simulate_one(Z, D, μ, β, α1, y0, τ)
-    y2 = simulate_one(Z, D, μ, λ*β, α2, np.array(y1)[:,-1], ndays - τ)
+    init = [S0, E0, Ir0, Iu0, Ir0]
+    sol1 = simulate_one(Z, D, μ, β, α1, init, τ)
+    sol1 = np.array(sol1)
+    sol2 = simulate_one(Z, D, μ, λ*β, α2, sol1[:, -1], ndays - τ)
     
-    S, E, Ir, Iu = np.concatenate((y1, y2), axis=1)
+    S, E, Ir, Iu, Y = np.concatenate((sol1, sol2), axis=1)
     R = N - (S + E + Ir + Iu)
-    return S, E, Ir, Iu, R
+    return S, E, Ir, Iu, R, Y
 
 
 def log_prior(θ):
@@ -79,7 +81,7 @@ def log_likelihood(θ, X):
     Z, D, μ, β, α1, λ, α2, E0, Iu0, τ = θ
     τ = int(τ)
     
-    S, E, Ir, Iu, R = simulate(*θ)
+    S, E, Ir, Iu, R, Y = simulate(*θ)
     p1 = 1/Td1
     p2 = 1/Td2
     Y1 = α1 * E[:τ] / Z
@@ -87,7 +89,7 @@ def log_likelihood(θ, X):
     Y = np.concatenate((Y1, Y2))
     Ysum = Y.cumsum()
     Xsum = X.cumsum() 
-    n = Ysum[1:] - Xsum[:-1] 
+    n = Y[1:] - Xsum[:-1] 
     n = np.maximum(0, n)
     p = ([p1] * τ + [p2] * (ndays - τ))[1:]
     loglik = scipy.stats.poisson.logpmf(X[1:], n * p)
@@ -110,18 +112,21 @@ if __name__ == '__main__':
     parser.add_argument('country_name')
     parser.add_argument('-s', '--steps',type=int,help='you can provide number of iteration steps, othewise the default is taken')
     parser.add_argument('-c', '--cores',type=int,help='by default 1 core')
-    parser.add_argument('-d', '--dir',type=str)
+    parser.add_argument('-d', '--ver_desc',type=str,help='short description of the version - will be part of the dir name')
     args = parser.parse_args()
-    country = args.country_name
+    country_name = args.country_name
     cores = args.cores
-    dir_name = args.dir if args.dir else 'test'
+    ver_desc = '-'+args.ver_desc if args.ver_desc else ''
 
-    if country=='Wuhan':
+    if not os.path.exists('../data'):
+        os.mkdir('../data')
+
+    if country_name=='Wuhan':
         df = pd.read_csv('../data/Incidence.csv')
         df['date'] = pd.to_datetime(df['Date'], dayfirst=True)
-        df['cases'] = df['Wuhan']
+        df['cases'] = df[country_name]
         df = df[::-1] # TODO why?
-        N = pd.read_csv('../data/pop.csv', index_col='City').loc['Wuhan'].values[0]
+        N = pd.read_csv('../data/pop.csv', index_col='City').loc[country_name].values[0]
     else:
         url = 'https://github.com/ImperialCollegeLondon/covid19model/raw/v1.0/data/COVID-19-up-to-date.csv'
         fname = '../data/COVID-19-up-to-date.csv'
@@ -129,12 +134,12 @@ if __name__ == '__main__':
             urllib.request.urlretrieve(url, fname)
         df = pd.read_csv(fname, encoding='iso-8859-1')
         df['date'] = pd.to_datetime(df['dateRep'], format='%d/%m/%Y')
-        df = df[df['countriesAndTerritories']==country]
+        df = df[df['countriesAndTerritories'] == country_name]
         N = df.iloc[0]['popData2018']
 
     cases_and_dates = df.iloc[::-1][['cases','date']]
     start_date = find_start_day(cases_and_dates)
-    X = np.array(cases_and_dates[cases_and_dates['date']>=start_date]['cases'])
+    X = np.array(cases_and_dates[cases_and_dates['date'] >= start_date]['cases'])
     ndays = len(X)
 
     var_names = ['Z', 'D', 'μ', 'β', 'α1', 'λ', 'α2', 'E0', 'Iu0','τ']
@@ -156,14 +161,21 @@ if __name__ == '__main__':
         sampler.run_mcmc(guesses, nsteps, progress=True);
 
     params = [nsteps, ndim, int(N), Td1, Td2]
-    ##TODO create the dir if not exist
+
+    now = datetime.now().strftime('%d-%b_%H-%M')
+    output_folder = '../output-tmp/{}{}/inference'.format(now,ver_desc) #tmp folder is not for production
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+    filename =  '{}.npz'.format(country_name)
+    filename = os.path.join(output_folder, filename)
+
     np.savez_compressed(
-        '../output-tmp/{}/result/{}.npz'.format(dir_name,country), #we copy the results to the production dir after
+        filename,
         chain=sampler.chain,
         incidences=X, # TODO maybe save as X=X
         params=params, 
         var_names=var_names,
         start_date=str(start_date)
     )
-    copyfile(sys.argv[0], '../output-tmp/{}/{}'.format(dir_name,sys.argv[0])) # we persist the source code of the current file for each experiment
+    copyfile(sys.argv[0], os.path.join(output_folder, sys.argv[0])) # we persist the source code of the current file for each experiment
 
