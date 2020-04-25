@@ -14,7 +14,8 @@ import emcee
 import argparse
 from shutil import copyfile
 
-np.random.seed(10)
+np.random.seed(10)    
+now = datetime.now().strftime('%d-%b_%H')
 
 Td1 = 9
 Td2 = 6
@@ -22,8 +23,10 @@ seed_max = 3000
 
 
 def find_start_day(cases_and_dates):
-    return cases_and_dates[cases_and_dates['cases']==0].iloc[-1]['date']
-
+    #looks for the last 0 0 sequence pattern
+    arr = np.array(cases_and_dates['cases'])
+    ind = len(arr)-list(zip(arr, arr[1:]))[::-1].index((0,0))
+    return cases_and_dates.iloc[ind-1]['date']
 
 def prior():
     Z = uniform(2, 5)
@@ -162,13 +165,12 @@ if __name__ == '__main__':
 
     params = [nsteps, ndim, int(N), Td1, Td2]
 
-    now = datetime.now().strftime('%d-%b_%H-%M')
     output_folder = '../output-tmp/{}{}/inference'.format(now,ver_desc) #tmp folder is not for production
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
     filename =  '{}.npz'.format(country_name)
     filename = os.path.join(output_folder, filename)
-
+    print(filename)
     np.savez_compressed(
         filename,
         chain=sampler.chain,
