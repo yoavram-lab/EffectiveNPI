@@ -28,7 +28,7 @@ def find_start_day(cases_and_dates):
     ind = len(arr)-list(zip(arr, arr[1:]))[::-1].index((0,0))
     return cases_and_dates.iloc[ind-1]['date']
 
-def prior():
+def prior(ndays):
     Z = uniform(2, 5)
     D = uniform(2, 5)
     μ = uniform(0.2, 1)
@@ -41,7 +41,7 @@ def prior():
     return Z, D, μ, β, α1, λ, α2, E0, Iu0, τ
 
 
-def ode(v, t, Z, D, α, β, μ):
+def ode(v, t, Z, D, α, β, μ, N):
     S, E, Ir, Iu, Y = v
     return [
         -β * S * Ir / N - μ * β * S * Iu / N,
@@ -52,20 +52,20 @@ def ode(v, t, Z, D, α, β, μ):
     ]
 
 
-def simulate_one(Z, D, μ, β, α, y0, ndays):
-    sol = odeint(ode, y0, np.arange(ndays), args=(Z, D, μ, β, α))
+def simulate_one(Z, D, μ, β, α, y0, ndays, N):
+    sol = odeint(ode, y0, np.arange(ndays), args=(Z, D, μ, β, α, N))
     S, E, Ir, Iu, Y = sol.T
     return S, E, Ir, Iu, Y
 
 
-def simulate(Z, D, μ, β, α1, λ, α2, E0, Iu0, τ):
+def simulate(Z, D, μ, β, α1, λ, α2, E0, Iu0, τ, ndays, N):
     τ = int(τ)
     Ir0 = 0
     S0 = N - E0 - Ir0 - Iu0
     init = [S0, E0, Ir0, Iu0, Ir0]
-    sol1 = simulate_one(Z, D, μ, β, α1, init, τ)
+    sol1 = simulate_one(Z, D, μ, β, α1, init, τ, N)
     sol1 = np.array(sol1)
-    sol2 = simulate_one(Z, D, μ, λ*β, α2, sol1[:, -1], ndays - τ)
+    sol2 = simulate_one(Z, D, μ, λ*β, α2, sol1[:, -1], ndays - τ, N)
     
     S, E, Ir, Iu, Y = np.concatenate((sol1, sol2), axis=1)
     R = N - (S + E + Ir + Iu)
@@ -84,7 +84,7 @@ def log_likelihood(θ, X):
     Z, D, μ, β, α1, λ, α2, E0, Iu0, τ = θ
     τ = int(τ)
     
-    S, E, Ir, Iu, R, Y = simulate(*θ)
+    S, E, Ir, Iu, R, Y = simulate(*θ, ndays, N)
     p1 = 1/Td1
     p2 = 1/Td2
     Xsum = X.cumsum() 
@@ -149,7 +149,7 @@ if __name__ == '__main__':
         nsteps = args.steps
 
     # nsteps = 10 * 50 # TODO remove this line or the former
-    guesses = np.array([prior() for _ in range(nwalkers)])
+    guesses = np.array([prior(ndays) for _ in range(nwalkers)])
 
     if cores:
         with Pool(cores) as pool:

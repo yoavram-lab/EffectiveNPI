@@ -17,6 +17,8 @@ from rakott.mpl import fig_panel_labels
 import warnings
 warnings.filterwarnings('ignore')
 
+from inference import ode, simulate, simulate_one
+
 official_τ_dates = {
     'Austria' : datetime(2020, 3, 16),
     'Belgium' : datetime(2020, 3, 18),
@@ -57,51 +59,33 @@ def print_all():
 def tau_to_string(tau):
     return (pd.to_datetime(start_date) + timedelta(days=tau)).strftime('%b %d')
 
-
-def ode(y, t, Z, D, α, β, μ):
-    S, E, Ir, Iu = y
-    return [
-        -β * S * Ir / N - μ * β * S * Iu / N,
-        +β * S * Ir / N + μ * β * S * Iu / N - E / Z,
-         α * E / Z - Ir / D,
-        (1-α) * E / Z - Iu / D
-    ]
-
-
-def simulate(Z, D, μ, β1, α1, λ, α2, E0, Iu0,tau,ndays):
-    tau=int(tau)
-    def simulate_one(Z, D, μ, β, α, y0, ndays):
-        sol = odeint(ode, y0, np.arange(ndays), args=(Z, D, μ, β, α))
-        S, E, Ir, Iu = sol.T
-        return S, E, Ir, Iu
-    Ir0 = 0
-    S0 = N - E0 - Ir0 - Iu0
-    y0 = [S0, E0, Ir0, Iu0]
-    y1 = simulate_one(Z, D, μ, β1, α1, y0, tau)
-    y2 = simulate_one(Z, D, μ, λ*β1, α2, np.array(y1)[:,-1], ndays-tau)
+def log_likelihood(θ, X):
+    Z, D, μ, β, α1, λ, α2, E0, Iu0, τ = θ
+    τ = int(τ)
     
-    S, E, Ir, Iu = np.concatenate((y1,y2),axis=1)
-    R = N - (S + E + Ir + Iu)
-    return S, E, Ir, Iu, R
+    S, E, Ir, Iu, R, Y = simulate(*θ, ndays, N)
+    p1 = 1/Td1
+    p2 = 1/Td2
+    Xsum = X.cumsum() 
+    n = Y[1:] - Xsum[:-1] 
+    n = np.maximum(0, n)
+    p = ([p1] * τ + [p2] * (ndays - τ))[1:]
+    loglik = scipy.stats.poisson.logpmf(X[1:], n * p)
+    return loglik.mean()
 
-def generate(Z, D, μ, β1, α1, λ, α2, E0, Iu0,tau,ndays):
+def generate(Z, D, μ, β1, α1, λ, α2, E0, Iu0,tau,ndays, N):
     tau=int(tau)
-    S, E, Ir, Iu, R = simulate(Z, D, μ, β1, α1, λ, α2, E0, Iu0,tau,ndays)
+    S, E, Ir, Iu, R, Y = simulate(Z, D, μ, β1, α1, λ, α2, E0, Iu0,tau,ndays,N)
     p1 = 1/Td1
     p2 = 1/Td2 
-    I1 = α1 *E[:tau]/Z
-    I2 = α2 *E[tau:ndays]/Z
-    I = np.concatenate((I1,I2))
-    Isum = I.cumsum()
-    C = np.zeros_like(I)
+    C = np.zeros_like(Y)
     for t in range(1, len(C)):
-        p = p1 if t<=tau else p2
-        n = Isum[t] - C[:t].sum()
+        p = p1 if t<tau else p2
+        n = Y[t] - C[:t].sum()
         n = max(0,n)
         C[t] = np.random.poisson(n * p)     
 
     return C
-
 
 def plot_β(ax=None):
     if ax is None: fig, ax = plt.subplots()
@@ -282,7 +266,7 @@ def plot_incidences(ax=None):
     daily_cases = []
     for _ in range(num_simulations):
         idx = np.random.choice(sample.shape[0])
-        y = generate(*sample[idx, :],ndays)
+        y = generate(*sample[idx, :],ndays,N)
         daily_cases.append(y)
     daily_cases = np.array(daily_cases)
 
