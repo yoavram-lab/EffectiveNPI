@@ -87,10 +87,6 @@ def log_likelihood(θ, X):
     S, E, Ir, Iu, R, Y = simulate(*θ)
     p1 = 1/Td1
     p2 = 1/Td2
-    Y1 = α1 * E[:τ] / Z
-    Y2 = α2 * E[τ:ndays] / Z
-    Y = np.concatenate((Y1, Y2))
-    Ysum = Y.cumsum()
     Xsum = X.cumsum() 
     n = Y[1:] - Xsum[:-1] 
     n = np.maximum(0, n)
