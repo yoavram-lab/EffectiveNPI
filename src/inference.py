@@ -15,7 +15,7 @@ import argparse
 from shutil import copyfile
 
 np.random.seed(10)    
-now = datetime.now().strftime('%d-%b_%H')
+now = datetime.now().strftime('%d-%b')
 
 Td1 = 9
 Td2 = 6
@@ -53,7 +53,7 @@ def ode(v, t, Z, D, α, β, μ, N):
 
 
 def simulate_one(Z, D, μ, β, α, y0, ndays, N):
-    sol = odeint(ode, y0, np.arange(ndays), args=(Z, D, μ, β, α, N))
+    sol = odeint(ode, y0, np.arange(ndays), args=(Z, D, α, β, μ, N))
     S, E, Ir, Iu, Y = sol.T
     return S, E, Ir, Iu, Y
 
