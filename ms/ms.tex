@@ -270,13 +270,16 @@ We compare models by reporting their relative DIC; lower is better.
 % Results
 \section*{Results}
 
-Several studies have described the effects of non-pharmaceutical interventions in several countries \citep{Flaxman2020,Gatto2020}. 
-These studies have assumed that that the epidemiological dynamics change at a specific date, as in \autoref{eq:NPI_model}, set the change date $\tau$ to the official NPI date $tau^*$, and fit the model once for $t<\tau^*$ and once for $t \ge \tau^*$ (see \hl{TABLE2} for a summary of official NPI dates.)
+Several studies have described the effects of non-pharmaceutical interventions in several countries \citep{Flaxman2020,Gatto2020,Li2020}. 
+These studies have assumed that the parameters of the epidemiological model change at a specific date, as in \autoref{eq:NPI_model}, and set the change date $\tau$ to the official NPI date $\tau^*$. They then fit the model once for $t<\tau^*$ and once for $t \ge \tau^*$ (see \hl{TABLE2} for a summary of official NPI dates.)
 For example, \citet{Li2020} estimate the dynamics in China before and after $\tau^*$ at Jan 23. Thereby, they effectively estimate $(\beta, \alpha_1)$ and $(\lambda, \alpha_2)$ separately.
 
 Here we estimate the posterior distribution of \emph{effective} start date of the NPI, $P(\tau \mid \vec{X}$, as well as maximum a priori (MAP) estimates, $\hat{\tau}$, by jointly estimating $\tau, \beta, \lambda, \alpha_1, \alpha_2$ on the entire time series per region (e.g. Italy, Austria), rather than splitting the region time series at $\tau^*$. 
-\hl{FIGURE} shows a comparison the official dates $\tau^*$ and our MAP estimates $\hat{\tau}$, with confidence intervals. 
-In most cases analyses, we find that $\hat{\tau}$ and $\tau^*$ differ significantly: that is, the effective start of NPI was either advanced or delayed compared to the official date.
+In all examined cases the effect of an NPI is significant: the DIC of a model without NPI ($\beta_t \equiv \beta, \alpha_t \equiv \alpha, p_t \equiv p$ for all $t$) was higher than the DIC of a model with NPI (\autoref{eq:NPI_model}) by at least \hl{Z}.
+Therefore, \hl{FIGURE} compares the official dates $\tau^*$ and our MAP estimates $\hat{\tau}$, with confidence intervals. 
+It can be seen that un most regions $\hat{\tau}$ and $\tau^*$ differ significantly: that is, the effective start of NPI was either advanced or delayed compared to the official date.
+\hl{Do we want to report DIC of model with $\tau$ compared to model with fixed $\tau=\tau^*$? Or just that  ($P(\tau \neq \tau^*) > zzz$) ? Or confidence intervals?}
+
 In the following, we describe our findings on delayed and advanced start of NPI. 
 
 \paragraph*{Delayed effective start of NPI.}
