@@ -17,39 +17,35 @@ from rakott.mpl import fig_panel_labels
 import warnings
 warnings.filterwarnings('ignore')
 
-from inference import ode, simulate, simulate_one
-
-official_τ_dates = {
-    'Austria' : datetime(2020, 3, 16),
-    'Belgium' : datetime(2020, 3, 18),
-    'Denmark' : datetime(2020, 3, 18),
-    'France' : datetime(2020, 3, 17),
-    'Germany' : datetime(2020, 3, 22),
-    'Italy' : datetime(2020, 3, 10),
-    'Norway' : datetime(2020, 3, 24),
-    'Spain': datetime(2020, 3, 14),
-    'Sweden': datetime(2020, 3, 18),
-    'Switzerland': datetime(2020, 3, 20),
-    'United_Kingdom': datetime(2020, 3, 24),
-    'Wuhan' : datetime(2020, 1, 24)
-}
+from inference import ode, simulate, simulate_one, official_τ_dates, TauModel
 
 def load_data(file_name, burn_fraction=0.6, lim_steps=None):
     # it's the only global point. we initialize all the params here once and don't update it later (only when load_data again for different file_name)
-    global official_τ_date,official_τ, incidences, start_date,var_names,nsteps,ndim,N,Td1,Td2,ndays,sample
+    global official_τ_date,official_τ, incidences, start_date,var_names,nsteps,ndim,N,Td1,Td2,ndays,sample,lnprobability
     data = np.load(file_name)
     incidences = data['incidences']
     start_date = data['start_date']
     var_names = list(data['var_names'])
-    nsteps,ndim,N,Td1,Td2 = data['params']
+    nsteps,ndim,N,Td1,Td2,tau_model = data['params']
+    tau_model = TauModel(tau_model)
     chain = data['chain']
     ndays = len(incidences)
     nburn = int(nsteps*burn_fraction)
     sample = chain[:, nburn:, :].reshape(-1, ndim)
+    lprobability = data['lnprobability'][:, nburn:]
     if lim_steps:
         sample = chain[:, int(lim_steps*burn_fraction):lim_steps, :].reshape(-1, ndim)
+        lprobability = data['lnprobability'][:, int(lim_steps*burn_fraction):lim_steps]
     official_τ_date = official_τ_dates[country_name]
     official_τ = (official_τ_date-pd.to_datetime(start_date)).days
+
+def calc_DIC():
+    means = [sample[:,i].mean() for i in range(len(var_names))]
+    # list(zip(var_names,means))
+    loglik_E = log_likelihood(means,incidences)
+    E_loglik = lnprobability.mean()
+    DIC = 2*loglik_E - 4*E_loglik
+    return DIC
 
 print_list = []
 def printt(s):
@@ -231,6 +227,14 @@ def plot_text(ax=None):
     
     plt.setp(ax, frame_on=False, xticks=(), yticks=());
     print_list.clear()
+def plot_text_new(ax=None):
+    if ax is None: fig, ax = plt.subplots(figsize=(0.01,0.01))
+    txt = ['{}    mean: {:.2f}\n    median: {:.2f}'.format(t[0],t[1],t[2]) for t in zip(var_names,means,medians)]
+    txt = '\n'.join(txt)
+    fig, ax = plt.subplots(figsize=(0.01,0.01))
+    plt.text(0,0,txt,fontsize=10)
+    plt.setp(ax, frame_on=False, xticks=(), yticks=());
+
 def plot_incidences_and_dates(ax=None):
     if ax is None: fig, ax = plt.subplots(figsize=(0.01,0.01))
 

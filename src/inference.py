@@ -6,14 +6,19 @@ from multiprocessing import Pool # TODO maybe use ProcessPoolExecutor?
 
 import matplotlib.pyplot as plt
 import numpy as np
-from numpy.random import uniform, randint
+from numpy.random import uniform
 import pandas as pd
 from scipy.integrate import odeint
 import scipy.stats
-from scipy.stats import truncnorm
+from scipy.stats import truncnorm, randint
 import emcee
 import argparse
 from shutil import copyfile
+from enum import IntEnum
+
+class TauModel(IntEnum):
+    uniform_prior = 1
+    wide_prior = 2
 
 np.random.seed(10)    
 now = datetime.now().strftime('%Y-%m-%d')
@@ -44,6 +49,10 @@ def find_start_day(cases_and_dates):
     return cases_and_dates.iloc[ind-1]['date']
 
 def get_τ_prior(start_date, ndays, country_name):
+    if tau_model==TauModel.uniform_prior:
+        return randint(1,ndays) #[including,not-including]
+
+    #wide_prior
     official_τ_date = official_τ_dates[country_name]
     official_τ = (official_τ_date-pd.to_datetime(start_date)).days
     lower = 1
@@ -62,7 +71,7 @@ def prior(ndays, τ_prior):
     λ = uniform(0, 1)
     α2 = uniform(0.02, 0.8)
     E0, Iu0 = uniform(0, seed_max, size=2)
-    τ = τ_prior.rvs(1)[0]
+    τ = τ_prior.rvs()
 
     return Z, D, μ, β, α1, λ, α2, E0, Iu0, τ
 
@@ -100,9 +109,11 @@ def simulate(Z, D, μ, β, α1, λ, α2, E0, Iu0, τ, ndays, N):
 
 def log_prior(θ, τ_prior):
     Z, D, μ, β1, α1, λ, α2, E0, Iu0,τ = θ
+    τ = int(τ)
     if (2 <= Z <=5) and (2 <= D <= 5) and (0.2 <= μ <= 1) and (0.8 <= β1 <= 1.5) and (0.02 <= α1 <= 1) and (0 <= λ <= 1) and (0.02 <= α2 <= 1) and (0 < E0 < seed_max) and (0 < Iu0 < seed_max):
-        ans = τ_prior.logpdf(τ)
-        return ans
+        if tau_model==TauModel.uniform_prior:
+            return τ_prior.logpmf(τ)
+        return τ_prior.logpdf(τ)
     else:
         return -np.inf
 
@@ -139,10 +150,12 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--steps',type=int,help='you can provide number of iteration steps, othewise the default is taken')
     parser.add_argument('-c', '--cores',type=int,help='by default 1 core')
     parser.add_argument('-d', '--ver_desc',type=str,help='short description of the version - will be part of the dir name')
+    parser.add_argument('-m', '--tau_model',type=int,help='1 - uniform prior, 2 - wide prior')
     args = parser.parse_args()
     country_name = args.country_name
     cores = args.cores
     ver_desc = '-'+args.ver_desc if args.ver_desc else ''
+    tau_model = TauModel(args.tau_model) if args.tau_model else TauModel.uniform_prior
 
     if not os.path.exists('../data'):
         os.mkdir('../data')
@@ -187,7 +200,7 @@ if __name__ == '__main__':
         sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X])
         sampler.run_mcmc(guesses, nsteps, progress=True);
 
-    params = [nsteps, ndim, int(N), Td1, Td2]
+    params = [nsteps, ndim, int(N), Td1, Td2, int(tau_model)]
 
     output_folder = '../output-tmp/{}{}/inference'.format(now,ver_desc) #tmp folder is not for production
     if not os.path.exists(output_folder):
@@ -198,6 +211,7 @@ if __name__ == '__main__':
     np.savez_compressed(
         filename,
         chain=sampler.chain,
+        lnprobability=sampler.lnprobability,
         incidences=X, # TODO maybe save as X=X
         params=params, 
         var_names=var_names,
