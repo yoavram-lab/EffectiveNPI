@@ -1,3 +1,4 @@
+import csv
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import numpy as np
@@ -21,7 +22,7 @@ from inference import ode, simulate, simulate_one, official_τ_dates, TauModel
 
 def load_data(file_name, burn_fraction=0.6, lim_steps=None):
     # it's the only global point. we initialize all the params here once and don't update it later (only when load_data again for different file_name)
-    global official_τ_date,official_τ, incidences, start_date,var_names,nsteps,ndim,N,Td1,Td2,ndays,sample,lnprobability
+    global official_τ_date,official_τ, incidences, start_date,var_names,nsteps,ndim,N,Td1,Td2,ndays,sample,lnprobability,tau_model
     data = np.load(file_name)
     incidences = data['incidences']
     start_date = data['start_date']
@@ -32,16 +33,39 @@ def load_data(file_name, burn_fraction=0.6, lim_steps=None):
     ndays = len(incidences)
     nburn = int(nsteps*burn_fraction)
     sample = chain[:, nburn:, :].reshape(-1, ndim)
-    lprobability = data['lnprobability'][:, nburn:]
+    lnprobability = data['lnprobability'][:, nburn:]
     if lim_steps:
         sample = chain[:, int(lim_steps*burn_fraction):lim_steps, :].reshape(-1, ndim)
-        lprobability = data['lnprobability'][:, int(lim_steps*burn_fraction):lim_steps]
+        lnprobability = data['lnprobability'][:, int(lim_steps*burn_fraction):lim_steps]
     official_τ_date = official_τ_dates[country_name]
     official_τ = (official_τ_date-pd.to_datetime(start_date)).days
 
+def write_csv_header(file_name):
+    mean_headers = [v+' mean' for v in var_names]
+    median_headers = [v+' median' for v in var_names]
+    params_headers = [e for l in zip(mean_headers,median_headers) for e in l]
+
+    with open(file_name, mode='w') as file:
+        writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        writer.writerow(['country','DIC','N','p_steps','p_tau_model','p_Td1','p_Td2','official_τ','τ mean','τ median', *params_headers])
+
+def write_csv_data(file_name):
+    #params means and medians
+    means = [round(sample[:,i].mean(),2) for i in range(len(var_names))]
+    medians = [round(np.median(sample[:,i]),2) for i in range(len(var_names))]
+    params_values = [e for l in zip(means,medians) for e in l]
+    #tau
+    τ_posterior = sample[:,var_names.index('τ')].astype(int)
+    τ_mean = format(tau_to_string(τ_posterior.mean()))
+    τ_median =  format(tau_to_string(np.median(τ_posterior)))
+    with open(file_name, mode='a') as file:
+        writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        writer.writerow([country_name,calc_DIC(),N,nsteps,tau_model,Td1,Td2,
+                         tau_to_string(official_τ),
+                         τ_mean,τ_median,*params_values])
+
 def calc_DIC():
     means = [sample[:,i].mean() for i in range(len(var_names))]
-    # list(zip(var_names,means))
     loglik_E = log_likelihood(means,incidences)
     E_loglik = lnprobability.mean()
     DIC = 2*loglik_E - 4*E_loglik
@@ -219,7 +243,8 @@ def plot_all():
     fig.tight_layout()
     
     return fig
-def plot_text(ax=None):
+
+def plot_text(ax=None): #OLD TODO remove
     if ax is None: fig, ax = plt.subplots(figsize=(0.01,0.01))
 
     txt = '\n'.join(print_list)
@@ -227,11 +252,14 @@ def plot_text(ax=None):
     
     plt.setp(ax, frame_on=False, xticks=(), yticks=());
     print_list.clear()
-def plot_text_new(ax=None):
+
+def plot_text(ax=None):
     if ax is None: fig, ax = plt.subplots(figsize=(0.01,0.01))
+    means = [sample[:,i].mean() for i in range(len(var_names))]
+    medians = [np.median(sample[:,i]) for i in range(len(var_names))]
     txt = ['{}    mean: {:.2f}\n    median: {:.2f}'.format(t[0],t[1],t[2]) for t in zip(var_names,means,medians)]
+
     txt = '\n'.join(txt)
-    fig, ax = plt.subplots(figsize=(0.01,0.01))
     plt.text(0,0,txt,fontsize=10)
     plt.setp(ax, frame_on=False, xticks=(), yticks=());
 
@@ -240,9 +268,27 @@ def plot_incidences_and_dates(ax=None):
 
     lst = ['Cases',
           incidences.__str__(),
-           'start date and official tau',
-           '{} - {}'.format(tau_to_string(0),tau_to_string(official_τ))
+          '',
+          'start_date {}'.format(tau_to_string(0)),
+          'official tau {}'.format(tau_to_string(official_τ)),
+           ''
           ]
+
+    τ_posterior = sample[:,var_names.index('τ')].astype(int)
+    τ_mean = τ_posterior.mean()
+    τ_median = np.median(τ_posterior)
+    lst.append('τ mean = {}'.format(tau_to_string(τ_mean)))
+    lst.append('τ median = {}'.format(tau_to_string(τ_median)))
+    confidence = 'P(τ > {}) = {:.2%}'.format(tau_to_string(official_τ), (τ_posterior > official_τ).mean())
+    lst.append(confidence)
+
+    α1_posterior = sample[:,var_names.index('α1')]
+    α2_posterior = sample[:,var_names.index('α2')]
+    Δα_posterior = α2_posterior - α1_posterior
+    lst.append('P(α2 > α1) = {:.2%}'.format((Δα_posterior > 0).mean()))
+
+    lst.append('')
+    lst.append('DIC: {}'.format(calc_DIC()))
     txt = '\n'.join(lst)
     plt.text(0,0,txt,fontsize=10)
     plt.setp(ax, frame_on=False, xticks=(), yticks=());
