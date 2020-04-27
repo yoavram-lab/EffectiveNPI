@@ -16,7 +16,7 @@ import argparse
 from shutil import copyfile
 
 np.random.seed(10)    
-now = datetime.now().strftime('%d-%b')
+now = datetime.now().strftime('%Y-%m-%d')
 
 Td1 = 9
 Td2 = 6
@@ -43,7 +43,17 @@ def find_start_day(cases_and_dates):
     ind = len(arr)-list(zip(arr, arr[1:]))[::-1].index((0,0))
     return cases_and_dates.iloc[ind-1]['date']
 
-def prior(ndays, country_name, start_date):
+def get_τ_prior(start_date, ndays, country_name):
+    official_τ_date = official_τ_dates[country_name]
+    official_τ = (official_τ_date-pd.to_datetime(start_date)).days
+    lower = 1
+    upper = ndays - 2
+    mu = official_τ
+    sigma = 5
+    return truncnorm(
+        (lower - mu) / sigma, (upper - mu) / sigma, loc=mu, scale=sigma)
+
+def prior(ndays, τ_prior):
     Z = uniform(2, 5)
     D = uniform(2, 5)
     μ = uniform(0.2, 1)
@@ -52,17 +62,7 @@ def prior(ndays, country_name, start_date):
     λ = uniform(0, 1)
     α2 = uniform(0.02, 0.8)
     E0, Iu0 = uniform(0, seed_max, size=2)
-
-    #tau
-    official_τ_date = official_τ_dates[country_name]
-    official_τ = (official_τ_date-pd.to_datetime(start_date)).days
-
-    lower = 1
-    upper = ndays - 2
-    mu = official_τ
-    sigma = 5
-    τ = truncnorm(
-        (lower - mu) / sigma, (upper - mu) / sigma, loc=mu, scale=sigma).rvs(1)[0]
+    τ = τ_prior.rvs(1)[0]
 
     return Z, D, μ, β, α1, λ, α2, E0, Iu0, τ
 
@@ -98,10 +98,11 @@ def simulate(Z, D, μ, β, α1, λ, α2, E0, Iu0, τ, ndays, N):
     return S, E, Ir, Iu, R, Y
 
 
-def log_prior(θ):
+def log_prior(θ, τ_prior):
     Z, D, μ, β1, α1, λ, α2, E0, Iu0,τ = θ
-    if (2 <= Z <=5) and (2 <= D <= 5) and (0.2 <= μ <= 1) and (0.8 <= β1 <= 1.5) and (0.02 <= α1 <= 1) and (0 <= λ <= 1) and (0.02 <= α2 <= 1) and (0 < E0 < seed_max) and (0 < Iu0 < seed_max) and (1<=τ<=ndays-1):
-            return 0 # flat prior
+    if (2 <= Z <=5) and (2 <= D <= 5) and (0.2 <= μ <= 1) and (0.8 <= β1 <= 1.5) and (0.02 <= α1 <= 1) and (0 <= λ <= 1) and (0.02 <= α2 <= 1) and (0 < E0 < seed_max) and (0 < Iu0 < seed_max):
+        ans = τ_prior.logpdf(τ)
+        return ans
     else:
         return -np.inf
 
@@ -121,8 +122,8 @@ def log_likelihood(θ, X):
     return loglik.mean()
 
 
-def log_posterior(θ, X):
-    logpri = log_prior(θ)  
+def log_posterior(θ, X, τ_prior):
+    logpri = log_prior(θ, τ_prior)  
     if np.isinf(logpri): 
         return logpri   
     assert not np.isnan(logpri), (logpri, θ)
@@ -166,6 +167,7 @@ if __name__ == '__main__':
     start_date = find_start_day(cases_and_dates)
     X = np.array(cases_and_dates[cases_and_dates['date'] >= start_date]['cases'])
     ndays = len(X)
+    τ_prior = get_τ_prior(start_date, ndays, country_name)
 
     var_names = ['Z', 'D', 'μ', 'β', 'α1', 'λ', 'α2', 'E0', 'Iu0','τ']
     ndim = len(var_names)
@@ -175,11 +177,11 @@ if __name__ == '__main__':
         nsteps = args.steps
 
     # nsteps = 10 * 50 # TODO remove this line or the former
-    guesses = np.array([prior(ndays,country_name, start_date) for _ in range(nwalkers)])
+    guesses = np.array([prior(ndays,τ_prior) for _ in range(nwalkers)])
 
     if cores:
         with Pool(cores) as pool:
-            sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X],pool=pool)
+            sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X,τ_prior],pool=pool)
             sampler.run_mcmc(guesses, nsteps, progress=True);
     else:
         sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X])
