@@ -31,10 +31,10 @@ official_τ_dates = {
     'Sweden': datetime(2020, 3, 18),
     'Switzerland': datetime(2020, 3, 20),
     'United_Kingdom': datetime(2020, 3, 24),
-    'Wuhan' : datetime(2020, 2, 14)
+    'Wuhan' : datetime(2020, 1, 24)
 }
 
-def load_data(file_name):
+def load_data(file_name, burn_fraction=0.6, lim_steps=None):
     # it's the only global point. we initialize all the params here once and don't update it later (only when load_data again for different file_name)
     global official_τ_date,official_τ, incidences, start_date,var_names,nsteps,ndim,N,Td1,Td2,ndays,sample
     data = np.load(file_name)
@@ -44,8 +44,10 @@ def load_data(file_name):
     nsteps,ndim,N,Td1,Td2 = data['params']
     chain = data['chain']
     ndays = len(incidences)
-    nburn = int(nsteps*0.6)
+    nburn = int(nsteps*burn_fraction)
     sample = chain[:, nburn:, :].reshape(-1, ndim)
+    if lim_steps:
+        sample = chain[:, int(lim_steps*burn_fraction):lim_steps, :].reshape(-1, ndim)
     official_τ_date = official_τ_dates[country_name]
     official_τ = (official_τ_date-pd.to_datetime(start_date)).days
 

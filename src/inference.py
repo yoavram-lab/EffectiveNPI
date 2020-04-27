@@ -10,6 +10,7 @@ from numpy.random import uniform, randint
 import pandas as pd
 from scipy.integrate import odeint
 import scipy.stats
+from scipy.stats import truncnorm
 import emcee
 import argparse
 from shutil import copyfile
@@ -21,6 +22,20 @@ Td1 = 9
 Td2 = 6
 seed_max = 3000
 
+official_τ_dates = {
+    'Austria' : datetime(2020, 3, 16),
+    'Belgium' : datetime(2020, 3, 18),
+    'Denmark' : datetime(2020, 3, 18),
+    'France' : datetime(2020, 3, 17),
+    'Germany' : datetime(2020, 3, 22),
+    'Italy' : datetime(2020, 3, 10),
+    'Norway' : datetime(2020, 3, 24),
+    'Spain': datetime(2020, 3, 14),
+    'Sweden': datetime(2020, 3, 18),
+    'Switzerland': datetime(2020, 3, 20),
+    'United_Kingdom': datetime(2020, 3, 24),
+    'Wuhan' : datetime(2020, 1, 24)
+}
 
 def find_start_day(cases_and_dates):
     #looks for the last 0 0 sequence pattern
@@ -28,7 +43,7 @@ def find_start_day(cases_and_dates):
     ind = len(arr)-list(zip(arr, arr[1:]))[::-1].index((0,0))
     return cases_and_dates.iloc[ind-1]['date']
 
-def prior(ndays):
+def prior(ndays, country_name, start_date):
     Z = uniform(2, 5)
     D = uniform(2, 5)
     μ = uniform(0.2, 1)
@@ -37,7 +52,18 @@ def prior(ndays):
     λ = uniform(0, 1)
     α2 = uniform(0.02, 0.8)
     E0, Iu0 = uniform(0, seed_max, size=2)
-    τ = randint(2, ndays-2)
+
+    #tau
+    official_τ_date = official_τ_dates[country_name]
+    official_τ = (official_τ_date-pd.to_datetime(start_date)).days
+
+    lower = 1
+    upper = ndays - 2
+    mu = official_τ
+    sigma = 5
+    τ = truncnorm(
+        (lower - mu) / sigma, (upper - mu) / sigma, loc=mu, scale=sigma).rvs(1)[0]
+
     return Z, D, μ, β, α1, λ, α2, E0, Iu0, τ
 
 
@@ -149,7 +175,7 @@ if __name__ == '__main__':
         nsteps = args.steps
 
     # nsteps = 10 * 50 # TODO remove this line or the former
-    guesses = np.array([prior(ndays) for _ in range(nwalkers)])
+    guesses = np.array([prior(ndays,country_name, start_date) for _ in range(nwalkers)])
 
     if cores:
         with Pool(cores) as pool:
