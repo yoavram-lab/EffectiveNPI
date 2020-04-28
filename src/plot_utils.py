@@ -22,32 +22,33 @@ from inference import ode, simulate, simulate_one, official_τ_dates, TauModel
 
 def load_data(file_name, burn_fraction=0.6, lim_steps=None):
     # it's the only global point. we initialize all the params here once and don't update it later (only when load_data again for different file_name)
-    global official_τ_date,official_τ, incidences, start_date,var_names,nsteps,ndim,N,Td1,Td2,ndays,sample,lnprobability,tau_model
+    # TODO PLEASE DONT USE global anywhere in your code
+    global official_τ_date, official_τ, incidences, start_date, var_names, nsteps, ndim, N, Td1, Td2, ndays, sample, lnprobability, τ_model
     data = np.load(file_name)
     incidences = data['incidences']
     start_date = data['start_date']
     var_names = list(data['var_names'])
-    nsteps,ndim,N,Td1,Td2,tau_model = data['params']
-    tau_model = TauModel(tau_model)
+    nsteps, ndim, N, Td1, Td2, τ_model = data['params']
+    τ_model = TauModel(τ_model)
     chain = data['chain']
     ndays = len(incidences)
-    nburn = int(nsteps*burn_fraction)
+    nburn = int(nsteps * burn_fraction)
     sample = chain[:, nburn:, :].reshape(-1, ndim)
     lnprobability = data['lnprobability'][:, nburn:]
     if lim_steps:
-        sample = chain[:, int(lim_steps*burn_fraction):lim_steps, :].reshape(-1, ndim)
-        lnprobability = data['lnprobability'][:, int(lim_steps*burn_fraction):lim_steps]
+        sample = chain[:, int(lim_steps * burn_fraction):lim_steps, :].reshape(-1, ndim)
+        lnprobability = data['lnprobability'][:, int(lim_steps * burn_fraction):lim_steps]
     official_τ_date = official_τ_dates[country_name]
-    official_τ = (official_τ_date-pd.to_datetime(start_date)).days
+    official_τ = (official_τ_date - pd.to_datetime(start_date)).days
 
 def write_csv_header(file_name):
-    mean_headers = [v+' mean' for v in var_names]
-    median_headers = [v+' median' for v in var_names]
-    params_headers = [e for l in zip(mean_headers,median_headers) for e in l]
+    mean_headers = [v + ' mean' for v in var_names]
+    median_headers = [v + ' median' for v in var_names]
+    params_headers = [e for l in zip(mean_headers, median_headers) for e in l]
 
-    with open(file_name, mode='w') as file:
+    with open(file_name, mode='w') as file: # use pd to write csv files?
         writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(['country','DIC','N','p_steps','p_tau_model','p_Td1','p_Td2','official_τ','τ mean','τ median', *params_headers])
+        writer.writerow(['country','DIC','N','p_steps','p_τ_model','p_Td1','p_Td2','official_τ','τ mean','τ median', *params_headers])
 
 def write_csv_data(file_name):
     #params means and medians
@@ -60,13 +61,13 @@ def write_csv_data(file_name):
     τ_median =  format(tau_to_string(np.median(τ_posterior)))
     with open(file_name, mode='a') as file:
         writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow([country_name,calc_DIC(),N,nsteps,tau_model,Td1,Td2,
-                         tau_to_string(official_τ),
-                         τ_mean,τ_median,*params_values])
+        writer.writerow([country_name, calc_DIC(), N, nsteps, τ_model, Td1, Td2,
+                         τ_to_string(official_τ),
+                         τ_mean, τ_median, *params_values])
 
 def calc_DIC():
     means = [sample[:,i].mean() for i in range(len(var_names))]
-    loglik_E = log_likelihood(means,incidences)
+    loglik_E = log_likelihood(means, incidences)
     E_loglik = lnprobability.mean()
     DIC = 2*loglik_E - 4*E_loglik
     return DIC
@@ -74,13 +75,15 @@ def calc_DIC():
 print_list = []
 def printt(s):
     print_list.append(s)
+    
 def print_all():
     for s in print_list:
         print(s)
     
-def tau_to_string(tau):
-    return (pd.to_datetime(start_date) + timedelta(days=tau)).strftime('%b %d')
+def τ_to_string(τ):
+    return (pd.to_datetime(start_date) + timedelta(days=τ)).strftime('%b %d')
 
+# TODO why do you have these functions here if they are defined in inference.py?
 def log_likelihood(θ, X):
     Z, D, μ, β, α1, λ, α2, E0, Iu0, τ = θ
     τ = int(τ)
