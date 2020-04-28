@@ -120,7 +120,7 @@ def log_prior(θ, τ_prior):
 
 def log_likelihood(θ, X):
     Z, D, μ, β, α1, λ, α2, E0, Iu0, τ = θ
-    τ = int(τ)
+    τ = int(τ) # for explanation see https://github.com/dfm/emcee/issues/150
     
     S, E, Ir, Iu, R, Y = simulate(*θ, ndays, N)
     p1 = 1/Td1
@@ -148,6 +148,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('country_name')
     parser.add_argument('-s', '--steps',type=int,help='you can provide number of iteration steps, othewise the default is taken')
+    parser.add_argument('-w', '--walkers',type=int,help='you can provide number of walkers, othewise the default is taken')
     parser.add_argument('-c', '--cores',type=int,help='by default 1 core')
     parser.add_argument('-d', '--ver_desc',type=str,help='short description of the version - will be part of the dir name')
     parser.add_argument('-m', '--tau_model',type=int,help='1 - uniform prior, 2 - wide prior')
@@ -185,6 +186,8 @@ if __name__ == '__main__':
     var_names = ['Z', 'D', 'μ', 'β', 'α1', 'λ', 'α2', 'E0', 'Iu0','τ']
     ndim = len(var_names)
     nwalkers = 50
+    if args.walkers:
+        nwalkers = args.walkers
     nsteps = 500 * 3 * 50
     if args.steps:
         nsteps = args.steps
@@ -194,7 +197,7 @@ if __name__ == '__main__':
 
     if cores:
         with Pool(cores) as pool:
-            sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X, τ_prior],pool=pool)
+            sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X, τ_prior], pool=pool)
             sampler.run_mcmc(guesses, nsteps, progress=True);
     else:
         sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X, τ_prior])
