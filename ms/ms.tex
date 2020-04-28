@@ -119,20 +119,23 @@ headheight=12pt
 % Introduction
 \section*{Introduction}
 
-The COVID-19 pandemic has resulted in extreme non-pharmaceutical interventions (NPIs) in many affected countries. These interventions, from social distancing to lockdowns, are applied in a rapid and widespread fashion.
+The COVID-19 pandemic has resulted in implementation of extreme non-pharmaceutical interventions (NPIs) in many affected countries. These interventions, from social distancing to lockdowns, are applied in a rapid and widespread fashion.
 The NPIs are designed and assessed using epidemiological models, which follow the dynamics of the viral infection to forecast the effect of different mitigation and suppression strategies on the levels of infection, hospitalization, and fatality.
-These epidemiological models usually assume that the effect of NPIs on disease transmission begins at the officially declared date (e.g.~\citet{Li2020,Gatto2020}).
+These epidemiological models usually assume that the effect of NPIs on disease transmission begins at the officially declared date (e.g.~\citet{Li2020,Gatto2020,Flaxman2020}).
 %Even models that allow the effect of NPIs to be dynamic usually simply assume that this effect increases or decreases as a function of time starting from the official date (e.g.~\citet{Banholzer2020}).
 
-However, behavioural and social change does not occur immediately, but rather requires time to diffuse in the population through media, social networks, social interactions, and even cognitive processes. 
+However, behavioural and social change does not occur immediately, but rather requires time to diffuse in the population through media, social networks, social interactions, and even cognitive processes. % REF for delay in behavioural adaptation
+% UO: If you want more text. you can add that social behaviour and compliance/adopting public health recommendations is very important in infectious diseases and perhaps cite/say a word about vaccines, HIV and condoms or something like that
 Moreover, compliance to NPIs may differ between interventions and people.
 For example, in a survey of 2,108 adults in the UK during Mar 2020, \citet{Atchison2020} found that those over 70 years old were more likely to adopt social distancing than young adults (18-34 years), and that those with lower income were less likely to be able work from home and to self-isolate.
 Furthermore, compliance to NPIs may be impacted both by the number of domestic cases, as well as by reported cases in other regions and countries.
 
-Here, we hypothesise that there is a significant difference between the official start of NPIs and the start of their intended effect on transmission dynamics.
+Here, we hypothesise that there is a significant difference between the official start of NPIs and the start of their adoption by the public.
 We apply a \textit{Susceptible-Exposed-Infected-Recovered} (SEIR) epidemiological model and \textit{Markov Chain Monte Carlo} (MCMC) parameter estimation framework to estimate the effective start date of NPIs in several geographical regions using publicly available confirmed COVID-19 case data. 
 We compare these estimates to the official dates and find both delayed and advanced effect of NPIs on COVID\=/19 transmission dynamics.
 We conclude by demonstrating how differences between the official and effective start of NPIs can confuse assessments of the effectiveness of the NPIs in a simple epidemic control framework.
+% UO: Perhaps add several sentences on how important such a delay is on estimating the effect of interventions and even planning them (which should perhaps be done while considering the expected delay)?
+
 
 
 
@@ -144,7 +147,7 @@ We conclude by demonstrating how differences between the official and effective 
 \paragraph*{Data.} 
 We use daily confirmed case data $\vec{X}=(X_1, \ldots, X_T)$ from several different countries. These incidence data summarize the number of individuals $X_t$ tested positive for SARS\=/CoV\=/2 RNA (using RT-qPCR) at each day $t$.
 Data was retrieved for X regions, see \autoref{table:data_table} for details and references.
-In regions in which there were multiple sequences of days with zero confirmed cases (e.g. France), we cropped the data to begin with the last sequence so that our analysis focuses on the first community-transmitted outbreak rather then isolated imported cases. 
+In regions in which there were multiple sequences of days with zero confirmed cases (e.g. France), we cropped the data to begin with the last sequence so that our analysis focuses on the first sustained outbreak rather than isolated imported cases. 
 % TODO any other preprocessing?
 
 % https://tablesgenerator.com/#
@@ -313,9 +316,10 @@ Several studies have described the effects of non-pharmaceutical interventions i
 These studies have assumed that the parameters of the epidemiological model change at a specific date, as in \autoref{eq:NPI_model}, and set the change date $\tau$ to the official NPI date $\tau^*$. They then fit the model once for $t<\tau^*$ and once for $t \ge \tau^*$ (see \hl{TABLE2} for a summary of official NPI dates.)
 For example, \citet{Li2020} estimate the dynamics in China before and after $\tau^*$ at Jan 23. Thereby, they effectively estimate $(\beta, \alpha_1)$ and $(\lambda, \alpha_2)$ separately.
 
-Here we estimate the posterior distribution of \emph{effective} start date of the NPI, $P(\tau \mid \vec{X}$, as well as maximum a priori (MAP) estimates, $\hat{\tau}$, by jointly estimating $\tau, \beta, \lambda, \alpha_1, \alpha_2$ on the entire time series per region (e.g. Italy, Austria), rather than splitting the region time series at $\tau^*$. 
-In all examined cases the effect of an NPI is significant: the DIC of a model without NPI ($\beta_t \equiv \beta, \alpha_t \equiv \alpha, p_t \equiv p$ for all $t$) was higher than the DIC of a model with NPI (\autoref{eq:NPI_model}) by at least \hl{Z}.
+Here we estimate the posterior distribution of \emph{effective} start date of the NPI, $P(\tau \mid \vec{X}$, as well as maximum a posteriori (MAP) estimates, $\hat{\tau}$, by jointly estimating $\tau, \beta, \lambda, \alpha_1, \alpha_2$ on the entire time series per region (e.g. Italy, Austria), rather than splitting the region time series at $\tau^*$. 
+In all examined cases considering NPIs leads to a better model fit: the DIC of a model without NPI ($\beta_t \equiv \beta, \alpha_t \equiv \alpha, p_t \equiv p$ for all $t$) was higher than the DIC of a model with NPI (\autoref{eq:NPI_model}) by at least \hl{Z}.
 \autoref{fig:fig1} compares the official dates $\tau^*$ and our MAP estimates $\hat{\tau}$, with confidence intervals. 
+% OU: I would report a) that we use the models with NPI because delta DIC>X, and b) 95% CIs of (tau*-tau^). E.g. if your CI on tau^ is (10,14) and tau* is 7, you have a CI of (3,7), which is easily interpreted as the confidence of the delay in the effective implementation of the CI.
 It can be seen that in most regions $\hat{\tau}$ and $\tau^*$ differ significantly: that is, the effective start of NPI was either advanced or delayed compared to the official date.
 \hl{Do we want to report DIC of model with $\tau$ compared to model with fixed $\tau=\tau^*$? Or just that  ($P(\tau \neq \tau^*) > zzz$) ? Or confidence intervals?}
 
