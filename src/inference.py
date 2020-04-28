@@ -194,10 +194,10 @@ if __name__ == '__main__':
 
     if cores:
         with Pool(cores) as pool:
-            sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X,τ_prior],pool=pool)
+            sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X, τ_prior],pool=pool)
             sampler.run_mcmc(guesses, nsteps, progress=True);
     else:
-        sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X])
+        sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X, τ_prior])
         sampler.run_mcmc(guesses, nsteps, progress=True);
 
     params = [nsteps, ndim, int(N), Td1, Td2, int(tau_model)]
