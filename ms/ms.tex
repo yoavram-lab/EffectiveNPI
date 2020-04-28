@@ -121,17 +121,24 @@ headheight=12pt
 
 The COVID-19 pandemic has resulted in extreme non-pharmaceutical interventions (NPIs) in many affected countries. These interventions, from social distancing to lockdowns, are applied in a rapid and widespread fashion.
 The NPIs are designed and assessed using epidemiological models, which follow the dynamics of the viral infection to forecast the effect of different mitigation and suppression strategies on the levels of infection, hospitalization, and fatality.
-However, compliance to NPIs differ between interventions and people and may be impacted both by the number of domestic cases as well as by the number of cases in other regions and countries.
-For example, using a survey of 2,108 adults in the UK during Mar 2020, \citet{Atchison2020} report that those over 70 years old were more likely to adopt social distancing than young adults (18-34 years), and that those with lower income were less likely to be able work from home and to self-isolate.
+These epidemiological models usually assume that the effect of NPIs on disease transmission begins at the officially declared date (e.g.~\citet{Li2020,Gatto2020}).
+%Even models that allow the effect of NPIs to be dynamic usually simply assume that this effect increases or decreases as a function of time starting from the official date (e.g.~\citet{Banholzer2020}).
 
-However, most epidemiological models assume the effect of NPIs on the epidemiological dynamics to begin at their officially declared date (e.g.~\citet{Li2020,Gatto2020}). Even models that allow the effect of NPIs to by more dynamics usually assume that it increases or decreases as a function of time (e.g.~\citet{Banholzer2020}).
-Here we apply a \textit{Susceptible-Exposed-Infected-Recovered} (SEIR) disease transmission model and \textit{Markov Chain Monte Carlo} (MCMC) parameter estimation framework to estimate the effective start date of NPIs in several geographical regions using publicly available confirmed COVID-19 case data.
+However, behavioural and social change does not occur immediately, but rather requires time to diffuse in the population through media, social networks, social interactions, and even cognitive processes. 
+Moreover, compliance to NPIs may differ between interventions and people.
+For example, in a survey of 2,108 adults in the UK during Mar 2020, \citet{Atchison2020} found that those over 70 years old were more likely to adopt social distancing than young adults (18-34 years), and that those with lower income were less likely to be able work from home and to self-isolate.
+Furthermore, compliance to NPIs may be impacted both by the number of domestic cases, as well as by reported cases in other regions and countries.
+
+Here, we hypothesise that there is a significant difference between the official start of NPIs and the start of their intended effect on transmission dynamics.
+We apply a \textit{Susceptible-Exposed-Infected-Recovered} (SEIR) epidemiological model and \textit{Markov Chain Monte Carlo} (MCMC) parameter estimation framework to estimate the effective start date of NPIs in several geographical regions using publicly available confirmed COVID-19 case data. 
+We compare these estimates to the official dates and find both delayed and advanced effect of NPIs on COVID\=/19 transmission dynamics.
+We conclude by demonstrating how differences between the official and effective start of NPIs can confuse assessments of the effectiveness of the NPIs in a simple epidemic control framework.
+
+
 
 %\pagebreak
 % Models and Methods
 \section*{Models and Methods}
-
-All source code will be publicly available under a permissive open-source license at \href{http://github.com/yoavram-lab/EffectiveNPI}{github.com/yoavram-lab/EffectiveNPI}.
 
 %%% Data %%%%
 \paragraph*{Data.} 
@@ -163,7 +170,7 @@ This model distinguishes between reported and unreported infected individuals: t
 
 Susceptible ($S$) individuals become exposed due to contact with reported or unreported infected individuals ($I_r$ or $I_u$) at a rate $\beta_t$ or $\mu \beta_t$.
 The parameter $0 < \mu < 1$ represents the decreased transmission rate from unreported infected individuals, who are often subclinical or even asymptomatic.
-The transmission rate $\beta_t \ge 0$ may change over  time $t$ due to behavioral changes of both susceptible and infected individuals.
+The transmission rate $\beta_t \ge 0$ may change over  time $t$ due to behavioural changes of both susceptible and infected individuals.
 Exposed individuals, after an average incubation period of $Z$ days, become reported infected with probability $\alpha_t$ or unreported infected with probability $(1-\alpha_t)$.
 The reporting rate $0 < \alpha_t < 1$ may also change over time due to changes in human behavior.
 Infected individuals remain infectious for an average period of $D$ days, after which they either recover, or becomes ill enough to be quarantined.
@@ -183,7 +190,9 @@ The vector $\theta$ of model parameters is
 \begin{equation} \label{eq:theta}
 \theta=\Big(Z, D, \mu, \{\beta_t\}, \{\alpha_t\}, \{p_t\}, E(0), I_u(0)\Big).
 \end{equation}
-This model is inspired by \citet{Li2020} and \citet{Pei2020}, who used a similar model with multiple regions and constant transmission $\beta$ and reporting rate $\alpha$ to infer COVID-19 dynamics in China and the continental US, respectively.
+This model is inspired by \citet{Li2020} and \citet{Pei2020}, who used a similar model with multiple regions and constant transmission $\beta$ and reporting rate $\alpha$ to infer COVID\=/19 dynamics in China and the continental US, respectively.
+
+
 
 %%% Likelihood %%%
 \paragraph*{Likelihood function.}
@@ -218,6 +227,8 @@ For given vector $\theta$ of model parameters (\autoref{eq:theta}), we compute t
 \end{equation}
 This defines a \emph{likelihood function} $\mathbb{L}(\theta \mid \vec{X})$ for the parameter vector $\theta$ given the data $\vec{X}$.
 
+
+
 %%% NPI %%%
 \paragraph*{NPI model.}
 To model non-pharmaceutical interventions (NPIs), we set the beginning of the NPIs to day $\tau$ and define
@@ -241,6 +252,8 @@ where $0 < \lambda < 1$.
 The values for $p_t$ follow \citet{Li2020}, who estimated the average time between infection and reporting in Wuhan, China, at 9 days before the start of NPIs (Jan 23, 2020) and 6 days after start of NPIs.
 The parameter $\tau$ is then added to the parameter vector $\theta$ (\autoref{eq:theta}).
 
+
+
 %%% Model fitting %%%
 \paragraph*{Parameter estimation.}
 To estimate the parameters $\theta$ of our model (\autoref{eq:model}) from the data $\vec{X}$, we apply a Bayesian inference approach.
@@ -263,6 +276,8 @@ Most priors follow \citet{Li2020}, except $\lambda$, which is used to enforce th
 The likelihood function is defined in \autoref{eq:likelihood}.
 The posterior distribution on the model parameters $P(\theta \mid \vec{X})$ is then estimated using an \textit{affine-invariant ensemble sampler for Markov chain Monte Carlo} (MCMC) implemented in the \texttt{emcee} Python package~\citep{Foreman-Mackey2013}.
 
+
+%%% Model selection %%%
 \paragraph*{Model selection.}
 We perform model selection using DIC (deviance information criterion)~\citep{Spiegelhalter2002},
 \begin{equation} \label{eq:DIC}
@@ -273,6 +288,14 @@ DIC(\theta, \vec{X}) &= 2\mathbb{E}[D(\theta)] - D(\mathbb{E}[\theta])   \\
 \end{equation}
 where $D(\theta)$ is the Bayesian deviance, and expectations $\mathbb{E}[\cdot]$ are taken over the posterior distribution $P(\theta \mid \vec{X})$.
 We compare models by reporting their relative DIC; lower is better.
+
+
+%%% Source code %%%
+\paragraph*{Source code.} 
+We use Python 3 (Anaconda) with the NumPy, Matplotlib, SciPy, Pandas, Seaborn, and emcee packages.
+All source code will be publicly available under a permissive open-source license at \href{http://github.com/yoavram-lab/EffectiveNPI}{github.com/yoavram-lab/EffectiveNPI}.
+
+
 
 %\pagebreak
 % Results
@@ -290,6 +313,7 @@ It can be seen that un most regions $\hat{\tau}$ and $\tau^*$ differ significant
 
 In the following, we describe our findings on delayed and advanced start of NPI. 
 
+%%% Delayed
 \paragraph*{Delayed effective start of NPI.}
 We find that our MAP estimates $\hat{\tau}$ often differ significantly from the official dates $tau^*$. 
 For example, in Italy, the first case officially confirmed on Feb 21, a lockdown was delayed in Northern Italy on Mar 8, with social distancing implemented in the rest of the country, and the lockdown was extended to the entire nation on Mar 11~\citep{Gatto2020}.
@@ -297,16 +321,22 @@ That is, the official date $\tau^*$ is either Mar 8 or 11.
 However, we estimate the effective date $\hat{\tau}$ at Mar 16 (the posterior probability that $\tau$ is later than Mar 11 is \hl{($P(\tau > \tau^*)=???$)}.
 Similarly, in Wuhan, China, lockdown was declared on Jan 23~\citep{Li2020}, but we estimate that the effective start of NPIs to be 3-4 days layer \hl{($P(\tau > \tau^*)=???$)}.
 
+%%% Advanced
 \paragraph*{Advanced effective start of NPIs.}
 In contrast, in some regions we estimate an effective start of NPIs $\hat{\tau}$ that is \emph{earlier} then the official date $\tau^*$.
 For example, social distancing was encouraged starting on Mar 8~\citep{Flaxman2020}, but mass gatherings still occurred on Mar 8, including a march of 120,000 people for the \href{https://www.nytimes.com/2020/03/13/world/europe/spain-coronavirus-emergency.html}{International Women's Day}, and a  football match between \href{https://www.espn.com/soccer/match?gameId=550350}{Real Betis and Real Madrid} (2-1) with a crowd of 50,965 in Seville.
 A national lockdown was only announced on Mar 14 ($\tau^*$)~\citep{Flaxman2020}.
 Nevertheless, we estimate the effective start of NPI $\hat{\tau}$ at Mar 8 or 9, rather than Mar 14 \hl{($P(\tau < \tau^*)=???$)}.
 
+%%% Exact
 \paragraph*{The exception that proves the rule.}
 We have also found a single case in which the official and effective dates match: Switzerland ordered a national lockdown on Mar 20 ($\tau^*$), after banning public evens and closing schools on Mar 13 and 14~\citep{Flaxman2020}.
 Indeed, our MAP estimate $\hat{\tau}$ is Mar 20, and the posterior distribution shows two density peaks: a smaller one between Mar 10 and Mar 14, and a taller one between Mar 17 and Mar 22. It's also worth mentioning that Switzerland was the first to mandate self isolation of confirmed cases~\citep{Flaxman2020}.
-This seems to be 
+
+%%% Assessment
+\paragraph*{Effect of delays and advances of real-time assessment.}
+
+
 
 \pagebreak
 % Discussion
