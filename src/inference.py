@@ -42,11 +42,27 @@ official_τ_dates = {
     'Wuhan' : datetime(2020, 1, 24)
 }
 
+var_names = ['Z', 'D', 'μ', 'β', 'α1', 'λ', 'α2', 'E0', 'Iu0','τ']
+
+params_bounds = {
+    'Z' : (2, 5),
+    'D' : (2, 5),
+    'μ' : (0.2, 1),
+    'β' : (0.8, 1.5),
+    'α1' : (0.02, 1),
+    'λ'  : (0, 1),
+    'α2' : (0.02, 1),
+    'E0' : (0, seed_max),
+    'Iu0' : (0, seed_max)
+}
+
+
 def find_start_day(cases_and_dates):
     #looks for the last 0 0 sequence pattern
     arr = np.array(cases_and_dates['cases'])
     ind = len(arr)-list(zip(arr, arr[1:]))[::-1].index((0,0))
     return cases_and_dates.iloc[ind-1]['date']
+
 
 def get_τ_prior(start_date, ndays, country_name):
     if tau_model==TauModel.uniform_prior:
@@ -62,15 +78,17 @@ def get_τ_prior(start_date, ndays, country_name):
     return truncnorm(
         (lower - mu) / sigma, (upper - mu) / sigma, loc=mu, scale=sigma)
 
+
 def prior(ndays, τ_prior):
-    Z = uniform(2, 5)
-    D = uniform(2, 5)
-    μ = uniform(0.2, 1)
-    β = uniform(0.6, 1.5)
-    α1 = uniform(0.02, 0.8)
-    λ = uniform(0, 1)
-    α2 = uniform(0.02, 0.8)
-    E0, Iu0 = uniform(0, seed_max, size=2)
+    Z = uniform(*params_bounds['Z'])
+    D = uniform(*params_bounds['D'])
+    μ = uniform(*params_bounds['μ'])
+    β = uniform(*params_bounds['β'])
+    α1 = uniform(*params_bounds['α1'])
+    λ = uniform(*params_bounds['λ'])
+    α2 = uniform(*params_bounds['α2'])
+    E0 = uniform(*params_bounds['E0'])
+    Iu0 = uniform(*params_bounds['Iu0'])
     τ = τ_prior.rvs()
 
     return Z, D, μ, β, α1, λ, α2, E0, Iu0, τ
@@ -106,11 +124,17 @@ def simulate(Z, D, μ, β, α1, λ, α2, E0, Iu0, τ, ndays, N):
     R = N - (S + E + Ir + Iu)
     return S, E, Ir, Iu, R, Y
 
+def in_bounds(**params):
+    bounds = [params_bounds[p] for p in params]
+    for val,(lower,higher) in zip(params.values(),bounds):
+        if not lower<=val<=higher:
+            return False
+    return True
 
 def log_prior(θ, τ_prior):
-    Z, D, μ, β1, α1, λ, α2, E0, Iu0,τ = θ
+    Z, D, μ, β, α1, λ, α2, E0, Iu0,τ = θ
     τ = int(τ)
-    if (2 <= Z <=5) and (2 <= D <= 5) and (0.2 <= μ <= 1) and (0.8 <= β1 <= 1.5) and (0.02 <= α1 <= 1) and (0 <= λ <= 1) and (0.02 <= α2 <= 1) and (0 < E0 < seed_max) and (0 < Iu0 < seed_max):
+    if in_bounds(Z=Z, D=D, μ=μ, β=β, α1=α1, λ=λ, α2=α2, E0=E0, Iu0=Iu0):
         if tau_model==TauModel.uniform_prior:
             return τ_prior.logpmf(τ)
         return τ_prior.logpdf(τ)
@@ -142,6 +166,13 @@ def log_posterior(θ, X, τ_prior):
     assert not np.isnan(loglik), (loglik, θ)
     logpost = logpri + loglik
     return logpost
+
+
+def guess_one():
+    while True:
+        res = prior(ndays,τ_prior)
+        if np.isfinite(log_likelihood(res,X)):
+            return res
 
 
 if __name__ == '__main__':
@@ -183,25 +214,50 @@ if __name__ == '__main__':
     ndays = len(X)
     τ_prior = get_τ_prior(start_date, ndays, country_name)
 
-    var_names = ['Z', 'D', 'μ', 'β', 'α1', 'λ', 'α2', 'E0', 'Iu0','τ']
     ndim = len(var_names)
     nwalkers = 50
     if args.walkers:
         nwalkers = args.walkers
-    nsteps = 500 * 3 * 50
+    nsteps = 75000
     if args.steps:
         nsteps = args.steps
 
-    # nsteps = 10 * 50 # TODO remove this line or the former
-    guesses = np.array([prior(ndays,τ_prior) for _ in range(nwalkers)])
+    guesses = np.array([guess_one() for _ in range(nwalkers)])
 
-    if cores:
-        with Pool(cores) as pool:
-            sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X, τ_prior], pool=pool)
-            sampler.run_mcmc(guesses, nsteps, progress=True);
-    else:
-        sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X, τ_prior])
-        sampler.run_mcmc(guesses, nsteps, progress=True);
+    # if cores:
+    #     with Pool(cores) as pool:
+    #         sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X, τ_prior], pool=pool)
+    #         sampler.run_mcmc(guesses, nsteps, progress=True);
+    # else:
+    #     sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X, τ_prior])
+    #     sampler.run_mcmc(guesses, nsteps, progress=True);
+
+
+    # TODO beautify
+    index = 0
+    autocorr = np.empty(nsteps)
+    old_tau = np.inf
+    with Pool(cores) as pool:
+        sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X, τ_prior],pool=pool)
+        for sample in sampler.sample(guesses, iterations=nsteps, progress=True):
+            # Only check convergence every 100 steps
+            if sampler.iteration % 10:
+                continue
+
+            # Compute the autocorrelation time so far
+            # Using tol=0 means that we'll always get an estimate even
+            # if it isn't trustworthy
+            tau = sampler.get_autocorr_time(tol=0)
+            autocorr[index] = np.mean(tau)
+            index += 1
+
+            # Check convergence
+            converged = np.all(tau * 100 < sampler.iteration)
+            converged &= np.all(np.abs(old_tau - tau) / tau < 0.01)
+            if converged:
+                print('CONVERGED',index)
+                break
+            old_tau = tau
 
     params = [nsteps, ndim, int(N), Td1, Td2, int(tau_model)]
 
@@ -216,6 +272,7 @@ if __name__ == '__main__':
         chain=sampler.chain,
         lnprobability=sampler.lnprobability,
         incidences=X, # TODO maybe save as X=X
+        autocorr=autocorr,
         params=params, 
         var_names=var_names,
         start_date=str(start_date)
