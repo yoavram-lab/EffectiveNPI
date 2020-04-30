@@ -224,40 +224,13 @@ if __name__ == '__main__':
 
     guesses = np.array([guess_one() for _ in range(nwalkers)])
 
-    # if cores:
-    #     with Pool(cores) as pool:
-    #         sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X, τ_prior], pool=pool)
-    #         sampler.run_mcmc(guesses, nsteps, progress=True);
-    # else:
-    #     sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X, τ_prior])
-    #     sampler.run_mcmc(guesses, nsteps, progress=True);
-
-
-    # TODO beautify
-    index = 0
-    autocorr = np.empty(nsteps)
-    old_tau = np.inf
-    with Pool(cores) as pool:
-        sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X, τ_prior],pool=pool)
-        for sample in sampler.sample(guesses, iterations=nsteps, progress=True):
-            # Only check convergence every 100 steps
-            if sampler.iteration % 10:
-                continue
-
-            # Compute the autocorrelation time so far
-            # Using tol=0 means that we'll always get an estimate even
-            # if it isn't trustworthy
-            tau = sampler.get_autocorr_time(tol=0)
-            autocorr[index] = np.mean(tau)
-            index += 1
-
-            # Check convergence
-            converged = np.all(tau * 100 < sampler.iteration)
-            converged &= np.all(np.abs(old_tau - tau) / tau < 0.01)
-            if converged:
-                print('CONVERGED',index)
-                break
-            old_tau = tau
+    if cores and cores!=1:
+        with Pool(cores) as pool:
+            sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X, τ_prior], pool=pool)
+            sampler.run_mcmc(guesses, nsteps, progress=True);
+    else:
+        sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X, τ_prior])
+        sampler.run_mcmc(guesses, nsteps, progress=True);
 
     params = [nsteps, ndim, int(N), Td1, Td2, int(tau_model)]
 
@@ -272,7 +245,7 @@ if __name__ == '__main__':
         chain=sampler.chain,
         lnprobability=sampler.lnprobability,
         incidences=X, # TODO maybe save as X=X
-        autocorr=autocorr,
+        # autocorr=autocorr,
         params=params, 
         var_names=var_names,
         start_date=str(start_date)
