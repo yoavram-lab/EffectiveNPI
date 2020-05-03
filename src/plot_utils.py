@@ -22,32 +22,33 @@ from inference import ode, simulate, simulate_one, official_τ_dates, TauModel
 
 def load_data(file_name, burn_fraction=0.6, lim_steps=None):
     # it's the only global point. we initialize all the params here once and don't update it later (only when load_data again for different file_name)
-    global official_τ_date,official_τ, incidences, start_date,var_names,nsteps,ndim,N,Td1,Td2,ndays,sample,lnprobability,tau_model
+    # TODO PLEASE DONT USE global anywhere in your code
+    global official_τ_date, official_τ, incidences, start_date, var_names, nsteps, ndim, N, Td1, Td2, ndays, sample, lnprobability, τ_model
     data = np.load(file_name)
     incidences = data['incidences']
     start_date = data['start_date']
     var_names = list(data['var_names'])
-    nsteps,ndim,N,Td1,Td2,tau_model = data['params']
-    tau_model = TauModel(tau_model)
+    nsteps, ndim, N, Td1, Td2, τ_model = data['params']
+    τ_model = TauModel(τ_model)
     chain = data['chain']
     ndays = len(incidences)
-    nburn = int(nsteps*burn_fraction)
+    nburn = int(nsteps * burn_fraction)
     sample = chain[:, nburn:, :].reshape(-1, ndim)
     lnprobability = data['lnprobability'][:, nburn:]
     if lim_steps:
-        sample = chain[:, int(lim_steps*burn_fraction):lim_steps, :].reshape(-1, ndim)
-        lnprobability = data['lnprobability'][:, int(lim_steps*burn_fraction):lim_steps]
+        sample = chain[:, int(lim_steps * burn_fraction):lim_steps, :].reshape(-1, ndim)
+        lnprobability = data['lnprobability'][:, int(lim_steps * burn_fraction):lim_steps]
     official_τ_date = official_τ_dates[country_name]
-    official_τ = (official_τ_date-pd.to_datetime(start_date)).days
+    official_τ = (official_τ_date - pd.to_datetime(start_date)).days
 
 def write_csv_header(file_name):
-    mean_headers = [v+' mean' for v in var_names]
-    median_headers = [v+' median' for v in var_names]
-    params_headers = [e for l in zip(mean_headers,median_headers) for e in l]
+    mean_headers = [v + ' mean' for v in var_names]
+    median_headers = [v + ' median' for v in var_names]
+    params_headers = [e for l in zip(mean_headers, median_headers) for e in l]
 
-    with open(file_name, mode='w') as file:
+    with open(file_name, mode='w') as file: # use pd to write csv files?
         writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(['country','DIC','N','p_steps','p_tau_model','p_Td1','p_Td2','official_τ','τ mean','τ median', *params_headers])
+        writer.writerow(['country','DIC','MAP loglik','N','p_steps','p_τ_model','p_Td1','p_Td2','official_τ','τ mean','τ median','τ CI (75%)', *params_headers])
 
 def write_csv_data(file_name):
     #params means and medians
@@ -56,31 +57,42 @@ def write_csv_data(file_name):
     params_values = [e for l in zip(means,medians) for e in l]
     #tau
     τ_posterior = sample[:,var_names.index('τ')].astype(int)
-    τ_mean = format(tau_to_string(τ_posterior.mean()))
-    τ_median =  format(tau_to_string(np.median(τ_posterior)))
+    τ_mean = format(τ_to_string(τ_posterior.mean()))
+    τ_median =  format(τ_to_string(np.median(τ_posterior)))
     with open(file_name, mode='a') as file:
         writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow([country_name,calc_DIC(),N,nsteps,tau_model,Td1,Td2,
-                         tau_to_string(official_τ),
-                         τ_mean,τ_median,*params_values])
+        writer.writerow([country_name, calc_DIC(), calc_LoglikMAP(), N, nsteps, τ_model, Td1, Td2,
+                         τ_to_string(official_τ),
+                         τ_mean, τ_median, calc_τ_CI(), *params_values])
 
 def calc_DIC():
     means = [sample[:,i].mean() for i in range(len(var_names))]
-    loglik_E = log_likelihood(means,incidences)
+    loglik_E = log_likelihood(means, incidences)
     E_loglik = lnprobability.mean()
     DIC = 2*loglik_E - 4*E_loglik
-    return DIC
+    return round(DIC,2)
+def calc_LoglikMAP():
+    means = [sample[:,i].mean() for i in range(len(var_names))]
+    loglik_E = log_likelihood(means, incidences)
+    return round(loglik_E,2)
+def calc_τ_CI():
+    tau_samples = sample.T[-1]
+    tau_samples_hat = tau_samples.mean()
+    res = np.quantile(abs(tau_samples - tau_samples_hat), 0.75)
+    return round(res,2)
 
 print_list = []
 def printt(s):
     print_list.append(s)
+    
 def print_all():
     for s in print_list:
         print(s)
     
-def tau_to_string(tau):
-    return (pd.to_datetime(start_date) + timedelta(days=tau)).strftime('%b %d')
+def τ_to_string(τ):
+    return (pd.to_datetime(start_date) + timedelta(days=τ)).strftime('%b %d')
 
+# TODO why do you have these functions here if they are defined in inference.py?
 def log_likelihood(θ, X):
     Z, D, μ, β, α1, λ, α2, E0, Iu0, τ = θ
     τ = int(τ)
@@ -204,9 +216,9 @@ def plot_τ(ax=None):
 
     τ_mean = τ_posterior.mean()
     τ_median = np.median(τ_posterior)
-    printt('τ mean = {}'.format(tau_to_string(τ_mean)))
-    printt('τ median = {}'.format(tau_to_string(τ_median)))
-    confidence = 'P(τ > {}) = {:.2%}'.format(tau_to_string(official_τ), (τ_posterior > official_τ).mean())
+    printt('τ mean = {}'.format(τ_to_string(τ_mean)))
+    printt('τ median = {}'.format(τ_to_string(τ_median)))
+    confidence = 'P(τ > {}) = {:.2%}'.format(τ_to_string(official_τ), (τ_posterior > official_τ).mean())
     printt(confidence)
 
     ax.hist(τ_posterior, bins=np.arange(ndays), density=True, color='k', align='left', width=1)
@@ -214,7 +226,7 @@ def plot_τ(ax=None):
     # plt.axvline(τ_median, color=red)
 
     days = list(range(0, ndays, round(ndays/10)))
-    xticklabels = [tau_to_string(d) for d in days]
+    xticklabels = [τ_to_string(d) for d in days]
     ax.set_xticks(days)
     ax.set_xticklabels(xticklabels, rotation=45)
     ax.set_xlim(τ_posterior.min(), τ_posterior.max()+2)
@@ -269,17 +281,18 @@ def plot_incidences_and_dates(ax=None):
     lst = ['Cases',
           incidences.__str__(),
           '',
-          'start_date {}'.format(tau_to_string(0)),
-          'official tau {}'.format(tau_to_string(official_τ)),
+          'start_date {}'.format(τ_to_string(0)),
+          'official tau {}'.format(τ_to_string(official_τ)),
            ''
           ]
 
     τ_posterior = sample[:,var_names.index('τ')].astype(int)
     τ_mean = τ_posterior.mean()
     τ_median = np.median(τ_posterior)
-    lst.append('τ mean = {}'.format(tau_to_string(τ_mean)))
-    lst.append('τ median = {}'.format(tau_to_string(τ_median)))
-    confidence = 'P(τ > {}) = {:.2%}'.format(tau_to_string(official_τ), (τ_posterior > official_τ).mean())
+    lst.append('τ mean = {}'.format(τ_to_string(τ_mean)))
+    lst.append('τ median = {}'.format(τ_to_string(τ_median)))
+    lst.append('τ CI: {}'.format(calc_τ_CI()))
+    confidence = 'P(τ > {}) = {:.2%}'.format(τ_to_string(official_τ), (τ_posterior > official_τ).mean())
     lst.append(confidence)
 
     α1_posterior = sample[:,var_names.index('α1')]
@@ -289,6 +302,8 @@ def plot_incidences_and_dates(ax=None):
 
     lst.append('')
     lst.append('DIC: {}'.format(calc_DIC()))
+    lst.append('loglik of MAP: {}'.format(calc_LoglikMAP()))
+
     txt = '\n'.join(lst)
     plt.text(0,0,txt,fontsize=10)
     plt.setp(ax, frame_on=False, xticks=(), yticks=());
@@ -303,13 +318,15 @@ def plot_corner():
     axes = np.array(cor.axes).reshape((ndim, ndim))
     for i, var in enumerate(θ):
         axes[i, i].axvline(var, color=green)
+
 def print_tau_dist():
     ind = var_names.index('τ')
     τ_posterior = sample[:,ind].astype(int)
     counts, bins = np.histogram(τ_posterior, np.arange(ndays), density=True)
     for b,c in zip(bins, counts):
         if c > 0:
-            print(tau_to_string(int(b)), c)
+            print(τ_to_string(int(b)), c)
+
 def plot_incidences(ax=None):
     if ax is None: fig, ax = plt.subplots()
 
@@ -332,7 +349,7 @@ def plot_incidences(ax=None):
     plt.axvline(τ_mean,color=purple, linewidth=1, linestyle='--')
 
     days = list(range(0, ndays, round(ndays/10)))
-    labels = [tau_to_string(d) for d in days]
+    labels = [τ_to_string(d) for d in days]
     plt.xticks(days,labels,rotation=90);
     
     plt.ylabel('Daily cases')
