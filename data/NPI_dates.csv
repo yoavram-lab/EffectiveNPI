@@ -1,13 +1,13 @@
-Country,Date
-Austria,Mar 16 2020
-Belgium,Mar 18 2020
-Denmark,Mar 18 2020
-France,Mar 17 2020
-Germany,Mar 22 2020
-Italy,Mar 10 2020
-Norway,Mar 24 2020
-Spain,Mar 14 2020
-Sweden,Mar 18 2020
-Switzerland,Mar 20 2020
-United Kingdom,Mar 24 2020
-Wuhan,Jan 24 2020
+Country,First,Last
+Austria,Mar 10 2020,Mar 16 2020
+Belgium,Mar 12 2020,Mar 18 2020
+Denmark,Mar 12 2020,Mar 18 2020
+France,Mar 13 2020,Mar 17 2020
+Germany,Mar 12 2020,Mar 22 2020
+Italy,Mar 5 2020,Mar 11 2020
+Norway,Mar 12 2020,Mar 24 2020
+Spain,Mar 9 2020,Mar 14 2020
+Sweden,Mar 12 2020,Mar 18 2020
+Switzerland,Mar 13 2020,Mar 20 2020
+United Kingdom,Mar 16 2020,Mar 24 2020
+Wuhan,Jan 23 2020,Jan 23 2020
