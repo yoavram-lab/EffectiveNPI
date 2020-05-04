@@ -27,6 +27,7 @@ Td1 = 9
 Td2 = 6
 seed_max = 3000
 
+# TODO read from ../data/NPI_dates.csv, which is also fed to ms.tex
 official_τ_dates = {
     'Austria' : datetime(2020, 3, 16),
     'Belgium' : datetime(2020, 3, 18),

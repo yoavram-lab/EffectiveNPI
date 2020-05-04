@@ -28,6 +28,7 @@ headheight=12pt
 \usepackage{enumitem}
 \usepackage{soul}
 \usepackage{booktabs}
+\usepackage{pgfplotstable} % http://mirrors.ctan.org/graphics/pgf/contrib/pgfplots/doc/pgfplotstable.pdf
 
 %SetFonts
 % newtxtext+newtxmath
@@ -142,25 +143,24 @@ We conclude by demonstrating how differences between the official and effective 
 %%% Data %%%%
 \paragraph*{Data.} 
 We use daily confirmed case data $\vec{X}=(X_1, \ldots, X_T)$ from several different countries. These incidence data summarize the number of individuals $X_t$ tested positive for SARS\=/CoV\=/2 RNA (using RT-qPCR) at each day $t$.
-Data was retrieved for X regions, see \autoref{table:data_table} for details and references.
-In regions in which there were multiple sequences of days with zero confirmed cases (e.g. France), we cropped the data to begin with the last sequence so that our analysis focuses on the first sustained outbreak rather than isolated imported cases. 
-% TODO any other preprocessing?
-
-% https://tablesgenerator.com/#
-% add \centering after \begin{table} to center the table
+Data for Wuhan, China retrieved from \citet{Pei2020}, data for 11 European countries retrieved from \citet{Flaxman2020}. 
+Regions in which there were multiple sequences of days with zero confirmed cases (e.g. France), we cropped the data to begin with the last sequence so that our analysis focuses on the first sustained outbreak rather than isolated imported cases. 
+For dates of official NPI dates see \autoref{table:table1}.
+ 
 \begin{table}[h]
 \centering
-\begin{tabular}{@{}llll@{}}
-\toprule
-Region       & Start date & End date & Reference           \\ \midrule
-Austria      & X Feb      &          & \citet{Flaxman2020} \\
-Wuhan, China & 10 Jan     & 8 Feb    & \citet{Pei2020}     \\ \bottomrule
-\end{tabular}
-\caption{Reference for confirmed cases incidence data. All dates in 2020.}
-\label{table:data_table}
+\pgfplotstabletypeset[
+    col sep=comma,
+    string type,
+%    columns/name/.style={column name=Name, column type={|l}},
+%    columns/surname/.style={column name=Surname, column type={|l}},
+%    columns/age/.style={column name=Age, column type={|c|}},
+    every head row/.style={before row=\hline,after row=\hline},
+    every last row/.style={after row=\hline},
+    ]{../data/NPI_dates.csv}
+\caption{Official start of non-pharmaceutical interventions. In all countries except Sweden, the date is for the start of a lockdown. In Sweden, where a lockdown was not ordered during the duration of the study, the date is for start ofschool closures. Dates for European countries from \citet{Flaxman2020}, date for Wuhan, China from \citet{Pei2020}.}
+\label{table:table1}
 \end{table}
-
-
 
 %%% SEIR model %%%%
 \paragraph*{SEIR model.}
@@ -309,7 +309,8 @@ All source code will be publicly available under a permissive open-source licens
 \section*{Results}
 
 Several studies have described the effects of non-pharmaceutical interventions in different geographical regions~\citep{Flaxman2020,Gatto2020,Li2020}. 
-These studies have assumed that the parameters of the epidemiological model change at a specific date, as in \autoref{eq:NPI_model}, and set the change date $\tau$ to the official NPI date $\tau^*$. They then fit the model once for time $t<\tau^*$ and once for time $t \ge \tau^*$ (see \hl{TABLE2} for a summary of official NPI dates.)
+These studies have assumed that the parameters of the epidemiological model change at a specific date, as in \autoref{eq:NPI_model}, and set the change date $\tau$ to the official NPI date $\tau^*$ (\autoref{table:table1}).
+They then fit the model once for time $t<\tau^*$ and once for time $t \ge \tau^*$.
 For example, \citet{Li2020} estimate the dynamics in China before and after $\tau^*$ at Jan 23. Thereby, they effectively estimate $(\beta, \alpha_1)$ and $(\lambda, \alpha_2)$ separately.
 Here we estimate the posterior distribution $P(\tau \mid \vec{X})$ of the \emph{effective} start date of the NPIs by jointly estimating $\tau, \beta, \lambda, \alpha_1, \alpha_2$ on the entire data per region (e.g. Italy, Austria), rather than splitting the data at $\tau^*$.
 We then compute the maximum a posteriori estimate $\hat{\tau}=\mathit{argmax}_{\tau}{P(\tau \mid \vec{X})}$.
