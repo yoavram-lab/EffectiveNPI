@@ -83,7 +83,7 @@ def calc_LoglikMAP():
 def calc_τ_CI(p=0.75):
     tau_samples = sample.T[-1]
     tau_samples_hat = tau_samples.mean()
-    res = np.quantile(abs(tau_samples - tau_samples_hat), 0.75)
+    res = np.quantile(abs(tau_samples - tau_samples_hat), p)
     return round(res,2)
 
 print_list = []
