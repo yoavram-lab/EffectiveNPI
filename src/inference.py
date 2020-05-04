@@ -33,13 +33,13 @@ official_τ_dates = {
     'Denmark' : datetime(2020, 3, 18),
     'France' : datetime(2020, 3, 17),
     'Germany' : datetime(2020, 3, 22),
-    'Italy' : datetime(2020, 3, 10),
+    'Italy' : datetime(2020, 3, 10), # TODO should be 11
     'Norway' : datetime(2020, 3, 24),
     'Spain': datetime(2020, 3, 14),
-    'Sweden': datetime(2020, 3, 18),
+    'Sweden': datetime(2020, 3, 18), # only school closure
     'Switzerland': datetime(2020, 3, 20),
     'United_Kingdom': datetime(2020, 3, 24),
-    'Wuhan' : datetime(2020, 1, 24)
+    'Wuhan' : datetime(2020, 1, 24)  # TODO should be 23
 }
 
 var_names = ['Z', 'D', 'μ', 'β', 'α1', 'λ', 'α2', 'E0', 'Iu0','τ']
