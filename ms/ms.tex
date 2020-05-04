@@ -29,6 +29,7 @@ headheight=12pt
 \usepackage{soul}
 \usepackage{booktabs}
 \usepackage{pgfplotstable} % http://mirrors.ctan.org/graphics/pgf/contrib/pgfplots/doc/pgfplotstable.pdf
+\usepackage{subcaption}
 
 %SetFonts
 % newtxtext+newtxmath
@@ -164,7 +165,8 @@ For dates of official NPI dates see \autoref{table:table1}.
     ]{../data/NPI_dates.csv}
 \caption{
 \textbf{Official start of non-pharmaceutical interventions.}
-In all countries except Sweden, the date is for the start of a lockdown. In Sweden, where a lockdown was not ordered during the duration of the study, the date is for start ofschool closures. Dates for European countries from \citet{Flaxman2020}, date for Wuhan, China from \citet{Pei2020}.
+The date of the first intervention is for a ban of public events, or encouragement of social distancing, or for school closures.
+In all countries except Sweden, the date of the last intervention is for a lockdown. In Sweden, where a lockdown was not ordered during the studied dates, the last date is for school closures. Dates for European countries from \citet{Flaxman2020}, date for Wuhan, China from \citet{Pei2020}.
 }
 \label{table:table1}
 \end{table}
@@ -334,16 +336,25 @@ We compare the official $\tau^*$ and effective $\hat{\tau}$ start of NPIs and fi
 
 In the following, we describe our findings on delayed and advanced start of NPI in detail.
 
+
+
 %%% Fig 2 %%%
 \begin{figure}[h]
     \centering
-	\includegraphics[width=\textwidth]{../figures/Fig2.pdf}
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../figures/Wuhan_τ_posterior.pdf}
+    \end{subfigure}
+  	~
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../figures/Italy_τ_posterior.pdf}
+    \end{subfigure}
     \caption{
-    \textbf{Delayed effect of non-pharmaceutical interventions in Italy and Wuhan, China.}
+	\textbf{Delayed effect of non-pharmaceutical interventions in Italy and Wuhan, China.}
     }
     \label{fig:fig2}
 \end{figure}
-%%%%%%%%%%%%%%
+
+
 
 %%% Delayed
 \paragraph*{Delayed effective start of NPI.}
@@ -354,28 +365,40 @@ That is, the official date $\tau^*$ is either Mar~8 or~11.
 However, we estimate the effective date $\hat{\tau}$ at Mar~16 (the posterior probability that $\tau$ is later than Mar~11 is \hl{($P(\tau > \tau^*)=???$)} (\autoref{fig:fig2}).
 Similarly, in Wuhan, China, lockdown was declared on Jan 23~\citep{Li2020}, but we estimate  the effective start of NPIs to be 3-4 days layer \hl{($P(\tau > \tau^*)=???$)} (\autoref{fig:fig2}).
 
+
+
 %%% Fig 3 %%%
 \begin{figure}[h]
     \centering
-	\includegraphics[width=\textwidth]{../figures/Fig3.pdf}
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../figures/United_Kingdom_τ_posterior.pdf}
+    \end{subfigure}
+    ~
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../figures/France_τ_posterior.pdf}
+    \end{subfigure}
     \caption{
-    \textbf{Advanced effect of non-pharmaceutical interventions in Spain and France.}
-    }
-    \label{fig:fig3}
+    \textbf{Advanced effect of non-pharmaceutical interventions in \hl{Spain} and France.}
+	}
+	\label{fig:fig3}
 \end{figure}
-%%%%%%%%%%%%%%
+
+
 
 %%% Advanced
 \paragraph*{Advanced effective start of NPIs.}
 In contrast, in some regions we estimate an effective start of NPIs $\hat{\tau}$ that is \emph{earlier} then the official date $\tau^*$ (\autoref{fig:fig1}).
 For example, in Spain social distancing was encouraged starting on Mar~8~\citep{Flaxman2020}, but mass gatherings still occurred on Mar~8, including a march of 120,000 people for the \href{https://www.nytimes.com/2020/03/13/world/europe/spain-coronavirus-emergency.html}{International Women's Day}, and a  football match between \href{https://www.espn.com/soccer/match?gameId=550350}{Real Betis and Real Madrid} (2:1) with a crowd of 50,965 in Seville.
 A national lockdown was only announced on Mar~14~\citep{Flaxman2020}.
-Nevertheless, we estimate the effective start of NPI $\hat{\tau}$ at Mar~8 or~9, rather than Mar 14 \hl{($P(\tau < \tau^*)=???$)} (\autoref{fig:fig3}).
+Nevertheless, we estimate the effective start of NPI $\hat{\tau}$ at Mar~8 or~9, rather than Mar~14 \hl{($P(\tau < \tau^*)=???$)} % TODO (\autoref{fig:fig3}).
+
+Similarly, in France the official lockdown started at Mar~17 ($\tau^*$), with initial NPIs at Mar 13~\citep{Flaxman2020}. 
+However, we estimate the effective start of NPIs $\hat{\tau}$ at Mar~8, with 95\% confidence interval between Mar~2 and Mar~14, still three days before the lockdown (\autoref{fig:fig3}).
 
 %%% Exact
 \paragraph*{The exception that proves the rule.}
 We find one case in which the official and effective dates match: Switzerland ordered a national lockdown on Mar~20, after banning public evens and closing schools on Mar~13 and~14~\citep{Flaxman2020}.
-Indeed, our MAP estimate $\hat{\tau}$ is Mar 20, and the posterior distribution shows two density peaks: a smaller one between Mar 10 and Mar 14, and a taller one between Mar~17 and Mar~22. It's also worth mentioning that Switzerland was the first to mandate self isolation of confirmed cases~\citep{Flaxman2020}.
+Indeed, our MAP estimate $\hat{\tau}$ is Mar~20, and the posterior distribution shows two density peaks: a smaller one between Mar~10 and Mar~14, and a taller one between Mar~17 and Mar~22. It's also worth mentioning that Switzerland was the first to mandate self isolation of confirmed cases~\citep{Flaxman2020}.
 
 %%% Assessment
 \paragraph*{Effect of delays and advances of real-time assessment.}
@@ -430,6 +453,7 @@ Our results emphasize the complex interaction between personal, regional, and gl
 %We thank XXX for discussions and comments.
 This work was supported in part by the Israel Science Foundation 552/19 and 1399/17.
 }
+
 
 \pagebreak
 \begin{multicols}{2}[\section*{References}]
