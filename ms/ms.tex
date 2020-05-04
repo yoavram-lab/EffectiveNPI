@@ -24,7 +24,7 @@ headheight=12pt
 \usepackage{lipsum}
 \usepackage{multicol}
 \usepackage{titlesec}	
-\usepackage{caption}
+\usepackage[font=small,labelfont=bf]{caption}
 \usepackage{enumitem}
 \usepackage{soul}
 \usepackage{booktabs}
@@ -136,9 +136,13 @@ We use a \textit{Susceptible-Exposed-Infected-Recovered} (SEIR) epidemiological 
 We compare these estimates to the official dates and find both delayed and advanced effect of NPIs on COVID\=/19 transmission dynamics.
 We conclude by demonstrating how differences between the official and effective start of NPIs can confuse assessments of the effectiveness of the NPIs in a simple epidemic control framework. % TODO explain why important
 
+
+
 %\pagebreak
 % Models and Methods
 \section*{Models and Methods}
+
+
 
 %%% Data %%%%
 \paragraph*{Data.} 
@@ -147,20 +151,25 @@ Data for Wuhan, China retrieved from \citet{Pei2020}, data for 11 European count
 Regions in which there were multiple sequences of days with zero confirmed cases (e.g. France), we cropped the data to begin with the last sequence so that our analysis focuses on the first sustained outbreak rather than isolated imported cases. 
 For dates of official NPI dates see \autoref{table:table1}.
  
+ 
+ 
+% Table 1 %%%
 \begin{table}[h]
 \centering
 \pgfplotstabletypeset[
     col sep=comma,
     string type,
-%    columns/name/.style={column name=Name, column type={|l}},
-%    columns/surname/.style={column name=Surname, column type={|l}},
-%    columns/age/.style={column name=Age, column type={|c|}},
     every head row/.style={before row=\hline,after row=\hline},
     every last row/.style={after row=\hline},
     ]{../data/NPI_dates.csv}
-\caption{Official start of non-pharmaceutical interventions. In all countries except Sweden, the date is for the start of a lockdown. In Sweden, where a lockdown was not ordered during the duration of the study, the date is for start ofschool closures. Dates for European countries from \citet{Flaxman2020}, date for Wuhan, China from \citet{Pei2020}.}
+\caption{
+\textbf{Official start of non-pharmaceutical interventions.}
+In all countries except Sweden, the date is for the start of a lockdown. In Sweden, where a lockdown was not ordered during the duration of the study, the date is for start ofschool closures. Dates for European countries from \citet{Flaxman2020}, date for Wuhan, China from \citet{Pei2020}.
+}
 \label{table:table1}
 \end{table}
+
+
 
 %%% SEIR model %%%%
 \paragraph*{SEIR model.}
@@ -289,20 +298,25 @@ where $D(\theta)$ is the Bayesian deviance, and expectations $\mathbb{E}[\cdot]$
 We compare models by reporting their relative DIC; lower is better.
 
 
+
 %%% Source code %%%
 \paragraph*{Source code.} 
 We use Python 3 (Anaconda) with the NumPy, Matplotlib, SciPy, Pandas, Seaborn, and emcee packages.
 All source code will be publicly available under a permissive open-source license at \href{http://github.com/yoavram-lab/EffectiveNPI}{github.com/yoavram-lab/EffectiveNPI}.
 
 
+
 %%% Fig 1 %%%
 \begin{figure}[h]
     \centering
 	\includegraphics[width=0.6\textwidth]{../figures/Fig1.pdf}
-    \caption{Official and effective start of non-pharmaceutical interventions.}
+    \caption{
+    \textbf{Official and effective start of non-pharmaceutical interventions.}
+    }
     \label{fig:fig1}
 \end{figure}
-%%%%%%%%%%%%%%
+
+
 
 %\pagebreak
 % Results
@@ -324,7 +338,9 @@ In the following, we describe our findings on delayed and advanced start of NPI 
 \begin{figure}[h]
     \centering
 	\includegraphics[width=\textwidth]{../figures/Fig2.pdf}
-    \caption{Delayed effect of non-pharmaceutical interventions in Italy and Wuhan, China.}
+    \caption{
+    \textbf{Delayed effect of non-pharmaceutical interventions in Italy and Wuhan, China.}
+    }
     \label{fig:fig2}
 \end{figure}
 %%%%%%%%%%%%%%
@@ -342,7 +358,9 @@ Similarly, in Wuhan, China, lockdown was declared on Jan 23~\citep{Li2020}, but 
 \begin{figure}[h]
     \centering
 	\includegraphics[width=\textwidth]{../figures/Fig3.pdf}
-    \caption{Advanced effect of non-pharmaceutical interventions in Spain and France.}
+    \caption{
+    \textbf{Advanced effect of non-pharmaceutical interventions in Spain and France.}
+    }
     \label{fig:fig3}
 \end{figure}
 %%%%%%%%%%%%%%
@@ -370,7 +388,9 @@ However, we hypothesize that a significant difference between the beginning of t
 \begin{figure}[h]
     \centering
 	\includegraphics[width=\textwidth]{../figures/Fig4.pdf}
-    \caption{Delayed effective start of NPI causes leads to under-estimation of daily confirmed cases. The red and black lines show model predictions when NPIs start on the official date $\tau^*$ or on the effective date $\hat{\tau}$, respectively, with 95\% confidence intervals. This demonstrates $\Delta$ the assessment error seven days after the official start of NPIs, which in this case is about 40\%.
+    \caption{
+    \textbf{Delayed effective start of NPI causes leads to under-estimation of daily confirmed cases.}
+    The red and black lines show model predictions when NPIs start on the official date $\tau^*$ or on the effective date $\hat{\tau}$, respectively, with 95\% confidence intervals. This demonstrates $\Delta$ the assessment error seven days after the official start of NPIs, which in this case is about 40\%.
     Parameters are MAP estimates for Italy (\hl{TABLE}).
     } 
     \label{fig:fig4}
