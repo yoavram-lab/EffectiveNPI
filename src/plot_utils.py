@@ -48,7 +48,7 @@ def write_csv_header(file_name):
 
     with open(file_name, mode='w') as file: # use pd to write csv files?
         writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(['country','DIC','MAP loglik','N','p_steps','p_τ_model','p_Td1','p_Td2','official_τ','τ mean','τ median','t mean from 1 Jan','t median from 1 Jan','τ CI (75%)','τ CI (95%)', *params_headers])
+        writer.writerow(['country','DIC','MAP loglik','N','p_steps','p_τ_model','p_Td1','p_Td2','official_τ','τ mean','τ median','τ mean from 1 Jan','τ median from 1 Jan','τ CI (75%)','τ CI (95%)', *params_headers])
 
 def write_csv_data(file_name):
     #params means and medians
@@ -330,7 +330,7 @@ def plot_text(ax=None):
     # means = [sample[:,i].mean() for i in range(len(var_names))]
     # medians = [np.median(sample[:,i]) for i in range(len(var_names))]
     # txt = ['{}    mean: {:.2f}\n    median: {:.2f}'.format(t[0],t[1],t[2]) for t in zip(var_names,means,medians)]
-    txt = [str(a) for a in print_tau_dist()]
+    txt = [str(a) for a in print_τ_dist()]
     txt = '\n'.join(txt)
     plt.text(0,0,txt,fontsize=10)
     plt.setp(ax, frame_on=False, xticks=(), yticks=());
@@ -379,15 +379,17 @@ def plot_corner():
     for i, var in enumerate(θ):
         axes[i, i].axvline(var, color=green)
 
-def print_tau_dist():
+def print_τ_dist():
     ind = var_names.index('τ')
     τ_posterior = sample[:,ind].astype(int)
     counts, bins = np.histogram(τ_posterior, np.arange(ndays), density=True)
     arr = []
     for b,c in zip(bins, counts):
         if c > 0.001:
-            arr.append((τ_to_string(int(b)), c))
-    return arr
+            arr.append((τ_to_string(int(b)), round(c,2)))
+    #top 10
+    s = sorted(arr, key=lambda t: t[1], reverse=True)[:10]
+    return sorted(s,key=lambda t: pd.Timestamp('2020 '+t[0]))
 
 def plot_incidences(ax=None):
     if ax is None: fig, ax = plt.subplots()
