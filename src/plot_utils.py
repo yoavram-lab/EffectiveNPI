@@ -48,7 +48,7 @@ def write_csv_header(file_name):
 
     with open(file_name, mode='w') as file: # use pd to write csv files?
         writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(['country','DIC','MAP loglik','N','p_steps','p_τ_model','p_Td1','p_Td2','official_τ','τ mean','τ median','τ CI (75%)', *params_headers])
+        writer.writerow(['country','DIC','MAP loglik','N','p_steps','p_τ_model','p_Td1','p_Td2','official_τ','τ mean','τ median','t mean from 1 Jan','t median from 1 Jan','τ CI (75%)','τ CI (95%)', *params_headers])
 
 def write_csv_data(file_name):
     #params means and medians
@@ -59,11 +59,16 @@ def write_csv_data(file_name):
     τ_posterior = sample[:,var_names.index('τ')].astype(int)
     τ_mean = format(τ_to_string(τ_posterior.mean()))
     τ_median =  format(τ_to_string(np.median(τ_posterior)))
+
+    τ_mean_from1Jar = (pd.to_datetime(start_date) - pd.Timestamp('2020-01-01')).days + τ_posterior.mean()
+    τ_median_from1Jar =  (pd.to_datetime(start_date) - pd.Timestamp('2020-01-01')).days + np.median(τ_posterior)
+    τ_mean_from1Jar = round(τ_mean_from1Jar,2)
+    τ_median_from1Jar = round(τ_median_from1Jar,2)
     with open(file_name, mode='a') as file:
         writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         writer.writerow([country_name, calc_DIC(), calc_LoglikMAP(), N, nsteps, τ_model, Td1, Td2,
                          τ_to_string(official_τ),
-                         τ_mean, τ_median, calc_τ_CI(), *params_values])
+                         τ_mean, τ_median, τ_mean_from1Jar, τ_median_from1Jar, calc_τ_CI(),calc_τ_CI(0.95), *params_values])
 
 def calc_DIC():
     means = [sample[:,i].mean() for i in range(len(var_names))]
@@ -75,7 +80,7 @@ def calc_LoglikMAP():
     means = [sample[:,i].mean() for i in range(len(var_names))]
     loglik_E = log_likelihood(means, incidences)
     return round(loglik_E,2)
-def calc_τ_CI():
+def calc_τ_CI(p=0.75):
     tau_samples = sample.T[-1]
     tau_samples_hat = tau_samples.mean()
     res = np.quantile(abs(tau_samples - tau_samples_hat), 0.75)
@@ -283,9 +288,10 @@ def plot_hists():
   
     fig = plt.figure(figsize=(5*3,5*5))
     spec = gridspec.GridSpec(nrows=5, ncols=3, hspace=0.5,wspace=0.3, figure=fig)
+    i = -1;
     for r in range(5):
         for c in range(3):
-            i = r*2+c
+            i+=1
             if i>=len(var_names):
                 break
             fig.add_subplot(spec[r, c])
@@ -321,10 +327,10 @@ def plot_text(ax=None): #OLD TODO remove
 
 def plot_text(ax=None):
     if ax is None: fig, ax = plt.subplots(figsize=(0.01,0.01))
-    means = [sample[:,i].mean() for i in range(len(var_names))]
-    medians = [np.median(sample[:,i]) for i in range(len(var_names))]
-    txt = ['{}    mean: {:.2f}\n    median: {:.2f}'.format(t[0],t[1],t[2]) for t in zip(var_names,means,medians)]
-
+    # means = [sample[:,i].mean() for i in range(len(var_names))]
+    # medians = [np.median(sample[:,i]) for i in range(len(var_names))]
+    # txt = ['{}    mean: {:.2f}\n    median: {:.2f}'.format(t[0],t[1],t[2]) for t in zip(var_names,means,medians)]
+    txt = [str(a) for a in print_tau_dist()]
     txt = '\n'.join(txt)
     plt.text(0,0,txt,fontsize=10)
     plt.setp(ax, frame_on=False, xticks=(), yticks=());
@@ -377,9 +383,11 @@ def print_tau_dist():
     ind = var_names.index('τ')
     τ_posterior = sample[:,ind].astype(int)
     counts, bins = np.histogram(τ_posterior, np.arange(ndays), density=True)
+    arr = []
     for b,c in zip(bins, counts):
-        if c > 0:
-            print(τ_to_string(int(b)), c)
+        if c > 0.001:
+            arr.append((τ_to_string(int(b)), c))
+    return arr
 
 def plot_incidences(ax=None):
     if ax is None: fig, ax = plt.subplots()
