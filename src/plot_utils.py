@@ -208,6 +208,27 @@ def plot_α2_minus_α1(ax=None):
     plt.xlabel('α2-α1')
     plt.ylabel('Posterior density');
 
+def bar_plot_τ(ax=None):
+    if ax is None: fig, ax = plt.subplots()
+
+    d = dist(sample,'τ')
+    d = [int(dd) for dd in d]
+    d = pd.value_counts(d).sort_index()
+    for i in range(0,len(incidences)):
+        if not d.get(i):
+            d[i] = 0
+    d = d.sort_index()
+    # d = d.rename(lambda x: (pd.to_datetime(start_date)+timedelta(days=x)).strftime('%B %d'))
+    d = d.apply(lambda x:x/d.sum())
+    d.plot(kind='bar',color=green)
+    days = list(range(0,ndays,2))
+    labels = [τ_to_string(d) for d in days]
+    plt.xticks(days,labels);
+    plt.title('tau distribution')
+    
+    taumean = int(dist(sample,'τ').mean())
+    taumedian = int(np.median(dist(sample,'τ')))
+
 def plot_τ(ax=None):
     if ax is None: fig, ax = plt.subplots()
     
@@ -236,6 +257,39 @@ def plot_τ(ax=None):
     ax.set_xlabel('Effective start of NPI, $\\tau$')
     # plt.tight_layout()
     return ax
+
+def dist(sample,param_name):
+    ind = var_names.index(param_name)
+    return sample[:,ind]
+def plot_hists():
+    def hist_param(sample, a):
+        d1 = dist(sample,a)
+        pd.Series(d1).hist(bins=20, histtype='step',linewidth=1,color=green,label=a,density=True)
+        plt.xlim(d1.min(),d1.max())
+        plt.grid(b=None)
+        plt.yticks([])
+
+        mean = d1.mean()
+        #median + quantiles
+        q_16, q_50, q_84 = np.quantile(d1,[0.16, 0.5, 0.84])
+        q_m, q_p = q_50-q_16, q_84-q_50
+        median = r"${{{0}}}_{{-{1}}}^{{+{2}}}$"
+        median = median.format(round(q_50,2), round(q_m,2), round(q_p,2))
+        
+        plt.axvline(mean,color='blue', linewidth=1, linestyle='--')
+        plt.axvline(q_50,color='red', linewidth=1, linestyle='--')
+        plt.title('{} mean: {:.2f} \n median: {}'.format(a, mean, median), y=1.04,fontsize=14)
+        plt.rc('xtick', labelsize=11)
+  
+    fig = plt.figure(figsize=(5*3,5*5))
+    spec = gridspec.GridSpec(nrows=5, ncols=3, hspace=0.5,wspace=0.3, figure=fig)
+    for r in range(5):
+        for c in range(3):
+            i = r*2+c
+            if i>=len(var_names):
+                break
+            fig.add_subplot(spec[r, c])
+            hist_param(sample,var_names[i])
 
 def plot_all():
     fig = plt.figure(figsize=(12, 16))
