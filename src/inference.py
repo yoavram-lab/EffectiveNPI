@@ -18,7 +18,7 @@ from enum import IntEnum
 
 class TauModel(IntEnum):
     uniform_prior = 1
-    wide_prior = 2
+    normal_prior = 2
 
 np.random.seed(10)    
 now = datetime.now().strftime('%Y-%m-%d')
@@ -34,13 +34,13 @@ official_τ_dates = {
     'Denmark' : datetime(2020, 3, 18),
     'France' : datetime(2020, 3, 17),
     'Germany' : datetime(2020, 3, 22),
-    'Italy' : datetime(2020, 3, 10), # TODO should be 11
+    'Italy' : datetime(2020, 3, 11), 
     'Norway' : datetime(2020, 3, 24),
     'Spain': datetime(2020, 3, 14),
     'Sweden': datetime(2020, 3, 18), # only school closure
     'Switzerland': datetime(2020, 3, 20),
     'United_Kingdom': datetime(2020, 3, 24),
-    'Wuhan' : datetime(2020, 1, 24)  # TODO should be 23
+    'Wuhan' : datetime(2020, 1, 23)
 }
 
 var_names = ['Z', 'D', 'μ', 'β', 'α1', 'λ', 'α2', 'E0', 'Iu0','τ']
@@ -62,6 +62,7 @@ def find_start_day(cases_and_dates):
     #looks for the last 0 0 sequence pattern
     arr = np.array(cases_and_dates['cases'])
     ind = len(arr)-list(zip(arr, arr[1:]))[::-1].index((0,0))
+    # return cases_and_dates.iloc[ind-1]['date']
     return cases_and_dates.iloc[ind-1]['date']
 
 
@@ -69,7 +70,7 @@ def get_τ_prior(start_date, ndays, country_name):
     if tau_model==TauModel.uniform_prior:
         return randint(1,ndays) #[including,not-including]
 
-    #wide_prior
+    #normal_prior
     official_τ_date = official_τ_dates[country_name]
     official_τ = (official_τ_date-pd.to_datetime(start_date)).days
     lower = 1
