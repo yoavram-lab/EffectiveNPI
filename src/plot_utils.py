@@ -18,9 +18,9 @@ from rakott.mpl import fig_panel_labels
 import warnings
 warnings.filterwarnings('ignore')
 
-from inference import ode, simulate, simulate_one, official_τ_dates, TauModel
+from inference import ode, simulate, simulate_one, official_τ_dates, TauModel, log_likelihood
 
-def load_data(file_name, burn_fraction=0.6, lim_steps=None):
+def load_data(file_name, country_name, burn_fraction=0.6, lim_steps=None):
     # it's the only global point. we initialize all the params here once and don't update it later (only when load_data again for different file_name)
     # TODO PLEASE DONT USE global anywhere in your code
     global official_τ_date, official_τ, incidences, start_date, var_names, nsteps, ndim, N, Td1, Td2, ndays, sample, lnprobability, τ_model
@@ -72,14 +72,16 @@ def write_csv_data(file_name):
 
 def calc_DIC():
     means = [sample[:,i].mean() for i in range(len(var_names))]
-    loglik_E = log_likelihood(means, incidences)
+    loglik_E = log_likelihood(means, incidences, N)
     E_loglik = lnprobability.mean()
     DIC = 2*loglik_E - 4*E_loglik
     return round(DIC,2)
+
 def calc_LoglikMAP():
     means = [sample[:,i].mean() for i in range(len(var_names))]
-    loglik_E = log_likelihood(means, incidences)
+    loglik_E = log_likelihood(means, incidences, N)
     return round(loglik_E,2)
+
 def calc_τ_CI(p=0.75):
     tau_samples = sample.T[-1]
     tau_samples_hat = tau_samples.mean()
@@ -96,21 +98,6 @@ def print_all():
     
 def τ_to_string(τ):
     return (pd.to_datetime(start_date) + timedelta(days=τ)).strftime('%b %d')
-
-# TODO why do you have these functions here if they are defined in inference.py?
-def log_likelihood(θ, X):
-    Z, D, μ, β, α1, λ, α2, E0, Iu0, τ = θ
-    τ = int(τ)
-    
-    S, E, Ir, Iu, R, Y = simulate(*θ, ndays, N)
-    p1 = 1/Td1
-    p2 = 1/Td2
-    Xsum = X.cumsum() 
-    n = Y[1:] - Xsum[:-1] 
-    n = np.maximum(0, n)
-    p = ([p1] * τ + [p2] * (ndays - τ))[1:]
-    loglik = scipy.stats.poisson.logpmf(X[1:], n * p)
-    return loglik.mean()
 
 def generate(Z, D, μ, β1, α1, λ, α2, E0, Iu0,tau,ndays, N):
     tau=int(tau)
@@ -391,7 +378,7 @@ def print_τ_dist():
     s = sorted(arr, key=lambda t: t[1], reverse=True)[:10]
     return sorted(s,key=lambda t: pd.Timestamp('2020 '+t[0]))
 
-def plot_incidences(ax=None):
+def plot_incidences(ax=None, color=blue):
     if ax is None: fig, ax = plt.subplots()
 
     np.random.seed(10)
@@ -404,7 +391,7 @@ def plot_incidences(ax=None):
     daily_cases = np.array(daily_cases)
 
     t = np.arange(ndays)
-    plt.plot(t, np.median(daily_cases,axis=0), color=blue)
+    plt.plot(t, np.median(daily_cases,axis=0), color=color)
     plt.plot(t, incidences, '.', color=red)
         
     ind = var_names.index('τ')
@@ -419,3 +406,4 @@ def plot_incidences(ax=None):
     plt.ylabel('Daily cases')
     plt.xlabel('Day')
     sns.despine()
+    return ax

@@ -144,10 +144,11 @@ def log_prior(θ, τ_prior):
         return -np.inf
 
 
-def log_likelihood(θ, X):
+def log_likelihood(θ, X, N):
     Z, D, μ, β, α1, λ, α2, E0, Iu0, τ = θ
     τ = int(τ) # for explanation see https://github.com/dfm/emcee/issues/150
     
+    ndays = len(X)
     S, E, Ir, Iu, R, Y = simulate(*θ, ndays, N)
     p1 = 1/Td1
     p2 = 1/Td2
@@ -159,12 +160,12 @@ def log_likelihood(θ, X):
     return loglik.mean()
 
 
-def log_posterior(θ, X, τ_prior):
+def log_posterior(θ, X, τ_prior, N):
     logpri = log_prior(θ, τ_prior)  
     if np.isinf(logpri): 
         return logpri   
     assert not np.isnan(logpri), (logpri, θ)
-    loglik = log_likelihood(θ, X)
+    loglik = log_likelihood(θ, X, N)
     assert not np.isnan(loglik), (loglik, θ)
     logpost = logpri + loglik
     return logpost
@@ -173,7 +174,7 @@ def log_posterior(θ, X, τ_prior):
 def guess_one():
     while True:
         res = prior(ndays,τ_prior)
-        if np.isfinite(log_likelihood(res,X)):
+        if np.isfinite(log_likelihood(res,X,N)):
             return res
 
 
@@ -228,10 +229,10 @@ if __name__ == '__main__':
 
     if cores and cores!=1:
         with Pool(cores) as pool:
-            sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X, τ_prior], pool=pool)
+            sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X, τ_prior, N], pool=pool)
             sampler.run_mcmc(guesses, nsteps, progress=True);
     else:
-        sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X, τ_prior])
+        sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X, τ_prior, N])
         sampler.run_mcmc(guesses, nsteps, progress=True);
 
     params = [nsteps, ndim, int(N), Td1, Td2, int(tau_model)]
