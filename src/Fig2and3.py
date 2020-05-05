@@ -63,7 +63,7 @@ if __name__ == '__main__':
 	τ_ci = np.quantile(abs(τ_sample - τ_hat), quantile)
 	print("+-{:.2f} days for {:.2f} quantile".format(τ_ci, quantile))
 
-	fig, ax = plt.subplots(figsize=(8, 3))
+	fig, ax = plt.subplots(figsize=(10, 4))
 	xmax = max(official_date_days, np.ceil(τ_sample.max())) + 2.5
 	density, bins, _ = ax.hist(τ_sample, bins=np.arange(0, xmax, 1), density=True, align='mid')
 	ymax = density.max() * 1.2
@@ -88,6 +88,6 @@ if __name__ == '__main__':
 	ax.set_title(country.replace('_', ' '))
 	sns.despine()
 	plt.show()
-	fig_filename = os.path.join(output_folder, 'figures', '{}_τ_posterior_{}.pdf')
+	fig_filename = os.path.join(output_folder, 'figures', '{}_τ_posterior.pdf'.format(country))
 	print("Saving to", fig_filename)
 	fig.savefig(fig_filename, dpi=100, **savefig_bbox(*txt))
