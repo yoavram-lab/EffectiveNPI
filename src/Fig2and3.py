@@ -58,12 +58,12 @@ if __name__ == '__main__':
 
 	τ_sample = τ_sample[:, nburn:].ravel()
 	τ_hat = np.mean(τ_sample)
-	print("τ_hat = {:.2f}".format(τ_hat))
+	print("τ_hat = {:.2f}".format(τ_hat), int_to_dt(τ_hat))
 	quantile = 0.95
 	τ_ci = np.quantile(abs(τ_sample - τ_hat), quantile)
 	print("+-{:.2f} days for {:.2f} quantile".format(τ_ci, quantile))
 
-	fig, ax = plt.subplots(figsize=(10, 4))
+	fig, ax = plt.subplots(figsize=(6, 3))
 	xmax = max(official_date_days, np.ceil(τ_sample.max())) + 2.5
 	density, bins, _ = ax.hist(τ_sample, bins=np.arange(0, xmax, 1), density=True, align='mid')
 	ymax = density.max() * 1.2
