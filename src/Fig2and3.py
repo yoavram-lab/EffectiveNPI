@@ -22,9 +22,9 @@ if __name__ == '__main__':
 	NPI_dates = pd.read_csv('../data/NPI_dates.csv')
 	official_date = pd.to_datetime(NPI_dates.loc[NPI_dates['Country'] == country.replace('_', ' '), 'Last'].values[0])
 
-	npz_path = os.path.join(output_folder, 'inference', '{}.npz')
+	npz_path = os.path.join(output_folder, 'inference', '{}.npz').format(country)
 	print("Loading inference data from", npz_path)
-	data = np.load(npz_path.format(country))
+	data = np.load(npz_path)
 
 	var_names = data['var_names']
 	start_date = data['start_date']
