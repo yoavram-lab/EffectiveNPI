@@ -287,14 +287,14 @@ D & \sim \mathit{Uniform}(2, 5) \\
 \alpha_1, \alpha_2 & \sim \mathit{Uniform}(0.02, 1)\\
 E(0) & \sim \mathit{Uniform}(0, 3000) \\
 I_u(0) & \sim \mathit{Uniform}(0, 3000) \\
-\tau &\sim \mathit{Uniform}(1, T-1),
+\tau &\sim \mathit{TruncatedNormal}(\tau^*, 5, 1, T-2),
 \end{aligned}
 \end{equation}
-where $T$ is the number of days in the data $\vec{X}$.
+where $\mathit{TruncatedNormal}(\mu, \sigma, a, b)$ is a truncated normal distribution with mean $\mu$ and standard deviation $\sigma$ taking values between $a$ and $b$; $T$ is the number of days in the data $\vec{X}$; and $\tau^*$ is the official start of the NPI.
 Most priors follow \citet{Li2020}, with the following exceptions.
 $\lambda$ is used to ensure transmission rates are lower after the start of the NPIs ($\lambda < 1$).
 We checked values of $\Delta t$ larger than five days and found they generally produce lower likelihood and unreasonable parameter estimates.
-For the effective start of NPIs $\tau$ we have also tested a wide normal prior centered around the official date $\tau^*$. % TODO
+For the effective start of NPIs $\tau$ we have also tested an uninformative uniform prior $U(1,T-1)$. DIC (see below) was lower for the truncated normal prior in all countries except \hl{Germany?}, and therefore we decided to use the informative prior.
 
 The likelihood function is defined in \autoref{eq:likelihood}.
 The posterior distribution of the model parameters $P(\theta \mid \vec{X})$ is then estimated using an \textit{affine-invariant ensemble sampler for Markov chain Monte Carlo} (MCMC) implemented in the \texttt{emcee} Python package~\citep{Foreman-Mackey2013}.
@@ -310,7 +310,7 @@ DIC(\theta, \vec{X}) &= 2\mathbb{E}[D(\theta)] - D(\mathbb{E}[\theta])   \\
 &= 2 \log\mathcal{L}(\mathbb{E}[\theta] \mid \vec{X}) - 4\mathbb{E}[\log\mathcal{L}(\theta \mid \vec{X})],
 \end{aligned}
 \end{equation}
-where $D(\theta)$ is the Bayesian deviance, and expectations $\mathbb{E}[\cdot]$ are taken over the posterior distribution $P(\theta \mid \vec{X})$.
+where $D(\theta)=-2\log\mathcal{L}(\theta \mid \vec{X})$ is the Bayesian deviance, and expectations $\mathbb{E}[\cdot]$ are taken over the posterior distribution $P(\theta \mid \vec{X})$.
 We compare models by reporting their relative DIC; lower is better.
 
 
