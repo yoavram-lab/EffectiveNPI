@@ -348,10 +348,7 @@ Here we estimate the posterior distribution $P(\tau \mid \vec{X})$ of the \emph{
 We then compute the maximum a posteriori estimate $\hat{\tau}=\mathit{argmax}_{\tau}{P(\tau \mid \vec{X})}$.
 
 We find that a model that considers an NPI (\autoref{eq:NPI_model}) is a better fit to the data than a model without an NPI, i.e. with constant $\beta$ and $\alpha$ (\hl{$\Delta DIC > ?$ for all regions}.)
-We compare the official $\tau^*$ and effective $\hat{\tau}$ start of NPIs and find that in most regions the effective start of NPI  significantly differs from the official date (\autoref{fig:fig1}): the \hl{95\%} confidence interval on $\hat{\tau}$ does not include $\tau^*$, and the DIC of the model with free $\tau$ parameter is lower than that of a model with a fixed $\tau \equiv \tau^*$ (\hl{$\Delta DIC > ?$}.) The exception that proves the rule is \hl{Switzerland}.
-We also find that the posterior distributions of $\tau$ are either unimodal (e.g. Italy) or flat (e.g. Sweden). The exception is the posterior of the \hl{United Kingdom}, which has 
-
-% TODO UK posterior tau and 95% CI very wide, probably because data ends few days after tau*. This will be checked against more data.
+We compare the official $\tau^*$ and effective $\hat{\tau}$ start of NPIs and find that in most regions the effective start of NPI  significantly differs from the official date (\autoref{fig:fig1}): the \hl{95\%} credible interval on $\hat{\tau}$ does not include $\tau^*$, and the DIC of the model with free $\tau$ parameter is lower than that of a model with a fixed $\tau \equiv \tau^*$ (\hl{$\Delta DIC > ?$}.) The exception that proves the rule is \hl{Switzerland}, where the effective and official dates are the same. Another important exception is the \hl{United~Kingdom?} % TODO need more data? Maybe not such an exception?
 
 In the following, we describe our findings on delayed and advanced start of NPI in detail.
 
@@ -399,7 +396,7 @@ A national lockdown was only announced on Mar~14~\citep{Flaxman2020}.
 Nevertheless, we estimate the effective start of NPI $\hat{\tau}$ at Mar~8 or~9 ($\pm$2.96 95\%CI), rather than Mar~14 (\autoref{fig:fig3}).
 
 Similarly, in France the official lockdown started at Mar~17 ($\tau^*$), with initial NPIs at Mar 13~\citep{Flaxman2020}. 
-However, we estimate the effective start of NPIs $\hat{\tau}$ at Mar~8 ($\pm$5.9 days 95\% CI). Although the confidence interval is wide, spanning from Mar~2 to Mar~13, the official lockdown start at Mar~17 is later still (\autoref{fig:fig3}).
+However, we estimate the effective start of NPIs $\hat{\tau}$ at Mar~8 ($\pm$5.9 days 95\% CI). Although the credible interval is wide, spanning from Mar~2 to Mar~13, the official lockdown start at Mar~17 is later still (\autoref{fig:fig3}).
 
 Interestingly, the effective start of NPIs $\hat{\tau}$ in both France and Spain is estimated at Mar~8, although the official dates are differ by three days. Moreover, the number of daily cases was similar until Mar~8 in both countries, but diverged by Mar~13, reaching significantly higher numbers in Spain (\autoref{fig:fig-fr-vs-es}).
 
@@ -423,7 +420,7 @@ Interestingly, the effective start of NPIs $\hat{\tau}$ in both France and Spain
     \end{subfigure}
     \caption{
     \textbf{Advanced effect of non-pharmaceutical interventions in France and Spain.}
-    Posterior distribution of $\tau$, the effective start date of NPI, is shown as a histogram of MCMC samples. Red line shows the official NPI date $\tau^*$. Black line shows the MAP estimate $\hat{\tau}$. Shaded area shows a 95\% confidence interval (area in which $P(|\tau - \hat{\tau}| \mid \vec{X}) = 0.95$). 
+    Posterior distribution of $\tau$, the effective start date of NPI, is shown as a histogram of MCMC samples. Red line shows the official NPI date $\tau^*$. Black line shows the MAP estimate $\hat{\tau}$. Shaded area shows a 95\% credible interval (area in which $P(|\tau - \hat{\tau}| \mid \vec{X}) = 0.95$). 
 	}
 	\label{fig:fig3}
 \end{figure}
@@ -450,7 +447,7 @@ Here, a lockdown is officially ordered on Mar~10 ($\tau^*$, but its delayed effe
 	\includegraphics[width=\textwidth]{../figures/Fig4.pdf}
     \caption{
     \textbf{Delayed effective start of NPI causes leads to under-estimation of daily confirmed cases.}
-    The red and black lines show model predictions when NPIs start on the official date $\tau^*$ or on the effective date $\hat{\tau}$, respectively, with 95\% confidence intervals. This demonstrates $\Delta$ the assessment error seven days after the official start of NPIs, which in this case is about 40\%.
+    The red and black lines show model predictions when NPIs start on the official date $\tau^*$ or on the effective date $\hat{\tau}$, respectively, with 95\% credible intervals. This demonstrates $\Delta$ the assessment error seven days after the official start of NPIs, which in this case is about 40\%.
     Parameters are MAP estimates for Italy (\hl{TABLE}).
     } 
     \label{fig:fig4}
