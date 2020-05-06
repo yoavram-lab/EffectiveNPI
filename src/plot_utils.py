@@ -110,9 +110,9 @@ def print_all():
 def τ_to_string(τ):
     return (pd.to_datetime(start_date) + timedelta(days=τ)).strftime('%b %d')
 
-def generate(Z, D, μ, β1, α1, λ, α2, E0, Iu0,tau,ndays, N):
+def generate(Z, D, μ, β1, α1, λ, α2, E0, Iu0,delta_t0,tau,ndays, N):
     tau=int(tau)
-    S, E, Ir, Iu, R, Y = simulate(Z, D, μ, β1, α1, λ, α2, E0, Iu0,tau,ndays,N)
+    S, E, Ir, Iu, R, Y = simulate(Z, D, μ, β1, α1, λ, α2, E0, Iu0,delta_t0,tau,ndays,N)
     p1 = 1/Td1
     p2 = 1/Td2 
     C = np.zeros_like(Y)
