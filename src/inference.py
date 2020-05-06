@@ -75,10 +75,10 @@ def get_τ_prior(start_date, ndays, country_name):
     official_τ = (official_τ_date-pd.to_datetime(start_date)).days
     lower = 1
     upper = ndays - 2
-    mu = official_τ
-    sigma = 5
+    μ = official_τ
+    σ = 5
     return truncnorm(
-        (lower - mu) / sigma, (upper - mu) / sigma, loc=mu, scale=sigma)
+        (lower - μ) / σ, (upper - μ) / σ, loc=μ, scale=σ)
 
 
 def prior(ndays, τ_prior):
