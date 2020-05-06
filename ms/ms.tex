@@ -276,7 +276,11 @@ The model in \autoref{eq:model} is parameterized by the vector $\theta$, where
 \begin{equation} \label{eq:theta}
 \theta=\Big(Z, D, \mu, \{\beta_t\}, \{\alpha_t\}, \{p_t\}, E(0), I_u(0)\Big), \tau, \Delta t.
 \end{equation} 
-We define the following flat priors on the model parameters $P(\theta)$: 
+
+The likelihood function is defined in \autoref{eq:likelihood}.
+The posterior distribution of the model parameters $P(\theta \mid \vec{X})$ is then estimated using an \textit{affine-invariant ensemble sampler for Markov chain Monte Carlo} (MCMC) implemented in the \texttt{emcee} Python package~\citep{Foreman-Mackey2013}.
+
+We define the following priors on the model parameters $P(\theta)$: 
 \begin{equation} \label{eq:priors}
 \begin{aligned} % TODO verify before submitting
 Z & \sim \mathit{Uniform}(2, 5) \\
@@ -294,10 +298,8 @@ where $\mathit{TruncatedNormal}(\mu, \sigma, a, b)$ is a truncated normal distri
 Most priors follow \citet{Li2020}, with the following exceptions.
 $\lambda$ is used to ensure transmission rates are lower after the start of the NPIs ($\lambda < 1$).
 We checked values of $\Delta t$ larger than five days and found they generally produce lower likelihood and unreasonable parameter estimates.
-For the effective start of NPIs $\tau$ we have also tested an uninformative uniform prior $U(1,T-1)$. DIC (see below) was lower for the truncated normal prior in all countries except \hl{Germany?}, and therefore we decided to use the informative prior.
-
-The likelihood function is defined in \autoref{eq:likelihood}.
-The posterior distribution of the model parameters $P(\theta \mid \vec{X})$ is then estimated using an \textit{affine-invariant ensemble sampler for Markov chain Monte Carlo} (MCMC) implemented in the \texttt{emcee} Python package~\citep{Foreman-Mackey2013}.
+For the effective start of NPIs $\tau$ we have also tested an uninformative uniform prior $U(1,T-1)$. DIC (see definition below) was lower for the truncated normal prior in most countries, except \hl{Germany?}. More importantly, the uninformative prior could result in non-negligible posterior probability for unreasonable $\tau$ values, such as Mar~1 in the United~Kingdom (this was due to MCMC chains being stuck on values far from the MAP).
+We therefore decided to use the more informative truncated normal prior.
 
 
 
@@ -347,6 +349,7 @@ We then compute the maximum a posteriori estimate $\hat{\tau}=\mathit{argmax}_{\
 
 We find that a model that considers an NPI (\autoref{eq:NPI_model}) is a better fit to the data than a model without an NPI, i.e. with constant $\beta$ and $\alpha$ (\hl{$\Delta DIC > ?$ for all regions}.)
 We compare the official $\tau^*$ and effective $\hat{\tau}$ start of NPIs and find that in most regions the effective start of NPI  significantly differs from the official date (\autoref{fig:fig1}): the \hl{95\%} confidence interval on $\hat{\tau}$ does not include $\tau^*$, and the DIC of the model with free $\tau$ parameter is lower than that of a model with a fixed $\tau \equiv \tau^*$ (\hl{$\Delta DIC > ?$}.) The exception that proves the rule is \hl{Switzerland}.
+We also find that the posterior distributions of $\tau$ are either unimodal (e.g. Italy) or flat (e.g. Sweden). The exception is the posterior of the \hl{United Kingdom}, which has 
 
 % TODO UK posterior tau and 95% CI very wide, probably because data ends few days after tau*. This will be checked against more data.
 
