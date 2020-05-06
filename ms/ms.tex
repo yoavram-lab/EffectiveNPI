@@ -136,7 +136,8 @@ Adoption of public health recommendations is often critical for effective respon
 However, behavioral and social change does not occur immediately, but rather requires time to diffuse in the population through media, social networks, and social interactions. 
 Moreover, compliance to NPIs may differ between different interventions and between people.
 For example, in a survey of 2,108 adults in the UK during Mar 2020, \citet{Atchison2020} found that those over 70 years old were more likely to adopt social distancing than young adults (18-34 years old), and that those with lower income were less likely to be able to work from home and to self-isolate.
-Furthermore, compliance to NPIs may be impacted by risk perception, as perceived by the number of domestic cases or even by reported cases in other regions and countries.
+Similarly, compliance to NPIs may be impacted by personal experiences. \citet{Smith2020} have surveyed 6,149 UK adults in late April and found that people who believe they have already had COVID\=/19 are more likely to think they are immune, and less likely to comply with social distancing measures. 
+Compliance may also depend on risk perception as perceived by the the number of domestic cases or even by reported cases in other regions and countries.
 Interestingly, the perceived risk of COVID\=/19 infection has likely caused a reduction in the number of influenza-like illness cases in the US starting from mid-February~\citep{Zipfel2020}.
 
 Here, we hypothesize that there is a significant difference between the official start of NPIs and their adoption by the public and therefore their effect on transmission dynamics.
@@ -277,9 +278,7 @@ The model in \autoref{eq:model} is parameterized by the vector $\theta$, where
 \end{equation} 
 
 The likelihood function is defined in \autoref{eq:likelihood}.
-The posterior distribution of the model parameters $P(\theta \mid \vec{X})$ is then estimated using an \textit{affine-invariant ensemble sampler for Markov chain Monte Carlo} (MCMC) implemented in the \texttt{emcee} Python package~\citep{Foreman-Mackey2013}.
-
-We define the following priors on the model parameters $P(\theta)$: 
+We define the following prior distributions on the model parameters $P(\theta)$: 
 \begin{equation} \label{eq:priors}
 \begin{aligned} % TODO verify before submitting
 Z & \sim \mathit{Uniform}(2, 5) \\
@@ -297,8 +296,11 @@ where $\mathit{TruncatedNormal}(\mu, \sigma, a, b)$ is a truncated normal distri
 Most priors follow \citet{Li2020}, with the following exceptions.
 $\lambda$ is used to ensure transmission rates are lower after the start of the NPIs ($\lambda < 1$).
 We checked values of $\Delta t$ larger than five days and found they generally produce lower likelihood and unreasonable parameter estimates.
-For the effective start of NPIs $\tau$ we have also tested an uninformative uniform prior $U(1,T-1)$. DIC (see definition below) was lower for the truncated normal prior in most countries, except \hl{Germany?}. More importantly, the uninformative prior could result in non-negligible posterior probability for unreasonable $\tau$ values, such as Mar~1 in the United~Kingdom (this was due to MCMC chains being stuck on values far from the MAP).
+For the effective start of NPIs $\tau$ we have also tested an uninformative uniform prior $U(1,T-1)$. DIC (see definition below) was lower for the truncated normal prior in most countries, except \hl{Germany?}. More importantly, the uninformative prior could result in non-negligible posterior probability for unreasonable $\tau$ values, such as Mar~1 in the United~Kingdom (this was due to MCMC chains being stuck in low posterior regions of the parameter space).
 We therefore decided to use the more informative truncated normal prior.
+
+The posterior distribution of the model parameters $P(\theta \mid \vec{X})$ is then estimated using an \textit{affine-invariant ensemble sampler for Markov chain Monte Carlo} (MCMC) implemented in the \texttt{emcee} Python package~\citep{Foreman-Mackey2013}.
+The maximum a posteriori
 
 
 
@@ -344,7 +346,7 @@ These studies have assumed that the parameters of the epidemiological model chan
 They then fit the model once for time $t<\tau^*$ and once for time $t \ge \tau^*$.
 For example, \citet{Li2020} estimate the dynamics in China before and after $\tau^*$ at Jan 23. Thereby, they effectively estimate $(\beta, \alpha_1)$ and $(\lambda, \alpha_2)$ separately.
 Here we estimate the posterior distribution $P(\tau \mid \vec{X})$ of the \emph{effective} start date of the NPIs by jointly estimating $\tau, \beta, \lambda, \alpha_1, \alpha_2$ on the entire data per region (e.g. Italy, Austria), rather than splitting the data at $\tau^*$.
-We then compute the maximum a posteriori estimate $\hat{\tau}=\mathit{argmax}_{\tau}{P(\tau \mid \vec{X})}$.
+We then estimate the maximum a posteriori (MAP) estimate $\hat{\tau}=\mathit{argmax}_{\tau}{P(\tau \mid \vec{X})}$. \hl{using median or argmax?}
 
 We find that a model that considers an NPI (\autoref{eq:NPI_model}) is a better fit to the data than a model without an NPI, i.e. with constant $\beta$ and $\alpha$ (\hl{$\Delta DIC > ?$ for all regions}.)
 We compare the official $\tau^*$ and effective $\hat{\tau}$ start of NPIs and find that in most regions the effective start of NPI  significantly differs from the official date (\autoref{fig:fig1}): the \hl{95\%} credible interval on $\hat{\tau}$ does not include $\tau^*$, and the DIC of the model with free $\tau$ parameter is lower than that of a model with a fixed $\tau \equiv \tau^*$ (\hl{$\Delta DIC > ?$}.) The exception that proves the rule is \hl{Switzerland}, where the effective and official dates are the same. Another important exception is the \hl{United~Kingdom?} % TODO need more data? Maybe not such an exception?
