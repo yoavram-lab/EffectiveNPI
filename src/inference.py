@@ -43,7 +43,7 @@ official_τ_dates = {
     'Wuhan' : datetime(2020, 1, 23)
 }
 
-var_names = ['Z', 'D', 'μ', 'β', 'α1', 'λ', 'α2', 'E0', 'Iu0','τ']
+var_names = ['Z', 'D', 'μ', 'β', 'α1', 'λ', 'α2', 'E0', 'Iu0','Δt0','τ']
 
 params_bounds = {
     'Z' : (2, 5),
@@ -54,7 +54,8 @@ params_bounds = {
     'λ'  : (0, 1),
     'α2' : (0.02, 1),
     'E0' : (0, seed_max),
-    'Iu0' : (0, seed_max)
+    'Iu0' : (0, seed_max),
+    'Δt0' : (1,5) #how much zeros before the first incident
 }
 
 
@@ -63,7 +64,8 @@ def find_start_day(cases_and_dates):
     arr = np.array(cases_and_dates['cases'])
     ind = len(arr)-list(zip(arr, arr[1:]))[::-1].index((0,0))
     # return cases_and_dates.iloc[ind-1]['date']
-    return cases_and_dates.iloc[ind-1]['date']
+    zeros = params_bounds['Δt0'][1]
+    return cases_and_dates.iloc[ind-zeros]['date']
 
 
 def get_τ_prior(start_date, ndays, country_name, τ_model):
@@ -73,7 +75,7 @@ def get_τ_prior(start_date, ndays, country_name, τ_model):
     #normal_prior
     official_τ_date = official_τ_dates[country_name]
     official_τ = (official_τ_date-pd.to_datetime(start_date)).days
-    lower = 1
+    lower = params_bounds['Δt0'][1]
     upper = ndays - 2
     μ = official_τ
     σ = 5
@@ -91,9 +93,10 @@ def prior(ndays, τ_prior):
     α2 = uniform(*params_bounds['α2'])
     E0 = uniform(*params_bounds['E0'])
     Iu0 = uniform(*params_bounds['Iu0'])
+    Δt0 = randint(params_bounds['Δt0'][0],params_bounds['Δt0'][1]+1).rvs() #+1 because randint don't include the upper value
     τ = τ_prior.rvs()
 
-    return Z, D, μ, β, α1, λ, α2, E0, Iu0, τ
+    return Z, D, μ, β, α1, λ, α2, E0, Iu0, Δt0, τ
 
 
 def ode(v, t, Z, D, α, β, μ, N):
@@ -113,7 +116,7 @@ def simulate_one(Z, D, μ, β, α, y0, ndays, N):
     return S, E, Ir, Iu, Y
 
 
-def simulate(Z, D, μ, β, α1, λ, α2, E0, Iu0, τ, ndays, N):
+def simulate(Z, D, μ, β, α1, λ, α2, E0, Iu0, Δt0, τ, ndays, N):
     τ = int(τ)
     Ir0 = 0
     S0 = N - E0 - Ir0 - Iu0
@@ -134,9 +137,10 @@ def in_bounds(**params):
     return True
 
 def log_prior(θ, τ_prior, τ_model):
-    Z, D, μ, β, α1, λ, α2, E0, Iu0,τ = θ
+    Z, D, μ, β, α1, λ, α2, E0, Iu0, Δt0, τ = θ
     τ = int(τ)
-    if in_bounds(Z=Z, D=D, μ=μ, β=β, α1=α1, λ=λ, α2=α2, E0=E0, Iu0=Iu0):
+    Δt0 = int(Δt0)
+    if in_bounds(Z=Z, D=D, μ=μ, β=β, α1=α1, λ=λ, α2=α2, E0=E0, Iu0=Iu0, Δt0=Δt0):
         if τ_model==TauModel.uniform_prior:
             return τ_prior.logpmf(τ)
         return τ_prior.logpdf(τ)
@@ -145,9 +149,10 @@ def log_prior(θ, τ_prior, τ_model):
 
 
 def log_likelihood(θ, X, N):
-    Z, D, μ, β, α1, λ, α2, E0, Iu0, τ = θ
+    Z, D, μ, β, α1, λ, α2, E0, Iu0, Δt0, τ = θ
     τ = int(τ) # for explanation see https://github.com/dfm/emcee/issues/150
-    
+    Δt0 = int(Δt0)
+
     ndays = len(X)
     S, E, Ir, Iu, R, Y = simulate(*θ, ndays, N)
     p1 = 1/Td1
@@ -156,7 +161,8 @@ def log_likelihood(θ, X, N):
     n = Y[1:] - Xsum[:-1] 
     n = np.maximum(0, n)
     p = ([p1] * τ + [p2] * (ndays - τ))[1:]
-    loglik = scipy.stats.poisson.logpmf(X[1:], n * p)
+
+    loglik = scipy.stats.poisson.logpmf(X[Δt0:], n[Δt0-1:] * p[Δt0-1:])
     return loglik.mean()
 
 
@@ -164,6 +170,7 @@ def log_posterior(θ, X, τ_prior, N):
     logpri = log_prior(θ, τ_prior, τ_model)  
     if np.isinf(logpri): 
         return logpri   
+
     assert not np.isnan(logpri), (logpri, θ)
     loglik = log_likelihood(θ, X, N)
     assert not np.isnan(loglik), (loglik, θ)
@@ -226,7 +233,6 @@ if __name__ == '__main__':
         nsteps = args.steps
 
     guesses = np.array([guess_one() for _ in range(nwalkers)])
-
     if cores and cores!=1:
         with Pool(cores) as pool:
             sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X, τ_prior, N], pool=pool)
