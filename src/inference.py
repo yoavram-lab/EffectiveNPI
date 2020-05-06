@@ -66,8 +66,8 @@ def find_start_day(cases_and_dates):
     return cases_and_dates.iloc[ind-1]['date']
 
 
-def get_τ_prior(start_date, ndays, country_name):
-    if tau_model==TauModel.uniform_prior:
+def get_τ_prior(start_date, ndays, country_name, τ_model):
+    if τ_model==TauModel.uniform_prior:
         return randint(1,ndays) #[including,not-including]
 
     #normal_prior
@@ -133,11 +133,11 @@ def in_bounds(**params):
             return False
     return True
 
-def log_prior(θ, τ_prior):
+def log_prior(θ, τ_prior, τ_model):
     Z, D, μ, β, α1, λ, α2, E0, Iu0,τ = θ
     τ = int(τ)
     if in_bounds(Z=Z, D=D, μ=μ, β=β, α1=α1, λ=λ, α2=α2, E0=E0, Iu0=Iu0):
-        if tau_model==TauModel.uniform_prior:
+        if τ_model==TauModel.uniform_prior:
             return τ_prior.logpmf(τ)
         return τ_prior.logpdf(τ)
     else:
@@ -161,7 +161,7 @@ def log_likelihood(θ, X, N):
 
 
 def log_posterior(θ, X, τ_prior, N):
-    logpri = log_prior(θ, τ_prior)  
+    logpri = log_prior(θ, τ_prior, τ_model)  
     if np.isinf(logpri): 
         return logpri   
     assert not np.isnan(logpri), (logpri, θ)
@@ -190,7 +190,7 @@ if __name__ == '__main__':
     country_name = args.country_name
     cores = args.cores
     ver_desc = '-'+args.ver_desc if args.ver_desc else ''
-    tau_model = TauModel(args.tau_model) if args.tau_model else TauModel.uniform_prior
+    τ_model = TauModel(args.tau_model) if args.tau_model else TauModel.uniform_prior
 
     if not os.path.exists('../data'):
         os.mkdir('../data')
@@ -215,7 +215,7 @@ if __name__ == '__main__':
     start_date = find_start_day(cases_and_dates)
     X = np.array(cases_and_dates[cases_and_dates['date'] >= start_date]['cases'])
     ndays = len(X)
-    τ_prior = get_τ_prior(start_date, ndays, country_name)
+    τ_prior = get_τ_prior(start_date, ndays, country_name,τ_model)
 
     ndim = len(var_names)
     nwalkers = 50
@@ -235,18 +235,22 @@ if __name__ == '__main__':
         sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X, τ_prior, N])
         sampler.run_mcmc(guesses, nsteps, progress=True);
 
-    params = [nsteps, ndim, int(N), Td1, Td2, int(tau_model)]
+    params = [nsteps, ndim, int(N), Td1, Td2, int(τ_model)]
 
     output_folder = '../output-tmp/{}{}/inference'.format(now,ver_desc) #tmp folder is not for production
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
     filename =  '{}.npz'.format(country_name)
     filename = os.path.join(output_folder, filename)
+    print('filling logliks')
+    priors = [log_prior(s, τ_prior, τ_model) for s in sampler.chain.reshape(-1, ndim)]
+    logliks = sampler.lnprobability.reshape(-1) - priors
     print(filename)
     np.savez_compressed(
         filename,
         chain=sampler.chain,
-        lnprobability=sampler.lnprobability,
+        lnprobability=sampler.lnprobability, #log_posteriors
+        # logliks=logliks,
         incidences=X, # TODO maybe save as X=X
         # autocorr=autocorr,
         params=params, 

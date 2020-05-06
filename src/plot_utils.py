@@ -18,7 +18,7 @@ from rakott.mpl import fig_panel_labels
 import warnings
 warnings.filterwarnings('ignore')
 
-from inference import ode, simulate, simulate_one, official_τ_dates, TauModel, log_likelihood
+from inference import ode, simulate, simulate_one, official_τ_dates, TauModel, log_likelihood, log_prior, get_τ_prior
 
 def load_data(file_name, country_name, burn_fraction=0.6, lim_steps=None):
     # it's the only global point. we initialize all the params here once and don't update it later (only when load_data again for different file_name)
