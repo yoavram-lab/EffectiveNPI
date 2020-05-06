@@ -250,7 +250,7 @@ if __name__ == '__main__':
         filename,
         chain=sampler.chain,
         lnprobability=sampler.lnprobability, #log_posteriors
-        # logliks=logliks,
+        logliks=logliks,
         incidences=X, # TODO maybe save as X=X
         # autocorr=autocorr,
         params=params, 
