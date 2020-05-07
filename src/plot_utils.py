@@ -23,7 +23,7 @@ from inference import ode, simulate, simulate_one, official_τ_dates, TauModel, 
 def load_data(file_name, country_name, burn_fraction=0.6, lim_steps=None):
     # it's the only global point. we initialize all the params here once and don't update it later (only when load_data again for different file_name)
     # TODO PLEASE DONT USE global anywhere in your code
-    global official_τ_date, official_τ, incidences, start_date, var_names, nsteps, ndim, N, Td1, Td2, ndays, sample, lnprobability, τ_model
+    global official_τ_date, official_τ, incidences, start_date, var_names, nsteps, ndim, N, Td1, Td2, ndays, sample, lnprobability, logliks, τ_model
     data = np.load(file_name)
     incidences = data['incidences']
     start_date = data['start_date']
@@ -31,13 +31,16 @@ def load_data(file_name, country_name, burn_fraction=0.6, lim_steps=None):
     nsteps, ndim, N, Td1, Td2, τ_model = data['params']
     τ_model = TauModel(τ_model)
     chain = data['chain']
+    nwalkers = chain.shape[0]
     ndays = len(incidences)
     nburn = int(nsteps * burn_fraction)
     sample = chain[:, nburn:, :].reshape(-1, ndim)
     lnprobability = data['lnprobability'][:, nburn:]
+    logliks = data['logliks'].reshape(nwalkers,nsteps)[:,nburn:].reshape(-1)
     if lim_steps:
         sample = chain[:, int(lim_steps * burn_fraction):lim_steps, :].reshape(-1, ndim)
         lnprobability = data['lnprobability'][:, int(lim_steps * burn_fraction):lim_steps]
+        logliks = data['logliks'].reshape(nwalkers,nsteps)[:,int(lim_steps * burn_fraction):lim_steps].reshape(-1)
     official_τ_date = official_τ_dates[country_name]
     official_τ = (official_τ_date - pd.to_datetime(start_date)).days
 
@@ -77,9 +80,17 @@ def calc_DIC():
     DIC = 2*loglik_E - 4*E_loglik
     return round(DIC,2)
 
+def calc_DIC():
+    MAP = sample[lnprobability.argmax()]
+    loglik_E = log_likelihood(MAP, incidences, N)
+    E_loglik = logliks.mean()
+    DIC = 2*loglik_E - 4*E_loglik
+    return round(DIC,2)
+
+
 def calc_LoglikMAP():
-    means = [sample[:,i].mean() for i in range(len(var_names))]
-    loglik_E = log_likelihood(means, incidences, N)
+    MAP = sample[lnprobability.argmax()]
+    loglik_E = log_likelihood(MAP, incidences, N)
     return round(loglik_E,2)
 
 def calc_τ_CI(p=0.75):
