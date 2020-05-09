@@ -74,13 +74,6 @@ def write_csv_data(file_name):
                          τ_mean, τ_median, τ_mean_from1Jar, τ_median_from1Jar, calc_τ_CI(),calc_τ_CI(0.95), *params_values])
 
 def calc_DIC():
-    means = [sample[:,i].mean() for i in range(len(var_names))]
-    loglik_E = log_likelihood(means, incidences, N)
-    E_loglik = lnprobability.mean()
-    DIC = 2*loglik_E - 4*E_loglik
-    return round(DIC,2)
-
-def calc_DIC():
     MAP = sample[lnprobability.argmax()]
     loglik_E = log_likelihood(MAP, incidences, N)
     E_loglik = logliks.mean()
@@ -88,9 +81,9 @@ def calc_DIC():
     return round(DIC,2)
 
 
-def calc_LoglikMAP():
+def calc_LoglikMAP(zeros=1):
     MAP = sample[lnprobability.argmax()]
-    loglik_E = log_likelihood(MAP, incidences, N)
+    loglik_E = log_likelihood(MAP, incidences, N, zeros)
     return round(loglik_E,2)
 
 def calc_τ_CI(p=0.75):

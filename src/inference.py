@@ -144,7 +144,7 @@ def log_prior(θ, τ_prior, τ_model):
         return -np.inf
 
 
-def log_likelihood(θ, X, N):
+def log_likelihood(θ, X, N, zeros=1):
     Z, D, μ, β, α1, λ, α2, E0, Iu0, τ = θ
     τ = int(τ) # for explanation see https://github.com/dfm/emcee/issues/150
     
@@ -156,7 +156,7 @@ def log_likelihood(θ, X, N):
     n = Y[1:] - Xsum[:-1] 
     n = np.maximum(0, n)
     p = ([p1] * τ + [p2] * (ndays - τ))[1:]
-    loglik = scipy.stats.poisson.logpmf(X[1:], n * p)
+    loglik = scipy.stats.poisson.logpmf(X[zeros:], n[zeros-1:] * p[zeros-1:])
     return loglik.mean()
 
 
