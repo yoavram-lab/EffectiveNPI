@@ -20,10 +20,11 @@ warnings.filterwarnings('ignore')
 
 from inference import ode, simulate, simulate_one, official_τ_dates, TauModel, log_likelihood, log_prior, get_τ_prior
 
-def load_data(file_name, country_name, burn_fraction=0.6, lim_steps=None):
+def load_data(file_name, country_name, burn_fraction=0.6, lim_steps=None, num_zeros=1):
     # it's the only global point. we initialize all the params here once and don't update it later (only when load_data again for different file_name)
     # TODO PLEASE DONT USE global anywhere in your code
-    global official_τ_date, official_τ, incidences, start_date, var_names, nsteps, ndim, N, Td1, Td2, ndays, sample, lnprobability, logliks, τ_model
+    global official_τ_date, official_τ, incidences, start_date, var_names, nsteps, ndim, N, Td1, Td2, ndays, sample, lnprobability, logliks, τ_model, zeros
+    zeros = num_zeros
     data = np.load(file_name)
     incidences = data['incidences']
     start_date = data['start_date']
@@ -75,13 +76,13 @@ def write_csv_data(file_name):
 
 def calc_DIC():
     MAP = sample[lnprobability.argmax()]
-    loglik_E = log_likelihood(MAP, incidences, N)
+    loglik_E = log_likelihood(MAP, incidences, N, zeros)
     E_loglik = logliks.mean()
     DIC = 2*loglik_E - 4*E_loglik
     return round(DIC,2)
 
 
-def calc_LoglikMAP(zeros=1):
+def calc_LoglikMAP():
     MAP = sample[lnprobability.argmax()]
     loglik_E = log_likelihood(MAP, incidences, N, zeros)
     return round(loglik_E,2)
