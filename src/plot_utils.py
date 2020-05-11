@@ -18,7 +18,7 @@ from rakott.mpl import fig_panel_labels
 import warnings
 warnings.filterwarnings('ignore')
 
-from inference import ode, simulate, simulate_one, official_τ_dates, TauModel, log_likelihood, log_prior, get_τ_prior
+from inference import ode, simulate, simulate_one, TauModel, log_likelihood, log_prior, get_τ_prior, get_first_NPI_date, get_last_NPI_date
 
 def load_data(file_name, country_name, burn_fraction=0.6, lim_steps=None):
     # it's the only global point. we initialize all the params here once and don't update it later (only when load_data again for different file_name)
@@ -41,7 +41,7 @@ def load_data(file_name, country_name, burn_fraction=0.6, lim_steps=None):
         sample = chain[:, int(lim_steps * burn_fraction):lim_steps, :].reshape(-1, ndim)
         lnprobability = data['lnprobability'][:, int(lim_steps * burn_fraction):lim_steps]
         logliks = data['logliks'].reshape(nwalkers,nsteps)[:,int(lim_steps * burn_fraction):lim_steps].reshape(-1)
-    official_τ_date = official_τ_dates[country_name]
+    official_τ_date = get_last_NPI_date(country_name)
     official_τ = (official_τ_date - pd.to_datetime(start_date)).days
 
 def write_csv_header(file_name):

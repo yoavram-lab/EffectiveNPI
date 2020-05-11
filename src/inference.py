@@ -27,21 +27,14 @@ Td1 = 9
 Td2 = 6
 seed_max = 3000
 
-# TODO read from ../data/NPI_dates.csv, which is also fed to ms.tex
-official_τ_dates = {
-    'Austria' : datetime(2020, 3, 16),
-    'Belgium' : datetime(2020, 3, 18),
-    'Denmark' : datetime(2020, 3, 18),
-    'France' : datetime(2020, 3, 17),
-    'Germany' : datetime(2020, 3, 22),
-    'Italy' : datetime(2020, 3, 11), 
-    'Norway' : datetime(2020, 3, 24),
-    'Spain': datetime(2020, 3, 14),
-    'Sweden': datetime(2020, 3, 18), # only school closure
-    'Switzerland': datetime(2020, 3, 20),
-    'United_Kingdom': datetime(2020, 3, 24),
-    'Wuhan' : datetime(2020, 1, 23)
-}
+
+def get_first_NPI_date(country_name):
+    df = pd.read_csv('../data/NPI_dates.csv',parse_dates=['First','Last'])
+    return df[df['Country']==country_name]['First'].iloc[0].to_pydatetime()
+
+def get_last_NPI_date(country_name):
+    df = pd.read_csv('../data/NPI_dates.csv',parse_dates=['First','Last'])
+    return df[df['Country']==country_name]['Last'].iloc[0].to_pydatetime()
 
 var_names = ['Z', 'D', 'μ', 'β', 'α1', 'λ', 'α2', 'E0', 'Iu0','Δt0','τ']
 
@@ -68,17 +61,24 @@ def find_start_day(cases_and_dates):
     return cases_and_dates.iloc[ind-zeros]['date']
 
 
+def τ_to_string(τ, start_date):
+    return (pd.to_datetime(start_date) + timedelta(days=τ)).strftime('%b %d')
+
 def get_τ_prior(start_date, ndays, country_name, τ_model):
     if τ_model==TauModel.uniform_prior:
         return randint(1,ndays) #[including,not-including]
 
     #normal_prior
-    official_τ_date = official_τ_dates[country_name]
-    official_τ = (official_τ_date-pd.to_datetime(start_date)).days
+    last_τ = (get_last_NPI_date(country_name) - pd.to_datetime(start_date)).days
+    first_τ = (get_first_NPI_date(country_name) - pd.to_datetime(start_date)).days
+
     lower = params_bounds['Δt0'][1]
     upper = ndays - 2
-    μ = official_τ
-    σ = 5
+    μ = (last_τ + first_τ) / 2
+    σ = (last_τ - first_τ) / 2
+    σ = σ if σ!=0 else 5 # when last_tau == first_tau
+    print(τ_to_string(μ,start_date), τ_to_string(last_τ,start_date), τ_to_string(first_τ,start_date))
+    print(μ, σ)
     return truncnorm(
         (lower - μ) / σ, (upper - μ) / σ, loc=μ, scale=σ)
 
