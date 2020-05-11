@@ -101,7 +101,7 @@ headheight=12pt
 \usepackage[shortcuts]{extdash}
 
 % Title page
-\title{Inference of delayed and advanced effect of non-pharmaceutical interventions during COVID\=/19 outbreaks}
+\title{Late and early effective start of non-pharmaceutical interventions inferred during COVID-19 outbreaks }
 
 % Authors
 \renewcommand\Affilfont{\small}
@@ -121,7 +121,8 @@ headheight=12pt
 
 % Abstract
 \begin{abstract}
-\lipsum[1-1]
+During February and March 2020, several countries implemented a variety of non-pharmaceutical interventions with variable schedules to control the COVID\=/-19 pandemic caused by the SARA\=/CoV\=/2 virus.
+Overall, these interventions have successfully reduced the ...
 \end{abstract}
 
 \pagebreak
@@ -331,7 +332,8 @@ All source code will be publicly available under a permissive open-source licens
 	\includegraphics[width=0.6\textwidth]{../figures/Fig1.pdf}
     \caption{
     \textbf{Official and effective start of non-pharmaceutical interventions.}
-    	The difference between $\hat{\tau}$ the effective and $\tau^*$ the official start of NPI is shown for different regions. For values of $\hat{\tau}$ the MAP estimate, see \hl{TABLE2}. For $\tau^*$ values, see \autoref{table:table1}. % TODO add CI
+    	The difference between $\hat{\tau}$ the effective and $\tau^*$ the official start of NPI is shown for different regions. The effective NPI dates in Italy and Wuhan are significantly delayed compared to the official dates, whereas in Denmark, France, Spain, and Germany, the effective date is earlier than the official date.
+	$\hat{\tau}$ is the posterior median, see \hl{TABLE2}. $\tau^*$ is the last NPI date, see \autoref{table:table1}. Thin and bold lines show 95\% and 75\% credible intervals (area in which $P(|\tau - \hat{\tau}| \mid \vec{X}) = 0.95$ and $0.75$.)
     }
     \label{fig:fig1}
 \end{figure}
@@ -384,6 +386,7 @@ Similarly, in Wuhan, China, a lockdown was ordered on Jan 23~\citep{Li2020}, but
     \end{subfigure}
     \caption{
 	\textbf{Delayed effect of non-pharmaceutical interventions in Italy and Wuhan, China.}
+    Posterior distribution of $\tau$, the effective start date of NPI, is shown as a histogram of MCMC samples. Red line shows the official last NPI date $\tau^*$. Black line shows the estimated $\hat{\tau}$. Shaded area shows a 95\% credible interval (area in which $P(|\tau - \hat{\tau}| \mid \vec{X}) = 0.95$). 
     }
     \label{fig:fig2}
 \end{figure}
@@ -422,7 +425,7 @@ Interestingly, the effective start of NPIs $\hat{\tau}$ in both France and Spain
     \end{subfigure}
     \caption{
     \textbf{Advanced effect of non-pharmaceutical interventions in France and Spain.}
-    Posterior distribution of $\tau$, the effective start date of NPI, is shown as a histogram of MCMC samples. Red line shows the official NPI date $\tau^*$. Black line shows the MAP estimate $\hat{\tau}$. Shaded area shows a 95\% credible interval (area in which $P(|\tau - \hat{\tau}| \mid \vec{X}) = 0.95$). 
+    Posterior distribution of $\tau$, the effective start date of NPI, is shown as a histogram of MCMC samples. Red line shows the official last NPI date $\tau^*$. Black line shows the estimated $\hat{\tau}$. Shaded area shows a 95\% credible interval (area in which $P(|\tau - \hat{\tau}| \mid \vec{X}) = 0.95$). 
 	}
 	\label{fig:fig3}
 \end{figure}
