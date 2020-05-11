@@ -47,57 +47,57 @@ def load_data(file_name, country_name, burn_fraction=0.6, lim_steps=None):
 def write_csv_header(file_name):
     mean_headers = [v + ' mean' for v in var_names]
     median_headers = [v + ' median' for v in var_names]
-    params_headers = [e for l in zip(mean_headers, median_headers) for e in l]
+    MAP_headers = [v + ' MAP' for v in var_names]
+    params_headers = [e for l in zip(mean_headers, median_headers, MAP_headers) for e in l]
 
     with open(file_name, mode='w') as file: # use pd to write csv files?
         writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(['country','DIC','MAP loglik','N','p_steps','p_τ_model','p_Td1','p_Td2','official_τ','τ mean','τ median','τ mean from 1 Jan','τ median from 1 Jan','τ CI (75%)','τ CI (95%)', *params_headers])
+        writer.writerow(['country','DIC','MAP loglik','N','p_steps','p_τ_model','p_Td1','p_Td2','official_τ','τ mean','τ median','τ MAP','τ mean from 1 Jan','τ median from 1 Jan','τ MAP from 1 Jan','τ CI (75%)','τ CI (95%)', *params_headers])
 
 def write_csv_data(file_name):
     #params means and medians
     means = [round(sample[:,i].mean(),2) for i in range(len(var_names))]
     medians = [round(np.median(sample[:,i]),2) for i in range(len(var_names))]
-    params_values = [e for l in zip(means,medians) for e in l]
+    MAPs = [round(m,2) for m in get_MAP()]
+    params_values = [e for l in zip(means,medians,MAPs) for e in l]
+
     #tau
     τ_posterior = sample[:,var_names.index('τ')].astype(int)
     τ_mean = format(τ_to_string(τ_posterior.mean()))
     τ_median =  format(τ_to_string(np.median(τ_posterior)))
+    τ_MAP =  format(τ_to_string(MAPs[var_names.index('τ')]))
 
     τ_mean_from1Jar = (pd.to_datetime(start_date) - pd.Timestamp('2020-01-01')).days + τ_posterior.mean()
     τ_median_from1Jar =  (pd.to_datetime(start_date) - pd.Timestamp('2020-01-01')).days + np.median(τ_posterior)
+    τ_MAP_from1Jar =  (pd.to_datetime(start_date) - pd.Timestamp('2020-01-01')).days + MAPs[var_names.index('τ')]
+
     τ_mean_from1Jar = round(τ_mean_from1Jar,2)
     τ_median_from1Jar = round(τ_median_from1Jar,2)
+    τ_MAP_from1Jar = round(τ_MAP_from1Jar,2)
     with open(file_name, mode='a') as file:
         writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow([country_name, calc_DIC(), calc_LoglikMAP(), N, nsteps, τ_model, Td1, Td2,
+        writer.writerow([country_name, '{:.2f}'.format(calc_DIC()), '{:.2f}'.format(calc_LoglikMAP()), N, nsteps, τ_model, Td1, Td2,
                          τ_to_string(official_τ),
-                         τ_mean, τ_median, τ_mean_from1Jar, τ_median_from1Jar, calc_τ_CI(),calc_τ_CI(0.95), *params_values])
+                         τ_mean, τ_median, τ_MAP, τ_mean_from1Jar, τ_median_from1Jar, τ_MAP_from1Jar, '{:.2f}'.format(calc_τ_CI()),'{:.2f}'.format(calc_τ_CI(0.95)), *params_values])
 
 def calc_DIC():
-    means = [sample[:,i].mean() for i in range(len(var_names))]
-    loglik_E = log_likelihood(means, incidences, N)
-    E_loglik = lnprobability.mean()
-    DIC = 2*loglik_E - 4*E_loglik
-    return round(DIC,2)
-
-def calc_DIC():
-    MAP = sample[lnprobability.argmax()]
-    loglik_E = log_likelihood(MAP, incidences, N)
+    loglik_E = calc_LoglikMAP()
     E_loglik = logliks.mean()
     DIC = 2*loglik_E - 4*E_loglik
-    return round(DIC,2)
+    return DIC
 
+def get_MAP():
+    return sample[lnprobability.argmax()]
 
 def calc_LoglikMAP():
-    MAP = sample[lnprobability.argmax()]
-    loglik_E = log_likelihood(MAP, incidences, N)
-    return round(loglik_E,2)
+    loglik_E = log_likelihood(get_MAP(), incidences, N)
+    return loglik_E
 
 def calc_τ_CI(p=0.75):
     tau_samples = sample.T[-1]
-    tau_samples_hat = tau_samples.mean()
+    tau_samples_hat = get_MAP()[var_names.index('τ')]
     res = np.quantile(abs(tau_samples - tau_samples_hat), p)
-    return round(res,2)
+    return res
 
 print_list = []
 def printt(s):
@@ -347,8 +347,10 @@ def plot_incidences_and_dates(ax=None):
     τ_posterior = sample[:,var_names.index('τ')].astype(int)
     τ_mean = τ_posterior.mean()
     τ_median = np.median(τ_posterior)
+    τ_MAP = get_MAP()[var_names.index('τ')]
     lst.append('τ mean = {}'.format(τ_to_string(τ_mean)))
     lst.append('τ median = {}'.format(τ_to_string(τ_median)))
+    lst.append('τ MAP = {}'.format(τ_to_string(τ_MAP)))
     lst.append('τ CI: {}'.format(calc_τ_CI()))
     confidence = 'P(τ > {}) = {:.2%}'.format(τ_to_string(official_τ), (τ_posterior > official_τ).mean())
     lst.append(confidence)
