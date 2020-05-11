@@ -305,8 +305,8 @@ I_u(0) & \sim \mathit{Uniform}(0, 3000) \\
 where $\mathit{TruncatedNormal}(\mu, \sigma, a, b)$ is a truncated normal distribution with mean $\mu$ and standard deviation $\sigma$ taking values between $a$ and $b$; $T$ is the number of days in the data $\vec{X}$; and $\tau^*$ is the official start of the NPI.
 Most priors follow \citet{Li2020}, with the following exceptions.
 $\lambda$ is used to ensure transmission rates are lower after the start of the NPIs ($\lambda < 1$).
-We checked values of $\Delta t$ larger than five days and found they generally produce lower likelihood and unreasonable parameter estimates.
-For the effective start of NPIs $\tau$ we have also tested an uninformative uniform prior $U(1,T-1)$. DIC (see definition below) was lower for the truncated normal prior in most countries, except \hl{Germany?}. More importantly, the uninformative prior could result in non-negligible posterior probability for unreasonable $\tau$ values, such as Mar~1 in the United~Kingdom (this was due to MCMC chains being stuck in low posterior regions of the parameter space).
+We checked values of $\Delta t$ larger than five days and found they generally produce lower likelihood, higher DIC (see below), and unreasonable parameter estimates.
+For the effective start of NPIs $\tau$ we have also tested an uninformative uniform prior $U(1,T-1)$. DIC (see below) was lower for the truncated normal prior in \hl{most countries}. More importantly, the uninformative prior could result in non-negligible posterior probability for unreasonable $\tau$ values, such as Mar~1 in the United~Kingdom. This was probably due to MCMC chains being stuck in low posterior regions of the parameter space.
 We therefore decided to use the more informative truncated normal prior.
 
 The posterior distribution of the model parameters $P(\theta \mid \vec{X})$ is then estimated using an \textit{affine-invariant ensemble sampler for Markov chain Monte Carlo} (MCMC) implemented in the \texttt{emcee} Python package~\citep{Foreman-Mackey2013}.
@@ -358,10 +358,10 @@ These studies have assumed that the parameters of the epidemiological model chan
 They then fit the model once for time $t<\tau^*$ and once for time $t \ge \tau^*$.
 For example, \citet{Li2020} estimate the dynamics in China before and after $\tau^*$ at Jan 23. Thereby, they effectively estimate $(\beta, \alpha_1)$ and $(\lambda, \alpha_2)$ separately.
 Here we estimate the posterior distribution $P(\tau \mid \vec{X})$ of the \emph{effective} start date of the NPIs by jointly estimating $\tau, \beta, \lambda, \alpha_1, \alpha_2$ on the entire data per region (e.g. Italy, Austria), rather than splitting the data at $\tau^*$.
-We then estimate the maximum a posteriori (MAP) estimate $\hat{\tau}=\mathit{argmax}_{\tau}{P(\tau \mid \vec{X})}$. \hl{using median or argmax?}
+We then estimate the posterior probability $P(\tau \mid \vec{X})$ by marginalizing the joint posterior, and estimate $\hat{\tau}$ as the posterior median.
 
 We find that a model that considers an NPI (\autoref{eq:NPI_model}) is a better fit to the data than a model without an NPI, i.e. with constant $\beta$ and $\alpha$ (\hl{$\Delta DIC > ?$ for all regions}.)
-We compare the official $\tau^*$ and effective $\hat{\tau}$ start of NPIs and find that in most regions the effective start of NPI  significantly differs from the official date (\autoref{fig:fig1}): the \hl{95\%} credible interval on $\hat{\tau}$ does not include $\tau^*$, and the DIC of the model with free $\tau$ parameter is lower than that of a model with a fixed $\tau \equiv \tau^*$ (\hl{$\Delta DIC > ?$}.) The exception that proves the rule is \hl{Switzerland}, where the effective and official dates are the same. Another important exception is the \hl{United~Kingdom?} % TODO need more data? Maybe not such an exception?
+We compare the official $\tau^*$ and effective $\hat{\tau}$ start of NPIs and find that in some regions the effective start of NPI  significantly differs from the official date (\autoref{fig:fig1}): the credible interval on $\hat{\tau}$ does not include $\tau^*$, and the DIC of the model with free $\tau$ parameter is lower than that of a model with a fixed $\tau \equiv \tau^*$ (\hl{$\Delta DIC > ?$}.)
 
 In the following, we describe our findings on late and early effective start of NPI in detail.
 
@@ -388,25 +388,21 @@ $\tau^*$ is the official last NPI date, see \autoref{table:table1}.
 \paragraph*{Late effective start of NPIs.}
 In both Wuhan, China, and in Italy we find that our estimated effective start of NPI $\hat{\tau}$ is significantly later than the official date $\tau^*$ (\autoref{fig:fig1}). 
 
-In Italy, the first case officially confirmed on Feb~21, a lockdown was declared in Northern Italy on Mar~8, with social distancing implemented in the rest of the country, and the lockdown was extended to the entire nation on Mar 11~\citep{Gatto2020}.
+\hl{In Italy}, the first case officially confirmed on Feb~21, a lockdown was declared in Northern Italy on Mar~8, with social distancing implemented in the rest of the country, and the lockdown was extended to the entire nation on Mar 11~\citep{Gatto2020}.
 That is, the official date $\tau^*$ is either Mar~8 or~11.
 However, we estimate the effective date $\hat{\tau}$ at Mar~16 ($\pm$0.7 days 95\% CI ; \autoref{fig:fig2}).
-Similarly, in Wuhan, China, a lockdown was ordered on Jan 23~\citep{Li2020}, but we estimate  the effective start of NPIs to be several days layer at around Mar~2 ($\pm$2.65 days 95\% CI \autoref{fig:fig2}).
+Similarly, \hl{in Wuhan, China}, a lockdown was ordered on Jan 23~\citep{Li2020}, but we estimate  the effective start of NPIs to be several days layer at around Mar~2 ($\pm$2.65 days 95\% CI \autoref{fig:fig2}).
 
 
 %%% Fig 2 %%%
 \begin{figure}[h]
     \centering
-    % Wuhan
-    % τ_hat = 19.33
-	% +-2.65 days for 0.95 quantile
+    % Wuhan 
     \begin{subfigure}{0.45\textwidth}
         \includegraphics[width=\textwidth]{../figures/Fig2a.pdf}
     \end{subfigure}
   	~
 	% Italy
-	% τ_hat = 24.74
-	% +-0.71 days for 0.95 quantile
     \begin{subfigure}{0.45\textwidth}
         \includegraphics[width=\textwidth]{../figures/Fig2b.pdf}
     \end{subfigure}
@@ -424,12 +420,13 @@ Similarly, in Wuhan, China, a lockdown was ordered on Jan 23~\citep{Li2020}, but
 In contrast, in some regions we estimate an effective start of NPIs $\hat{\tau}$ that is \emph{earlier} then the official date $\tau^*$ (\autoref{fig:fig1}).
 In Spain, social distancing was encouraged starting on Mar~8~\citep{Flaxman2020}, but mass gatherings still occurred on Mar~8, including a march of 120,000 people for the \href{https://www.nytimes.com/2020/03/13/world/europe/spain-coronavirus-emergency.html}{International Women's Day}, and a  football match between \href{https://www.espn.com/soccer/match?gameId=550350}{Real Betis and Real Madrid} (2:1) with a crowd of 50,965 in Seville.
 A national lockdown was only announced on Mar~14~\citep{Flaxman2020}.
-Nevertheless, we estimate the effective start of NPI $\hat{\tau}$ at Mar~8 or~9 ($\pm$2.96 95\%CI), rather than Mar~14 (\autoref{fig:fig3}).
+Nevertheless, we estimate the \hl{effective start of NPI} $\hat{\tau}$ at Mar~8 or~9 ($\pm$2.96 95\%CI), rather than Mar~14 (\autoref{fig:fig3}).
 
-Similarly, in France the official lockdown started at Mar~17 ($\tau^*$), with initial NPIs at Mar 13~\citep{Flaxman2020}. 
+Similarly, in \hl{France} the official lockdown started at Mar~17 ($\tau^*$), with initial NPIs at Mar 13~\citep{Flaxman2020}. 
 However, we estimate the effective start of NPIs $\hat{\tau}$ at Mar~8 ($\pm$5.9 days 95\% CI). Although the credible interval is wide, spanning from Mar~2 to Mar~13, the official lockdown start at Mar~17 is later still (\autoref{fig:fig3}).
 
 Interestingly, the effective start of NPIs $\hat{\tau}$ in both France and Spain is estimated at Mar~8, although the official dates are differ by three days. Moreover, the number of daily cases was similar until Mar~8 in both countries, but diverged by Mar~13, reaching significantly higher numbers in Spain (\autoref{fig:fig-fr-vs-es}).
+This may suggest that correlation exist between effective start in NPIs due to global or international events.
 
 
 
@@ -460,7 +457,7 @@ Interestingly, the effective start of NPIs $\hat{\tau}$ in both France and Spain
 %%% Exact
 \paragraph*{The exception that proves the rule.}
 We find one case in which the official and effective dates match: Switzerland ordered a national lockdown on Mar~20, after banning public evens and closing schools on Mar~13 and~14~\citep{Flaxman2020}.
-Indeed, our MAP estimate $\hat{\tau}$ is Mar~20, and the posterior distribution shows two density peaks: a smaller one between Mar~10 and Mar~14, and a taller one between Mar~17 and Mar~22. It's also worth mentioning that Switzerland was the first to mandate self isolation of confirmed cases~\citep{Flaxman2020}.
+Indeed, we estimate that $\hat{\tau}$ is \hl{Mar~20}, and the posterior distribution shows two density peaks: a smaller one between Mar~10 and Mar~14, and a taller one between Mar~17 and Mar~22. It's also worth mentioning that Switzerland was the first to mandate self isolation of confirmed cases~\citep{Flaxman2020}.
 
 %%% Assessment
 \paragraph*{Effect of late and early effect of NPIs on real-time assessment.}
