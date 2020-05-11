@@ -30,6 +30,10 @@ headheight=12pt
 \usepackage{booktabs}
 \usepackage{pgfplotstable} % http://mirrors.ctan.org/graphics/pgf/contrib/pgfplots/doc/pgfplotstable.pdf
 \usepackage{subcaption}
+\usepackage{dcolumn}
+\newcolumntype{d}[1]{D{.}{.}{#1}}
+\newcommand\ccell[1]{\multicolumn{1}{c}{#1}} % a wild guess...
+\usepackage{adjustbox}
 
 %SetFonts
 % newtxtext+newtxmath
@@ -188,13 +192,13 @@ In all countries except Sweden, the date of the last intervention is for a lockd
 
 
 %%% SEIR model %%%%
-\paragraph*{SEIR model.}
+\paragraph*{SEIR model.} \label{sec:model}
 We model SARS\=/CoV\=/2 infection dynamics by following the number of susceptible $S$, exposed $E$, reported infected $I_r$, and unreported infected $I_u$ individuals in a population of size $N$.
 This model distinguishes between reported and unreported infected individuals: the reported infected are those that have enough symptoms to eventually be tested and thus appear in daily case reports, to which we fit the model.
 
 Susceptible ($S$) individuals become exposed due to contact with reported or unreported infected individuals ($I_r$ or $I_u$) at a rate $\beta_t$ or $\mu \beta_t$.
 The parameter $0 < \mu < 1$ represents the decreased transmission rate from unreported infected individuals, who are often subclinical or even asymptomatic.
-The transmission rate $\beta_t \ge 0$ may change over  time $t$ due to behavioural changes of both susceptible and infected individuals.
+The transmission rate $\beta_t \ge 0$ may change over  time $t$ due to behavioral changes of both susceptible and infected individuals.
 Exposed individuals, after an average incubation period of $Z$ days, become reported infected with probability $\alpha_t$ or unreported infected with probability $(1-\alpha_t)$.
 The reporting rate $0 < \alpha_t < 1$ may also change over time due to changes in human behavior.
 Infected individuals remain infectious for an average period of $D$ days, after which they either recover, or becomes ill enough to be quarantined.
@@ -280,7 +284,7 @@ To estimate the parameters of our model from the data $\vec{X}$, we apply a Baye
 We start our model $\Delta t$ days before the outbreak (defined as consecutive days with increasing confirmed cases) in each country~\citep{Gatto2020}.
 The model in \autoref{eq:model} is parameterized by the vector $\theta$, where
 \begin{equation} \label{eq:theta}
-\theta=\Big(Z, D, \mu, \{\beta_t\}, \{\alpha_t\}, \{p_t\}, E(0), I_u(0)\Big), \tau, \Delta t.
+\theta=\Big(Z, D, \mu, \{\beta_t\}, \{\alpha_t\}, \{p_t\}, E(0), I_u(0), \tau, \Delta t \Big).
 \end{equation} 
 
 The likelihood function is defined in \autoref{eq:likelihood}.
@@ -338,7 +342,7 @@ All source code will be publicly available under a permissive open-source licens
     \caption{
     \textbf{Official and effective start of non-pharmaceutical interventions.}
     	The difference between $\hat{\tau}$ the effective and $\tau^*$ the official start of NPI is shown for different regions. The effective NPI dates in Italy and Wuhan are significantly delayed compared to the official dates, whereas in Denmark, France, Spain, and Germany, the effective date is earlier than the official date.
-	$\hat{\tau}$ is the posterior median, see \hl{TABLE2}. $\tau^*$ is the last NPI date, see \autoref{table:table1}. Thin and bold lines show 95\% and 75\% credible intervals (area in which $P(|\tau - \hat{\tau}| \mid \vec{X}) = 0.95$ and $0.75$.)
+	$\hat{\tau}$ is the posterior median, see \autoref{table:table2}. $\tau^*$ is the last NPI date, see \autoref{table:table1}. Thin and bold lines show 95\% and 75\% credible intervals (area in which $P(|\tau - \hat{\tau}| \mid \vec{X}) = 0.95$ and $0.75$.)
     }
     \label{fig:fig1}
 \end{figure}
@@ -360,6 +364,23 @@ We find that a model that considers an NPI (\autoref{eq:NPI_model}) is a better 
 We compare the official $\tau^*$ and effective $\hat{\tau}$ start of NPIs and find that in most regions the effective start of NPI  significantly differs from the official date (\autoref{fig:fig1}): the \hl{95\%} credible interval on $\hat{\tau}$ does not include $\tau^*$, and the DIC of the model with free $\tau$ parameter is lower than that of a model with a fixed $\tau \equiv \tau^*$ (\hl{$\Delta DIC > ?$}.) The exception that proves the rule is \hl{Switzerland}, where the effective and official dates are the same. Another important exception is the \hl{United~Kingdom?} % TODO need more data? Maybe not such an exception?
 
 In the following, we describe our findings on late and early effective start of NPI in detail.
+
+
+
+%% Table 2 %%%
+\begin{table}[h]
+\centering
+\scriptsize
+\input{../figures/Table2.tex}
+\caption{
+\textbf{Parameter estimates for different regions.}
+See \autoref{eq:model} for model parameters.
+All estimates are posterior medians.
+75\% and 95\% credible intervals given only for $\tau$, in days.
+$\tau^*$ is the official last NPI date, see \autoref{table:table1}.
+}
+\label{table:table2}
+\end{table}
 
 
 
@@ -461,7 +482,7 @@ Here, a lockdown is officially ordered on Mar~10 ($\tau^*$, but its late effect 
     Shaded box illustrates a serial interval of seven days.
     \textbf{(A)} Using the official date $\tau^*$ for the start of the NPI,  the model under-estimates the number of cases seven days after the start of the NPI.
     \textbf{(B)} Using the effective date $\hat{\tau}$ for the start of the NPI,  the model correctly estimates the number of cases seven days after the start of the NPI.
-    Here, model parameters are MAP estimates for Italy (\hl{TABLE}) but with $\lambda=0.5$ and $\alpha_1=\alpha_2$.
+    Here, model parameters are estimates for Italy (\autoref{table:table2}) but with $\lambda=0.5$ and $\alpha_1=\alpha_2$.
     } 
     \label{fig:fig4}
 \end{figure}
