@@ -153,7 +153,12 @@ def log_likelihood(θ, X, N):
     τ = int(τ) # for explanation see https://github.com/dfm/emcee/issues/150
     Δt0 = int(Δt0)
 
+    total_zeros = params_bounds['Δt0'][1]
+    unrellevant_zeros = total_zeros - Δt0
+    τ = τ - unrellevant_zeros
+    X = X[unrellevant_zeros:]
     ndays = len(X)
+
     S, E, Ir, Iu, R, Y = simulate(*θ, ndays, N)
     p1 = 1/Td1
     p2 = 1/Td2
@@ -178,7 +183,7 @@ def log_posterior(θ, X, τ_prior, N):
     return logpost
 
 
-def guess_one():
+def guess_one(ndays):
     while True:
         res = prior(ndays,τ_prior)
         if np.isfinite(log_likelihood(res,X,N)):
@@ -221,8 +226,7 @@ if __name__ == '__main__':
     cases_and_dates = df.iloc[::-1][['cases','date']]
     start_date = find_start_day(cases_and_dates)
     X = np.array(cases_and_dates[cases_and_dates['date'] >= start_date]['cases'])
-    ndays = len(X)
-    τ_prior = get_τ_prior(start_date, ndays, country_name,τ_model)
+    τ_prior = get_τ_prior(start_date, len(X), country_name,τ_model)
 
     ndim = len(var_names)
     nwalkers = 50
@@ -232,7 +236,7 @@ if __name__ == '__main__':
     if args.steps:
         nsteps = args.steps
 
-    guesses = np.array([guess_one() for _ in range(nwalkers)])
+    guesses = np.array([guess_one(len(X)) for _ in range(nwalkers)])
     if cores and cores!=1:
         with Pool(cores) as pool:
             sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[X, τ_prior, N], pool=pool)
