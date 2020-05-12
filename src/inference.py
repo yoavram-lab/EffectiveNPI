@@ -29,10 +29,12 @@ seed_max = 3000
 
 
 def get_first_NPI_date(country_name):
+    country_name = 'United Kingdom' if country_name == 'United_Kingdom' else country_name
     df = pd.read_csv('../data/NPI_dates.csv',parse_dates=['First','Last'])
     return df[df['Country']==country_name]['First'].iloc[0].to_pydatetime()
 
 def get_last_NPI_date(country_name):
+    country_name = 'United Kingdom' if country_name == 'United_Kingdom' else country_name
     df = pd.read_csv('../data/NPI_dates.csv',parse_dates=['First','Last'])
     return df[df['Country']==country_name]['Last'].iloc[0].to_pydatetime()
 
@@ -74,11 +76,11 @@ def get_τ_prior(start_date, ndays, country_name, τ_model):
 
     lower = params_bounds['Δt0'][1]
     upper = ndays - 2
-    μ = (last_τ + first_τ) / 2
-    σ = (last_τ - first_τ) / 2
-    σ = σ if σ!=0 else 5 # when last_tau == first_tau
-    print(τ_to_string(μ,start_date), τ_to_string(last_τ,start_date), τ_to_string(first_τ,start_date))
-    print(μ, σ)
+    # μ = (last_τ + first_τ) / 2
+    # σ = (last_τ - first_τ) / 2
+    # σ = 5 if σ<5 else σ 
+    μ = last_τ
+    σ = 5
     return truncnorm(
         (lower - μ) / σ, (upper - μ) / σ, loc=μ, scale=σ)
 
