@@ -18,7 +18,7 @@ from rakott.mpl import fig_panel_labels
 import warnings
 warnings.filterwarnings('ignore')
 
-from inference import ode, simulate, simulate_one, TauModel, log_likelihood, log_prior, get_τ_prior, get_first_NPI_date, get_last_NPI_date
+from inference import ode, simulate, simulate_one, TauModel, log_likelihood, log_prior, get_τ_prior, get_first_NPI_date, get_last_NPI_date, params_bounds
 
 def load_data(file_name, country_name, burn_fraction=0.6, lim_steps=None):
     # it's the only global point. we initialize all the params here once and don't update it later (only when load_data again for different file_name)
@@ -414,15 +414,24 @@ def print_τ_dist():
     return sorted(s,key=lambda t: pd.Timestamp('2020 '+t[0]))
 
 def plot_incidences(ax=None, color=blue):
+    global daily_cases, theta
     if ax is None: fig, ax = plt.subplots()
 
     np.random.seed(10)
-    num_simulations = 300
+    num_simulations = 128
     daily_cases = []
-    for _ in range(num_simulations):
+    for i in range(num_simulations):
         idx = np.random.choice(sample.shape[0])
-        y = generate(*sample[idx, :],ndays,N)
-        daily_cases.append(y)
+        
+        Z, D, μ, β, α1, λ, α2, E0, Iu0, Δt0, τ = sample[idx, :]
+        Δt0 = int(Δt0)
+        τ = int(τ)
+        total_zeros = params_bounds['Δt0'][1]
+        unrellevant_zeros = total_zeros - Δt0
+        τ = τ - unrellevant_zeros
+        y = generate(Z, D, μ, β, α1, λ, α2, E0, Iu0, Δt0, τ, ndays-unrellevant_zeros ,N)       
+        
+        daily_cases.append(np.array([0]*unrellevant_zeros + list(y)))
     daily_cases = np.array(daily_cases)
 
     t = np.arange(ndays)
