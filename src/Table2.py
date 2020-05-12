@@ -19,8 +19,8 @@ if __name__ == '__main__':
 	NPI_dates = pd.read_csv('../data/NPI_dates.csv')
 
 	data = pd.read_csv(os.path.join(output_folder, 'tables', 'all-countries-{}.csv'.format(job_id)))
-	features = ['country', 'official_τ', 'τ median', 'τ CI (75%)', 'τ CI (95%)']
-	features += [x for x in data.columns if 'median' in x and 'τ' not in x]
+	features = ['country', 'official_τ', 'τ median', 'τ CI median (75%)', 'τ CI median (95%)']
+	features += [x for x in data.columns if 'median' in x and 'τ' not in x and 'loglik' not in x]
 
 	table = data[features].copy()
 	table['country'] = [x.replace('_', ' ') for x in table['country']]
