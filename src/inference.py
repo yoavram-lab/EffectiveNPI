@@ -66,7 +66,7 @@ def τ_to_string(τ, start_date):
 
 def get_τ_prior(start_date, ndays, country_name, τ_model):
     if τ_model==TauModel.uniform_prior:
-        return randint(1,ndays) #[including,not-including]
+        return randint(params_bounds['Δt0'][1], ndays) #[including,not-including]
 
     #normal_prior
     last_τ = (get_last_NPI_date(country_name) - pd.to_datetime(start_date)).days
@@ -159,7 +159,7 @@ def log_likelihood(θ, X, N):
     X = X[unrellevant_zeros:]
     ndays = len(X)
 
-    S, E, Ir, Iu, R, Y = simulate(*θ, ndays, N)
+    S, E, Ir, Iu, R, Y = simulate(Z, D, μ, β, α1, λ, α2, E0, Iu0, Δt0, τ, ndays, N)
     p1 = 1/Td1
     p2 = 1/Td2
     Xsum = X.cumsum() 
