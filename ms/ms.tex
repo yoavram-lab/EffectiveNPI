@@ -247,7 +247,9 @@ Therefore, $\big(X_t \mid \tilde{X}_{t-1} \big)$ is a binomial conditioned on a 
 
 For given vector $\theta$ of model parameters (\autoref{eq:theta}), we compute the expected cumulative number of reported infected individuals $\{Y_t\}_{t=1}^{T}$ for each day (\autoref{eq:Yt}). Then, since $\tilde{X}_{t-1}$ is a function of $X_1, \ldots, X_{t-1}$, we can use \autoref{eq:P(Xt|Xt-1)} to write the probability to observe the confirmed case data $\vec{X} = (X_1, \ldots, X_T)$ as 
 \begin{equation} \label{eq:likelihood}
-\mathbb{L}(\theta \mid \vec{X}) = P(\vec{X} \mid \theta) = P(X_1 \mid \theta) P(X_2 \mid \tilde{X_1}, \theta) \cdots P(X_T \mid \tilde{X}_{T-1}, \theta).
+\mathbb{L}(\theta \mid \vec{X}) = 
+P(\vec{X} \mid \theta) = 
+P(X_1 \mid \theta) \cdot P(X_2 \mid \tilde{X_1}, \theta) \cdots P(X_T \mid \tilde{X}_{T-1}, \theta).
 \end{equation}
 This defines a \emph{likelihood function} $\mathbb{L}(\theta \mid \vec{X})$ for the parameter vector $\theta$ given the data $\vec{X}$.
 
@@ -288,7 +290,9 @@ The model in \autoref{eq:model} is parameterized by the vector $\theta$, where
 \end{equation} 
 
 The likelihood function is defined in \autoref{eq:likelihood}.
-We define the following prior distributions on the model parameters $P(\theta)$: 
+The posterior distribution of the model parameters $P(\theta \mid \vec{X})$ is estimated using an \textit{affine-invariant ensemble sampler for Markov chain Monte Carlo} (MCMC) implemented in the \texttt{emcee} Python package~\citep{Foreman-Mackey2013}.
+
+We defined the following prior distributions on the model parameters $P(\theta)$: 
 \begin{equation} \label{eq:priors}
 \begin{aligned} % TODO verify before submitting
 Z & \sim \mathit{Uniform}(2, 5) \\
@@ -299,18 +303,15 @@ D & \sim \mathit{Uniform}(2, 5) \\
 \alpha_1, \alpha_2 & \sim \mathit{Uniform}(0.02, 1)\\
 E(0) & \sim \mathit{Uniform}(0, 3000) \\
 I_u(0) & \sim \mathit{Uniform}(0, 3000) \\
-\tau &\sim \mathit{TruncatedNormal}(\tau^*, 5, 1, T-2),
+%\tau &\sim \mathit{TruncatedNormal}(\tau^*, 5, 1, T-2),
+\tau &\sim \mathit{TruncatedNormal}\Big(\frac{\tau^*+\tau^0}{2}, \frac{\tau^*-\tau^0}{2}, 1, T-2\Big),
 \end{aligned}
 \end{equation}
-where $\mathit{TruncatedNormal}(\mu, \sigma, a, b)$ is a truncated normal distribution with mean $\mu$ and standard deviation $\sigma$ taking values between $a$ and $b$; $T$ is the number of days in the data $\vec{X}$; and $\tau^*$ is the official start of the NPI.
-Most priors follow \citet{Li2020}, with the following exceptions.
+where the prior for $\tau$ is a truncated normal distribution shaped so that the date of the first and last NPI, $\tau^0$ and $\tau^*$ (\autoref{table:table1}), are at minus and plus one standard deviation, and taking values only between 1 and  $T-2$, where $T$ is the number of days in the data $\vec{X}$.
+We have also tested an uninformative uniform prior $U(1,T-2)$. DIC (see below) was lower for the truncated normal prior in \hl{most countries}. More importantly, the uninformative prior could result in non-negligible posterior probability for unreasonable $\tau$ values, such as Mar~1 in the United~Kingdom. This was probably due to MCMC chains being stuck in low posterior regions of the parameter space. We therefore decided to use the more informative truncated normal prior.
+Other priors follow \citet{Li2020}, with the following exceptions.
 $\lambda$ is used to ensure transmission rates are lower after the start of the NPIs ($\lambda < 1$).
-We checked values of $\Delta t$ larger than five days and found they generally produce lower likelihood, higher DIC (see below), and unreasonable parameter estimates.
-For the effective start of NPIs $\tau$ we have also tested an uninformative uniform prior $U(1,T-1)$. DIC (see below) was lower for the truncated normal prior in \hl{most countries}. More importantly, the uninformative prior could result in non-negligible posterior probability for unreasonable $\tau$ values, such as Mar~1 in the United~Kingdom. This was probably due to MCMC chains being stuck in low posterior regions of the parameter space.
-We therefore decided to use the more informative truncated normal prior.
-
-The posterior distribution of the model parameters $P(\theta \mid \vec{X})$ is then estimated using an \textit{affine-invariant ensemble sampler for Markov chain Monte Carlo} (MCMC) implemented in the \texttt{emcee} Python package~\citep{Foreman-Mackey2013}.
-The maximum a posteriori
+We checked values of $\Delta t$ larger than five days and found they generally produce lower likelihood, higher DIC (see below), and unreasonable parameter estimates, and therefore chose $U(1,5)$ as the prior.
 
 
 
