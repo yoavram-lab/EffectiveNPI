@@ -18,18 +18,19 @@ from rakott.mpl import fig_panel_labels
 import warnings
 warnings.filterwarnings('ignore')
 
-from inference import ode, simulate, simulate_one, official_τ_dates, TauModel, log_likelihood, log_prior, get_τ_prior
+from model.normal_prior_model import NormalPriorModel
+from model.uniform_prior_model import UniformPriorModel
+from inference import get_first_NPI_date, get_last_NPI_date, params_bounds, params_bounds, get_model_class
 
 def load_data(file_name, country_name, burn_fraction=0.6, lim_steps=None):
     # it's the only global point. we initialize all the params here once and don't update it later (only when load_data again for different file_name)
     # TODO PLEASE DONT USE global anywhere in your code
-    global official_τ_date, official_τ, incidences, start_date, var_names, nsteps, ndim, N, Td1, Td2, ndays, sample, lnprobability, logliks, τ_model
+    global official_τ_date, official_τ, incidences, start_date, var_names, nsteps, ndim, N, Td1, Td2, ndays, sample, lnprobability, logliks, model_type, model
     data = np.load(file_name)
     incidences = data['incidences']
     start_date = data['start_date']
     var_names = list(data['var_names'])
-    nsteps, ndim, N, Td1, Td2, τ_model = data['params']
-    τ_model = TauModel(τ_model)
+    nsteps, ndim, N, Td1, Td2, model_type = data['params']
     chain = data['chain']
     nwalkers = chain.shape[0]
     ndays = len(incidences)
@@ -41,8 +42,11 @@ def load_data(file_name, country_name, burn_fraction=0.6, lim_steps=None):
         sample = chain[:, int(lim_steps * burn_fraction):lim_steps, :].reshape(-1, ndim)
         lnprobability = data['lnprobability'][:, int(lim_steps * burn_fraction):lim_steps]
         logliks = data['logliks'].reshape(nwalkers,nsteps)[:,int(lim_steps * burn_fraction):lim_steps].reshape(-1)
-    official_τ_date = official_τ_dates[country_name]
+    official_τ_date = get_last_NPI_date(country_name)
     official_τ = (official_τ_date - pd.to_datetime(start_date)).days
+
+    ModelClass = get_model_class(model_type)
+    model = ModelClass(country_name, incidences, pd.to_datetime(start_date), N, get_last_NPI_date(country_name), get_first_NPI_date(country_name), params_bounds, Td1, Td2)
 
 def write_csv_header(file_name):
     mean_headers = [v + ' mean' for v in var_names]
@@ -52,7 +56,7 @@ def write_csv_header(file_name):
 
     with open(file_name, mode='w') as file: # use pd to write csv files?
         writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(['country','DIC','MAP loglik','N','p_steps','p_τ_model','p_Td1','p_Td2','official_τ','τ mean','τ median','τ MAP','τ mean from 1 Jan','τ median from 1 Jan','τ MAP from 1 Jan','τ CI (75%)','τ CI (95%)', *params_headers])
+        writer.writerow(['country','DIC','loglik(MAP)','loglik(mean)','loglik(median)','N','p_steps','p_model_type','p_Td1','p_Td2','official_τ','τ mean','τ median','τ MAP','official τ from 1 Jan','τ mean from 1 Jan','τ median from 1 Jan','τ MAP from 1 Jan','τ CI median (75%)','τ CI median (95%)','τ CI mean (75%)','τ CI mean (95%)', *params_headers])
 
 def write_csv_data(file_name):
     #params means and medians
@@ -67,6 +71,7 @@ def write_csv_data(file_name):
     τ_median =  format(τ_to_string(np.median(τ_posterior)))
     τ_MAP =  format(τ_to_string(MAPs[var_names.index('τ')]))
 
+    τ_official_from1Jar = (pd.to_datetime(start_date) - pd.Timestamp('2020-01-01')).days + official_τ
     τ_mean_from1Jar = (pd.to_datetime(start_date) - pd.Timestamp('2020-01-01')).days + τ_posterior.mean()
     τ_median_from1Jar =  (pd.to_datetime(start_date) - pd.Timestamp('2020-01-01')).days + np.median(τ_posterior)
     τ_MAP_from1Jar =  (pd.to_datetime(start_date) - pd.Timestamp('2020-01-01')).days + MAPs[var_names.index('τ')]
@@ -76,12 +81,12 @@ def write_csv_data(file_name):
     τ_MAP_from1Jar = round(τ_MAP_from1Jar,2)
     with open(file_name, mode='a') as file:
         writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow([country_name, '{:.2f}'.format(calc_DIC()), '{:.2f}'.format(calc_LoglikMAP()), N, nsteps, τ_model, Td1, Td2,
+        writer.writerow([country_name, '{:.2f}'.format(calc_DIC()), '{:.2f}'.format(calc_LoglikMAP()),'{:.2f}'.format(calc_Loglik_mean()),'{:.2f}'.format(calc_Loglik_median()), N, nsteps, model_type, Td1, Td2,
                          τ_to_string(official_τ),
-                         τ_mean, τ_median, τ_MAP, τ_mean_from1Jar, τ_median_from1Jar, τ_MAP_from1Jar, '{:.2f}'.format(calc_τ_CI()),'{:.2f}'.format(calc_τ_CI(0.95)), *params_values])
+                         τ_mean, τ_median, τ_MAP, τ_official_from1Jar,  τ_mean_from1Jar, τ_median_from1Jar, τ_MAP_from1Jar, '{:.2f}'.format(calc_τ_CI_median()),'{:.2f}'.format(calc_τ_CI_median(0.95)), '{:.2f}'.format(calc_τ_CI_mean()),'{:.2f}'.format(calc_τ_CI_mean(0.95)), *params_values])
 
 def calc_DIC():
-    loglik_E = calc_LoglikMAP()
+    loglik_E = calc_Loglik_median()
     E_loglik = logliks.mean()
     DIC = 2*loglik_E - 4*E_loglik
     return DIC
@@ -90,12 +95,30 @@ def get_MAP():
     return sample[lnprobability.argmax()]
 
 def calc_LoglikMAP():
-    loglik_E = log_likelihood(get_MAP(), incidences, N)
-    return loglik_E
+    res = model.log_likelihood(get_MAP())
+    return res
 
-def calc_τ_CI(p=0.75):
-    tau_samples = sample.T[-1]
-    tau_samples_hat = get_MAP()[var_names.index('τ')]
+def calc_Loglik_median():
+    medians = [np.median(sample[:,i]) for i in range(len(var_names))]
+    res = model.log_likelihood(medians)
+    return res
+
+def calc_Loglik_mean():
+    means = [sample[:,i].mean() for i in range(len(var_names))]
+    res = model.log_likelihood(means)
+    return res
+
+def calc_τ_CI_median(p=0.75):
+    tau_samples = sample.T[var_names.index('τ')]
+    tau_samples_hat = np.median(tau_samples)
+
+    res = np.quantile(abs(tau_samples - tau_samples_hat), p)
+    return res
+
+def calc_τ_CI_mean(p=0.75):
+    tau_samples = sample.T[var_names.index('τ')]
+    tau_samples_hat = tau_samples.mean()
+
     res = np.quantile(abs(tau_samples - tau_samples_hat), p)
     return res
 
@@ -110,9 +133,10 @@ def print_all():
 def τ_to_string(τ):
     return (pd.to_datetime(start_date) + timedelta(days=τ)).strftime('%b %d')
 
+# TODO move function to the Model
 def generate(Z, D, μ, β1, α1, λ, α2, E0, Iu0,delta_t0,tau,ndays, N):
     tau=int(tau)
-    S, E, Ir, Iu, R, Y = simulate(Z, D, μ, β1, α1, λ, α2, E0, Iu0,delta_t0,tau,ndays,N)
+    S, E, Ir, Iu, R, Y = model.simulate(Z, D, μ, β1, α1, λ, α2, E0, Iu0,delta_t0,tau,ndays)
     p1 = 1/Td1
     p2 = 1/Td2 
     C = np.zeros_like(Y)
@@ -351,7 +375,8 @@ def plot_incidences_and_dates(ax=None):
     lst.append('τ mean = {}'.format(τ_to_string(τ_mean)))
     lst.append('τ median = {}'.format(τ_to_string(τ_median)))
     lst.append('τ MAP = {}'.format(τ_to_string(τ_MAP)))
-    lst.append('τ CI: {}'.format(calc_τ_CI()))
+    lst.append('τ CI median 75%: {:.2f}'.format(calc_τ_CI_median(0.75)))
+    lst.append('τ CI median 95%: {:.2f}'.format(calc_τ_CI_median(0.95)))
     confidence = 'P(τ > {}) = {:.2%}'.format(τ_to_string(official_τ), (τ_posterior > official_τ).mean())
     lst.append(confidence)
 
@@ -361,8 +386,10 @@ def plot_incidences_and_dates(ax=None):
     lst.append('P(α2 > α1) = {:.2%}'.format((Δα_posterior > 0).mean()))
 
     lst.append('')
-    lst.append('DIC: {}'.format(calc_DIC()))
-    lst.append('loglik of MAP: {}'.format(calc_LoglikMAP()))
+    lst.append('DIC: {:.2f}'.format(calc_DIC()))
+    lst.append('loglik of MAP: {:.2f}'.format(calc_LoglikMAP()))
+    lst.append('loglik of mean: {:.2f}'.format(calc_Loglik_mean()))
+    lst.append('loglik of median: {:.2f}'.format(calc_Loglik_median()))
 
     txt = '\n'.join(lst)
     plt.text(0,0,txt,fontsize=10)
@@ -392,15 +419,24 @@ def print_τ_dist():
     return sorted(s,key=lambda t: pd.Timestamp('2020 '+t[0]))
 
 def plot_incidences(ax=None, color=blue):
+    global daily_cases, theta
     if ax is None: fig, ax = plt.subplots()
 
     np.random.seed(10)
-    num_simulations = 300
+    num_simulations = 128
     daily_cases = []
-    for _ in range(num_simulations):
+    for i in range(num_simulations):
         idx = np.random.choice(sample.shape[0])
-        y = generate(*sample[idx, :],ndays,N)
-        daily_cases.append(y)
+        
+        Z, D, μ, β, α1, λ, α2, E0, Iu0, Δt0, τ = sample[idx, :]
+        Δt0 = int(Δt0)
+        τ = int(τ)
+        total_zeros = params_bounds['Δt0'][1]
+        unrellevant_zeros = total_zeros - Δt0
+        τ = τ - unrellevant_zeros
+        y = generate(Z, D, μ, β, α1, λ, α2, E0, Iu0, Δt0, τ, ndays-unrellevant_zeros ,N)       
+        
+        daily_cases.append(np.array([0]*unrellevant_zeros + list(y)))
     daily_cases = np.array(daily_cases)
 
     t = np.arange(ndays)
