@@ -18,12 +18,12 @@ from rakott.mpl import fig_panel_labels
 import warnings
 warnings.filterwarnings('ignore')
 
-from inference import ode, simulate, simulate_one, TauModel, log_likelihood, log_prior, get_τ_prior, get_first_NPI_date, get_last_NPI_date, params_bounds
+from inference import ode, simulate, simulate_one, TauModel, get_first_NPI_date, get_last_NPI_date, params_bounds, NormalPriorModel, params_bounds
 
 def load_data(file_name, country_name, burn_fraction=0.6, lim_steps=None):
     # it's the only global point. we initialize all the params here once and don't update it later (only when load_data again for different file_name)
     # TODO PLEASE DONT USE global anywhere in your code
-    global official_τ_date, official_τ, incidences, start_date, var_names, nsteps, ndim, N, Td1, Td2, ndays, sample, lnprobability, logliks, τ_model
+    global official_τ_date, official_τ, incidences, start_date, var_names, nsteps, ndim, N, Td1, Td2, ndays, sample, lnprobability, logliks, τ_model, model
     data = np.load(file_name)
     incidences = data['incidences']
     start_date = data['start_date']
@@ -43,6 +43,8 @@ def load_data(file_name, country_name, burn_fraction=0.6, lim_steps=None):
         logliks = data['logliks'].reshape(nwalkers,nsteps)[:,int(lim_steps * burn_fraction):lim_steps].reshape(-1)
     official_τ_date = get_last_NPI_date(country_name)
     official_τ = (official_τ_date - pd.to_datetime(start_date)).days
+
+    model = NormalPriorModel(country_name, incidences, pd.to_datetime(start_date), N, get_last_NPI_date(country_name), get_first_NPI_date(country_name), params_bounds)
 
 def write_csv_header(file_name):
     mean_headers = [v + ' mean' for v in var_names]
@@ -91,17 +93,17 @@ def get_MAP():
     return sample[lnprobability.argmax()]
 
 def calc_LoglikMAP():
-    res = log_likelihood(get_MAP(), incidences, N)
+    res = model.log_likelihood(get_MAP())
     return res
 
 def calc_Loglik_median():
     medians = [np.median(sample[:,i]) for i in range(len(var_names))]
-    res = log_likelihood(medians, incidences, N)
+    res = model.log_likelihood(medians)
     return res
 
 def calc_Loglik_mean():
     means = [sample[:,i].mean() for i in range(len(var_names))]
-    res = log_likelihood(means, incidences, N)
+    res = model.log_likelihood(means)
     return res
 
 def calc_τ_CI_median(p=0.75):
