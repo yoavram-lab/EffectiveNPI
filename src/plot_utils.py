@@ -18,18 +18,19 @@ from rakott.mpl import fig_panel_labels
 import warnings
 warnings.filterwarnings('ignore')
 
-from inference import ode, simulate, simulate_one, TauModel, get_first_NPI_date, get_last_NPI_date, params_bounds, NormalPriorModel, params_bounds
+from normal_prior_model import NormalPriorModel
+from uniform_prior_model import UniformPriorModel
+from inference import get_first_NPI_date, get_last_NPI_date, params_bounds, params_bounds, get_model_class
 
 def load_data(file_name, country_name, burn_fraction=0.6, lim_steps=None):
     # it's the only global point. we initialize all the params here once and don't update it later (only when load_data again for different file_name)
     # TODO PLEASE DONT USE global anywhere in your code
-    global official_τ_date, official_τ, incidences, start_date, var_names, nsteps, ndim, N, Td1, Td2, ndays, sample, lnprobability, logliks, τ_model, model
+    global official_τ_date, official_τ, incidences, start_date, var_names, nsteps, ndim, N, Td1, Td2, ndays, sample, lnprobability, logliks, model_type, model
     data = np.load(file_name)
     incidences = data['incidences']
     start_date = data['start_date']
     var_names = list(data['var_names'])
-    nsteps, ndim, N, Td1, Td2, τ_model = data['params']
-    τ_model = TauModel(τ_model)
+    nsteps, ndim, N, Td1, Td2, model_type = data['params']
     chain = data['chain']
     nwalkers = chain.shape[0]
     ndays = len(incidences)
@@ -44,7 +45,8 @@ def load_data(file_name, country_name, burn_fraction=0.6, lim_steps=None):
     official_τ_date = get_last_NPI_date(country_name)
     official_τ = (official_τ_date - pd.to_datetime(start_date)).days
 
-    model = NormalPriorModel(country_name, incidences, pd.to_datetime(start_date), N, get_last_NPI_date(country_name), get_first_NPI_date(country_name), params_bounds)
+    ModelClass = get_model_class(model_type)
+    model = ModelClass(country_name, incidences, pd.to_datetime(start_date), N, get_last_NPI_date(country_name), get_first_NPI_date(country_name), params_bounds, Td1, Td2)
 
 def write_csv_header(file_name):
     mean_headers = [v + ' mean' for v in var_names]
@@ -54,7 +56,7 @@ def write_csv_header(file_name):
 
     with open(file_name, mode='w') as file: # use pd to write csv files?
         writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(['country','DIC','loglik(MAP)','loglik(mean)','loglik(median)','N','p_steps','p_τ_model','p_Td1','p_Td2','official_τ','τ mean','τ median','τ MAP','official τ from 1 Jan','τ mean from 1 Jan','τ median from 1 Jan','τ MAP from 1 Jan','τ CI median (75%)','τ CI median (95%)','τ CI mean (75%)','τ CI mean (95%)', *params_headers])
+        writer.writerow(['country','DIC','loglik(MAP)','loglik(mean)','loglik(median)','N','p_steps','p_model_type','p_Td1','p_Td2','official_τ','τ mean','τ median','τ MAP','official τ from 1 Jan','τ mean from 1 Jan','τ median from 1 Jan','τ MAP from 1 Jan','τ CI median (75%)','τ CI median (95%)','τ CI mean (75%)','τ CI mean (95%)', *params_headers])
 
 def write_csv_data(file_name):
     #params means and medians
@@ -79,7 +81,7 @@ def write_csv_data(file_name):
     τ_MAP_from1Jar = round(τ_MAP_from1Jar,2)
     with open(file_name, mode='a') as file:
         writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow([country_name, '{:.2f}'.format(calc_DIC()), '{:.2f}'.format(calc_LoglikMAP()),'{:.2f}'.format(calc_Loglik_mean()),'{:.2f}'.format(calc_Loglik_median()), N, nsteps, τ_model, Td1, Td2,
+        writer.writerow([country_name, '{:.2f}'.format(calc_DIC()), '{:.2f}'.format(calc_LoglikMAP()),'{:.2f}'.format(calc_Loglik_mean()),'{:.2f}'.format(calc_Loglik_median()), N, nsteps, model_type, Td1, Td2,
                          τ_to_string(official_τ),
                          τ_mean, τ_median, τ_MAP, τ_official_from1Jar,  τ_mean_from1Jar, τ_median_from1Jar, τ_MAP_from1Jar, '{:.2f}'.format(calc_τ_CI_median()),'{:.2f}'.format(calc_τ_CI_median(0.95)), '{:.2f}'.format(calc_τ_CI_mean()),'{:.2f}'.format(calc_τ_CI_mean(0.95)), *params_values])
 
@@ -131,9 +133,10 @@ def print_all():
 def τ_to_string(τ):
     return (pd.to_datetime(start_date) + timedelta(days=τ)).strftime('%b %d')
 
+# TODO move function to the Model
 def generate(Z, D, μ, β1, α1, λ, α2, E0, Iu0,delta_t0,tau,ndays, N):
     tau=int(tau)
-    S, E, Ir, Iu, R, Y = simulate(Z, D, μ, β1, α1, λ, α2, E0, Iu0,delta_t0,tau,ndays,N)
+    S, E, Ir, Iu, R, Y = model.simulate(Z, D, μ, β1, α1, λ, α2, E0, Iu0,delta_t0,tau,ndays)
     p1 = 1/Td1
     p2 = 1/Td2 
     C = np.zeros_like(Y)

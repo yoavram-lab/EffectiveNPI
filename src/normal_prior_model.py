@@ -18,7 +18,7 @@ class NormalPriorModel:
         self.Td1 = Td1
         self.Td2 = Td2
         self.var_names = ['Z', 'D', 'μ', 'β', 'α1', 'λ', 'α2', 'E0', 'Iu0','Δt0','τ']
-        self.τ_prior = self.__get_τ_prior()
+        self.τ_prior = self._get_τ_prior()
 
 
     def log_likelihood(self, θ):
@@ -56,7 +56,7 @@ class NormalPriorModel:
         if self.__in_bounds(Z=Z, D=D, μ=μ, β=β, α1=α1, λ=λ, α2=α2, E0=E0, Iu0=Iu0, Δt0=Δt0):
             # if τ_model==TauModel.uniform_prior:
             #     return τ_prior.logpmf(τ)
-            return self.τ_prior.logpdf(τ)
+            return self.τ_prior.logpdf_or_pmf(τ)
         else:
             return -np.inf
 
@@ -67,11 +67,8 @@ class NormalPriorModel:
             if np.isfinite(self.log_likelihood(res)):
                 return res
 
-    def __get_τ_prior(self):
+    def _get_τ_prior(self):
         ndays = len(self.X)
-        # if τ_model==TauModel.uniform_prior:
-        #     return randint(params_bounds['Δt0'][1], ndays) #[including,not-including]
-
         last_τ = (self.last_NPI_date - self.start_date).days
         first_τ = (self.get_first_NPI_date - self.start_date).days
 
@@ -82,8 +79,9 @@ class NormalPriorModel:
         σ = 5 if σ<5 else σ 
         # μ = last_τ
         # σ = 5
-        return truncnorm(
-            (lower - μ) / σ, (upper - μ) / σ, loc=μ, scale=σ)
+        res = truncnorm((lower - μ) / σ, (upper - μ) / σ, loc=μ, scale=σ)
+        res.logpdf_or_pmf = res.logpdf
+        return res
 
     def __prior(self):
         params_bounds = self.params_bounds
