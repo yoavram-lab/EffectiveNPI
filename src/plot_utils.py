@@ -18,8 +18,8 @@ from rakott.mpl import fig_panel_labels
 import warnings
 warnings.filterwarnings('ignore')
 
-from normal_prior_model import NormalPriorModel
-from uniform_prior_model import UniformPriorModel
+from model.normal_prior_model import NormalPriorModel
+from model.uniform_prior_model import UniformPriorModel
 from inference import get_first_NPI_date, get_last_NPI_date, params_bounds, params_bounds, get_model_class
 
 def load_data(file_name, country_name, burn_fraction=0.6, lim_steps=None):

@@ -1,4 +1,4 @@
-from normal_prior_model import NormalPriorModel
+from model.normal_prior_model import NormalPriorModel
 from scipy.stats import truncnorm, randint
 
 class UniformPriorModel(NormalPriorModel):

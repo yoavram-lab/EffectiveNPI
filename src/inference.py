@@ -11,8 +11,8 @@ import emcee
 import argparse
 from shutil import copyfile
 from enum import IntEnum
-from normal_prior_model import NormalPriorModel
-from uniform_prior_model import UniformPriorModel
+from model.normal_prior_model import NormalPriorModel
+from model.uniform_prior_model import UniformPriorModel
 
 def get_model_class(model_type):
     if model_type == 1:
