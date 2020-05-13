@@ -121,32 +121,9 @@ def calc_τ_CI_mean(p=0.75):
 
     res = np.quantile(abs(tau_samples - tau_samples_hat), p)
     return res
-
-print_list = []
-def printt(s):
-    print_list.append(s)
-    
-def print_all():
-    for s in print_list:
-        print(s)
     
 def τ_to_string(τ):
     return (pd.to_datetime(start_date) + timedelta(days=τ)).strftime('%b %d')
-
-# TODO move function to the Model
-def generate(Z, D, μ, β1, α1, λ, α2, E0, Iu0,delta_t0,tau,ndays, N):
-    tau=int(tau)
-    S, E, Ir, Iu, R, Y = model.simulate(Z, D, μ, β1, α1, λ, α2, E0, Iu0,delta_t0,tau,ndays)
-    p1 = 1/Td1
-    p2 = 1/Td2 
-    C = np.zeros_like(Y)
-    for t in range(1, len(C)):
-        p = p1 if t<tau else p2
-        n = Y[t] - C[:t].sum()
-        n = max(0,n)
-        C[t] = np.random.poisson(n * p)     
-
-    return C
 
 def plot_β(ax=None):
     if ax is None: fig, ax = plt.subplots()
@@ -160,25 +137,13 @@ def plot_β(ax=None):
     idx = β_posterior > 0.8
     β_posterior= β_posterior[idx]
 
-    β_mean = β_posterior.mean()
-    β_median = np.median(β_posterior)
-    printt('β mean = {:.2}'.format(β_mean))
-    printt('β median = {:.2}'.format(β_median))
-
     sns.distplot(β_posterior, 100, hist=False, norm_hist=True, kde_kws=dict(bw=0.06), color=red, label=r'Before NPI', ax=ax)
-#     ax.axvline(β_mean, color=red, ls='--', alpha=0.7)
-#     ax.set_ylim(0, 2)
 
     ind = var_names.index('λ')
     λ_posterior = sample[:,ind]
     ind = var_names.index('β')
     β_posterior = sample[:,ind]
     βλ_posterior = β_posterior * λ_posterior
-
-    βλ_mean = βλ_posterior.mean()
-    βλ_median = np.median(βλ_posterior)
-    printt('βλ mean = {:.2}'.format(βλ_mean))
-    printt('βλ median = {:.2}'.format(βλ_median))
 
     sns.distplot(βλ_posterior, 100, hist=False, norm_hist=True, kde_kws=dict(bw=0.06), color=blue, label=r'After NPI', ax=ax)
 #     ax.axvline(βλ_mean, color=blue, ls='--', alpha=0.7)
@@ -196,21 +161,11 @@ def plot_α(ax=None):
     ind = var_names.index('α1')
     α1_posterior = sample[:,ind]
 
-    α1_mean = α1_posterior.mean()
-    α1_median = np.median(α1_posterior)
-    printt('α1 mean = {:.2}'.format(α1_mean))
-    printt('α1 median = {:.2}'.format(α1_median))
-
     sns.distplot(α1_posterior, 100, hist=False, norm_hist=True, kde_kws=dict(bw=0.06), color=red, label=r'Before NPI', ax=ax)
 #     ax.axvline(α1_mean, color=red, ls='--', alpha=0.7)
 
     ind = var_names.index('α2')
     α2_posterior = sample[:,ind]
-
-    α2_mean = α2_posterior.mean()
-    α2_median = np.median(α2_posterior)
-    printt('α2 mean = {:.2}'.format(α2_mean))
-    printt('α2 median = {:.2}'.format(α2_median))
 
     sns.distplot(α2_posterior, 100, hist=False, norm_hist=True, kde_kws=dict(bw=0.06), color=blue, label=r'After NPI', ax=ax)
 #     ax.axvline(α2_mean, color=blue, ls='--', alpha=0.7)
@@ -231,7 +186,6 @@ def plot_α2_minus_α1(ax=None):
     Δα_posterior = α2_posterior - α1_posterior
     sns.distplot(Δα_posterior, 100, kde_kws=dict(bw=0.04), norm_hist=True)
     plt.axvline(0, color='k')
-    printt('P(α2 > α1) = {:.2%}'.format((Δα_posterior > 0).mean()))
     plt.xlabel('α2-α1')
     plt.ylabel('Posterior density');
 
@@ -261,13 +215,6 @@ def plot_τ(ax=None):
     
     ind = var_names.index('τ')
     τ_posterior = sample[:,ind].astype(int)
-
-    τ_mean = τ_posterior.mean()
-    τ_median = np.median(τ_posterior)
-    printt('τ mean = {}'.format(τ_to_string(τ_mean)))
-    printt('τ median = {}'.format(τ_to_string(τ_median)))
-    confidence = 'P(τ > {}) = {:.2%}'.format(τ_to_string(official_τ), (τ_posterior > official_τ).mean())
-    printt(confidence)
 
     ax.hist(τ_posterior, bins=np.arange(ndays), density=True, color='k', align='left', width=1)
     ax.axvline(official_τ, color='k', ls='--', alpha=0.75)
@@ -337,15 +284,6 @@ def plot_all():
     fig.tight_layout()
     
     return fig
-
-def plot_text(ax=None): #OLD TODO remove
-    if ax is None: fig, ax = plt.subplots(figsize=(0.01,0.01))
-
-    txt = '\n'.join(print_list)
-    plt.text(0,0,txt,fontsize=10)
-    
-    plt.setp(ax, frame_on=False, xticks=(), yticks=());
-    print_list.clear()
 
 def plot_text(ax=None):
     if ax is None: fig, ax = plt.subplots(figsize=(0.01,0.01))
@@ -419,34 +357,30 @@ def print_τ_dist():
     return sorted(s,key=lambda t: pd.Timestamp('2020 '+t[0]))
 
 def plot_incidences(ax=None, color=blue):
-    global daily_cases, theta
     if ax is None: fig, ax = plt.subplots()
 
     np.random.seed(10)
     num_simulations = 128
     daily_cases = []
-    for i in range(num_simulations):
+    for _ in range(num_simulations):
         idx = np.random.choice(sample.shape[0])
         
-        Z, D, μ, β, α1, λ, α2, E0, Iu0, Δt0, τ = sample[idx, :]
-        Δt0 = int(Δt0)
-        τ = int(τ)
-        total_zeros = params_bounds['Δt0'][1]
-        unrellevant_zeros = total_zeros - Δt0
-        τ = τ - unrellevant_zeros
-        y = generate(Z, D, μ, β, α1, λ, α2, E0, Iu0, Δt0, τ, ndays-unrellevant_zeros ,N)       
-        
-        daily_cases.append(np.array([0]*unrellevant_zeros + list(y)))
-    daily_cases = np.array(daily_cases)
+        θ = sample[idx, :]
+
+        y = model.generate_daily_cases(θ)
+        daily_cases.append(y)
 
     t = np.arange(ndays)
     plt.plot(t, np.median(daily_cases,axis=0), color=color)
     plt.plot(t, incidences, '.', color=red)
-        
-    ind = var_names.index('τ')
-    τ_posterior = sample[:,ind].astype(int)
-    τ_mean = τ_posterior.mean()
-    plt.axvline(τ_mean,color=purple, linewidth=1, linestyle='--')
+
+    try:    
+        ind = var_names.index('τ') 
+        τ_posterior = sample[:,ind].astype(int)
+        τ_mean = τ_posterior.mean()
+        plt.axvline(τ_mean,color=purple, linewidth=1, linestyle='--')
+    except:
+        None #not all models have τ. It's okey
 
     days = list(range(0, ndays, round(ndays/10)))
     labels = [τ_to_string(d) for d in days]

@@ -24,7 +24,6 @@ class NormalPriorModel:
     def log_likelihood(self, θ):
         Z, D, μ, β, α1, λ, α2, E0, Iu0, Δt0, τ = θ
         X = self.X
-        N = self.N
         Td1 = self.Td1
         Td2 = self.Td2
 
@@ -53,9 +52,7 @@ class NormalPriorModel:
         Z, D, μ, β, α1, λ, α2, E0, Iu0, Δt0, τ = θ
         τ = int(τ)
         Δt0 = int(Δt0)
-        if self.__in_bounds(Z=Z, D=D, μ=μ, β=β, α1=α1, λ=λ, α2=α2, E0=E0, Iu0=Iu0, Δt0=Δt0):
-            # if τ_model==TauModel.uniform_prior:
-            #     return τ_prior.logpmf(τ)
+        if self._in_bounds(Z=Z, D=D, μ=μ, β=β, α1=α1, λ=λ, α2=α2, E0=E0, Iu0=Iu0, Δt0=Δt0):
             return self.τ_prior.logpdf_or_pmf(τ)
         else:
             return -np.inf
@@ -63,7 +60,7 @@ class NormalPriorModel:
 
     def guess_one(self):
         while True:
-            res = self.__prior()
+            res = self._prior()
             if np.isfinite(self.log_likelihood(res)):
                 return res
 
@@ -83,7 +80,7 @@ class NormalPriorModel:
         res.logpdf_or_pmf = res.logpdf
         return res
 
-    def __prior(self):
+    def _prior(self):
         params_bounds = self.params_bounds
         Z = uniform(*params_bounds['Z'])
         D = uniform(*params_bounds['D'])
@@ -100,7 +97,7 @@ class NormalPriorModel:
         return Z, D, μ, β, α1, λ, α2, E0, Iu0, Δt0, τ
 
 
-    def __in_bounds(self, **params):
+    def _in_bounds(self, **params):
         bounds = [self.params_bounds[p] for p in params]
         for val,(lower,higher) in zip(params.values(),bounds):
             if not lower<=val<=higher:
@@ -118,8 +115,7 @@ class NormalPriorModel:
              α * E / Z # accumulated reported infections
         ]
 
-    def __simulate_one(self, Z, D, μ, β, α, y0, ndays):
-        N = self.N
+    def _simulate_one(self, Z, D, μ, β, α, y0, ndays):
         sol = odeint(self.__ode, y0, np.arange(ndays), args=(Z, D, α, β, μ))
         S, E, Ir, Iu, Y = sol.T
         return S, E, Ir, Iu, Y
@@ -130,10 +126,33 @@ class NormalPriorModel:
         Ir0 = 0
         S0 = N - E0 - Ir0 - Iu0
         init = [S0, E0, Ir0, Iu0, Ir0]
-        sol1 = self.__simulate_one(Z, D, μ, β, α1, init, τ)
+        sol1 = self._simulate_one(Z, D, μ, β, α1, init, τ)
         sol1 = np.array(sol1)
-        sol2 = self.__simulate_one(Z, D, μ, λ*β, α2, sol1[:, -1], ndays - τ)
+        sol2 = self._simulate_one(Z, D, μ, λ*β, α2, sol1[:, -1], ndays - τ)
 
         S, E, Ir, Iu, Y = np.concatenate((sol1, sol2), axis=1)
         R = N - (S + E + Ir + Iu)
         return S, E, Ir, Iu, R, Y
+
+    def generate_daily_cases(self, θ):
+        Z, D, μ, β, α1, λ, α2, E0, Iu0, Δt0, τ = θ
+        Δt0 = int(Δt0)
+        τ = int(τ)
+        total_zeros = self.params_bounds['Δt0'][1]
+        unrellevant_zeros = total_zeros - Δt0
+        τ = τ - unrellevant_zeros
+        θ = Z, D, μ, β, α1, λ, α2, E0, Iu0, Δt0, τ
+
+        S, E, Ir, Iu, R, Y = self.simulate(*θ,len(self.X)-unrellevant_zeros)
+        p1 = 1/self.Td1
+        p2 = 1/self.Td2 
+        C = np.zeros_like(Y)
+        for t in range(1, len(C)):
+            p = p1 if t<τ else p2
+            n = Y[t] - C[:t].sum()
+            n = max(0,n)
+            C[t] = np.random.poisson(n * p)     
+
+        return [0]*unrellevant_zeros + list(C)
+
+

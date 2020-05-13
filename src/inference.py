@@ -13,14 +13,7 @@ from shutil import copyfile
 from enum import IntEnum
 from model.normal_prior_model import NormalPriorModel
 from model.uniform_prior_model import UniformPriorModel
-
-def get_model_class(model_type):
-    if model_type == 1:
-        return UniformPriorModel
-    elif model_type == 2:
-        return NormalPriorModel
-    else:
-        return None
+from model.no_tau_model import NoTauModel
 
 np.random.seed(10)    
 now = datetime.now().strftime('%Y-%m-%d')
@@ -29,17 +22,15 @@ Td1 = 9
 Td2 = 6
 seed_max = 3000
 
-
-def get_first_NPI_date(country_name):
-    country_name = 'United Kingdom' if country_name == 'United_Kingdom' else country_name
-    df = pd.read_csv('../data/NPI_dates.csv',parse_dates=['First','Last'])
-    return df[df['Country']==country_name]['First'].iloc[0].to_pydatetime()
-
-def get_last_NPI_date(country_name):
-    country_name = 'United Kingdom' if country_name == 'United_Kingdom' else country_name
-    df = pd.read_csv('../data/NPI_dates.csv',parse_dates=['First','Last'])
-    return df[df['Country']==country_name]['Last'].iloc[0].to_pydatetime()
-
+def get_model_class(model_type):
+    if model_type == 1:
+        return UniformPriorModel
+    elif model_type == 2:
+        return NormalPriorModel
+    elif model_type == 3:
+        return NoTauModel
+    else:
+        return None
 
 params_bounds = {
     'Z' : (2, 5),
@@ -53,6 +44,16 @@ params_bounds = {
     'Iu0' : (0, seed_max),
     'Δt0' : (1,5) #how much zeros before the first incident
 }
+
+def get_first_NPI_date(country_name):
+    country_name = 'United Kingdom' if country_name == 'United_Kingdom' else country_name
+    df = pd.read_csv('../data/NPI_dates.csv',parse_dates=['First','Last'])
+    return df[df['Country']==country_name]['First'].iloc[0].to_pydatetime()
+
+def get_last_NPI_date(country_name):
+    country_name = 'United Kingdom' if country_name == 'United_Kingdom' else country_name
+    df = pd.read_csv('../data/NPI_dates.csv',parse_dates=['First','Last'])
+    return df[df['Country']==country_name]['Last'].iloc[0].to_pydatetime()
 
 
 def find_start_day(cases_and_dates):
@@ -86,7 +87,7 @@ if __name__ == '__main__':
     parser.add_argument('-w', '--walkers',type=int,help='you can provide number of walkers, othewise the default is taken')
     parser.add_argument('-c', '--cores',type=int,help='by default 1 core')
     parser.add_argument('-d', '--ver_desc',type=str,help='short description of the version - will be part of the dir name')
-    parser.add_argument('-m', '--tau_model',type=int,help='1 - uniform prior, 2 (default) - normal prior')
+    parser.add_argument('-m', '--tau_model',type=int,help='1 - uniform prior, 2 (default) - normal prior, 3 - no tau')
     args = parser.parse_args()
     country_name = args.country_name
     cores = args.cores
