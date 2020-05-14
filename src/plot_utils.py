@@ -213,8 +213,11 @@ def bar_plot_τ(ax=None):
 def plot_τ(ax=None):
     if ax is None: fig, ax = plt.subplots()
     
-    ind = var_names.index('τ')
-    τ_posterior = sample[:,ind].astype(int)
+    try:
+        τ_posterior = model.τ # model with fixed τ
+    except AttributeError:
+        ind = var_names.index('τ')
+        τ_posterior = sample[:,ind].astype(int)
 
     ax.hist(τ_posterior, bins=np.arange(ndays), density=True, color='k', align='left', width=1)
     ax.axvline(official_τ, color='k', ls='--', alpha=0.75)
@@ -224,7 +227,10 @@ def plot_τ(ax=None):
     xticklabels = [τ_to_string(d) for d in days]
     ax.set_xticks(days)
     ax.set_xticklabels(xticklabels, rotation=45)
-    ax.set_xlim(τ_posterior.min(), τ_posterior.max()+2)
+    try:
+        ax.set_xlim(τ_posterior.min(), τ_posterior.max()+2)
+    except:
+        None #it's okey for model with fixed τ
     ax.set_ylim(0, 1)
 #     ax.text(14.2, 0.9, confidence, fontsize=16)
     ax.set_ylabel(r'Posterior probability')
@@ -290,7 +296,11 @@ def plot_text(ax=None):
     # means = [sample[:,i].mean() for i in range(len(var_names))]
     # medians = [np.median(sample[:,i]) for i in range(len(var_names))]
     # txt = ['{}    mean: {:.2f}\n    median: {:.2f}'.format(t[0],t[1],t[2]) for t in zip(var_names,means,medians)]
-    txt = [str(a) for a in print_τ_dist()]
+    
+    try:
+        txt = ['fixed tau: '+τ_to_string(model.τ)]
+    except AttributeError:
+        txt = [str(a) for a in print_τ_dist()]
     txt = '\n'.join(txt)
     plt.text(0,0,txt,fontsize=10)
     plt.setp(ax, frame_on=False, xticks=(), yticks=());
@@ -306,17 +316,20 @@ def plot_incidences_and_dates(ax=None):
            ''
           ]
 
-    τ_posterior = sample[:,var_names.index('τ')].astype(int)
-    τ_mean = τ_posterior.mean()
-    τ_median = np.median(τ_posterior)
-    τ_MAP = get_MAP()[var_names.index('τ')]
-    lst.append('τ mean = {}'.format(τ_to_string(τ_mean)))
-    lst.append('τ median = {}'.format(τ_to_string(τ_median)))
-    lst.append('τ MAP = {}'.format(τ_to_string(τ_MAP)))
-    lst.append('τ CI median 75%: {:.2f}'.format(calc_τ_CI_median(0.75)))
-    lst.append('τ CI median 95%: {:.2f}'.format(calc_τ_CI_median(0.95)))
-    confidence = 'P(τ > {}) = {:.2%}'.format(τ_to_string(official_τ), (τ_posterior > official_τ).mean())
-    lst.append(confidence)
+    try:
+        τ_posterior = sample[:,var_names.index('τ')].astype(int)
+        τ_mean = τ_posterior.mean()
+        τ_median = np.median(τ_posterior)
+        τ_MAP = get_MAP()[var_names.index('τ')]
+        lst.append('τ mean = {}'.format(τ_to_string(τ_mean)))
+        lst.append('τ median = {}'.format(τ_to_string(τ_median)))
+        lst.append('τ MAP = {}'.format(τ_to_string(τ_MAP)))
+        lst.append('τ CI median 75%: {:.2f}'.format(calc_τ_CI_median(0.75)))
+        lst.append('τ CI median 95%: {:.2f}'.format(calc_τ_CI_median(0.95)))
+        confidence = 'P(τ > {}) = {:.2%}'.format(τ_to_string(official_τ), (τ_posterior > official_τ).mean())
+        lst.append(confidence)
+    except:
+        None # there are models without τ of with fixed τ
 
     α1_posterior = sample[:,var_names.index('α1')]
     α2_posterior = sample[:,var_names.index('α2')]
@@ -374,13 +387,18 @@ def plot_incidences(ax=None, color=blue):
     plt.plot(t, np.median(daily_cases,axis=0), color=color)
     plt.plot(t, incidences, '.', color=red)
 
-    try:    
-        ind = var_names.index('τ') 
-        τ_posterior = sample[:,ind].astype(int)
-        τ_mean = τ_posterior.mean()
-        plt.axvline(τ_mean,color=purple, linewidth=1, linestyle='--')
+    try:
+        τ = model.τ #model with fixed tau
     except:
-        None #not all models have τ. It's okey
+        try:    
+            ind = var_names.index('τ') 
+            τ_posterior = sample[:,ind].astype(int)
+            τ = τ_posterior.mean()
+            plt.axvline(τ, color=purple, linewidth=1, linestyle='--')
+        except:
+            None #not all models have τ. It's okey
+    else:
+        plt.axvline(τ, color=purple, linewidth=1, linestyle='--')
 
     days = list(range(0, ndays, round(ndays/10)))
     labels = [τ_to_string(d) for d in days]

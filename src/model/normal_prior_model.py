@@ -36,7 +36,7 @@ class NormalPriorModel:
         X = X[unrellevant_zeros:]
         ndays = len(X)
 
-        S, E, Ir, Iu, R, Y = self.simulate(Z, D, μ, β, α1, λ, α2, E0, Iu0, Δt0, τ, ndays)
+        S, E, Ir, Iu, R, Y = self._simulate(Z, D, μ, β, α1, λ, α2, E0, Iu0, Δt0, τ, ndays)
         p1 = 1/Td1
         p2 = 1/Td2
         Xsum = X.cumsum() 
@@ -120,7 +120,7 @@ class NormalPriorModel:
         S, E, Ir, Iu, Y = sol.T
         return S, E, Ir, Iu, Y
 
-    def simulate(self, Z, D, μ, β, α1, λ, α2, E0, Iu0, Δt0, τ, ndays):
+    def _simulate(self, Z, D, μ, β, α1, λ, α2, E0, Iu0, Δt0, τ, ndays):
         N = self.N
         τ = int(τ)
         Ir0 = 0
@@ -143,7 +143,7 @@ class NormalPriorModel:
         τ = τ - unrellevant_zeros
         θ = Z, D, μ, β, α1, λ, α2, E0, Iu0, Δt0, τ
 
-        S, E, Ir, Iu, R, Y = self.simulate(*θ,len(self.X)-unrellevant_zeros)
+        S, E, Ir, Iu, R, Y = self._simulate(*θ,len(self.X)-unrellevant_zeros)
         p1 = 1/self.Td1
         p2 = 1/self.Td2 
         C = np.zeros_like(Y)

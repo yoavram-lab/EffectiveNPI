@@ -14,6 +14,7 @@ from enum import IntEnum
 from model.normal_prior_model import NormalPriorModel
 from model.uniform_prior_model import UniformPriorModel
 from model.no_tau_model import NoTauModel
+from model.fixed_tau_model import FixedTauModel
 
 np.random.seed(10)    
 now = datetime.now().strftime('%Y-%m-%d')
@@ -29,6 +30,8 @@ def get_model_class(model_type):
         return NormalPriorModel
     elif model_type == 3:
         return NoTauModel
+    elif model_type == 4:
+        return FixedTauModel
     else:
         return None
 
@@ -87,7 +90,7 @@ if __name__ == '__main__':
     parser.add_argument('-w', '--walkers',type=int,help='you can provide number of walkers, othewise the default is taken')
     parser.add_argument('-c', '--cores',type=int,help='by default 1 core')
     parser.add_argument('-d', '--ver-desc',type=str,help='short description of the version - will be part of the dir name')
-    parser.add_argument('-m', '--tau-model',type=int,help='1 - uniform prior, 2 (default) - normal prior, 3 - no tau')
+    parser.add_argument('-m', '--tau-model',type=int,help='1 - uniform prior, 2 (default) - normal prior, 3 - no tau, 4 - fixed tau (on lockdown date)')
     parser.add_argument('--up-to-date',type=str, help='you can provide the last date (including). The format yyyy-mm-dd')
     args = parser.parse_args()
     country_name = args.country_name

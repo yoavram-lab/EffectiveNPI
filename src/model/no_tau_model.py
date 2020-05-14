@@ -44,7 +44,7 @@ class NoTauModel(NormalPriorModel):
         X = X[unrellevant_zeros:]
         ndays = len(X)
 
-        S, E, Ir, Iu, R, Y = self.simulate(Z, D, μ, β, α1, E0, Iu0, Δt0, ndays)
+        S, E, Ir, Iu, R, Y = self._simulate(Z, D, μ, β, α1, E0, Iu0, Δt0, ndays)
         p1 = 1/Td1
         Xsum = X.cumsum() 
         n = Y[1:] - Xsum[:-1] 
@@ -55,7 +55,7 @@ class NoTauModel(NormalPriorModel):
         return loglik.mean()
 
 
-    def simulate(self, Z, D, μ, β, α1, E0, Iu0, Δt0, ndays):
+    def _simulate(self, Z, D, μ, β, α1, E0, Iu0, Δt0, ndays):
         N = self.N
         Ir0 = 0
         S0 = N - E0 - Ir0 - Iu0
@@ -71,7 +71,7 @@ class NoTauModel(NormalPriorModel):
         total_zeros = self.params_bounds['Δt0'][1]
         unrellevant_zeros = total_zeros - Δt0
 
-        S, E, Ir, Iu, R, Y = self.simulate(*θ,len(self.X)-unrellevant_zeros)
+        S, E, Ir, Iu, R, Y = self._simulate(*θ,len(self.X)-unrellevant_zeros)
         p1 = 1/self.Td1
         C = np.zeros_like(Y)
         for t in range(1, len(C)):
