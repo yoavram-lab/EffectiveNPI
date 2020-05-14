@@ -48,7 +48,7 @@ class NoTauModel(NormalPriorModel):
         p1 = 1/Td1
         Xsum = X.cumsum() 
         n = Y[1:] - Xsum[:-1] 
-        n = np.maximum(0, n)
+        n = np.maximum(1, n)
         p = ([p1] * ndays)[1:]
 
         loglik = scipy.stats.poisson.logpmf(X[Δt0:], n[Δt0-1:] * p[Δt0-1:])

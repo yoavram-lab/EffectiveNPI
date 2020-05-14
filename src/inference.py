@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import emcee
 import argparse
-from shutil import copyfile
+from shutil import copyfile, copytree, rmtree
 from enum import IntEnum
 from model.normal_prior_model import NormalPriorModel
 from model.uniform_prior_model import UniformPriorModel
@@ -86,15 +86,15 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--steps',type=int,help='you can provide number of iteration steps, othewise the default is taken')
     parser.add_argument('-w', '--walkers',type=int,help='you can provide number of walkers, othewise the default is taken')
     parser.add_argument('-c', '--cores',type=int,help='by default 1 core')
-    parser.add_argument('-d', '--ver_desc',type=str,help='short description of the version - will be part of the dir name')
-    parser.add_argument('-m', '--tau_model',type=int,help='1 - uniform prior, 2 (default) - normal prior, 3 - no tau')
+    parser.add_argument('-d', '--ver-desc',type=str,help='short description of the version - will be part of the dir name')
+    parser.add_argument('-m', '--tau-model',type=int,help='1 - uniform prior, 2 (default) - normal prior, 3 - no tau')
+    parser.add_argument('--up-to-date',type=str, help='you can provide the last date (including). The format yyyy-mm-dd')
     args = parser.parse_args()
     country_name = args.country_name
     cores = args.cores
     ver_desc = '-'+args.ver_desc if args.ver_desc else ''
     model_type = args.tau_model if args.tau_model else 2
     ModelClass = get_model_class(model_type)
-
     if not os.path.exists('../data'):
         os.mkdir('../data')
 
@@ -115,6 +115,8 @@ if __name__ == '__main__':
         N = df.iloc[0]['popData2018']
 
     cases_and_dates = df.iloc[::-1][['cases','date']]
+    if args.up_to_date:
+        cases_and_dates = cases_and_dates[cases_and_dates['date']<=args.up_to_date]
     start_date = find_start_day(cases_and_dates)
     X = np.array(cases_and_dates[cases_and_dates['date'] >= start_date]['cases'])
     model = ModelClass(country_name, X, start_date, N, get_first_NPI_date(country_name), get_last_NPI_date(country_name), params_bounds, Td1, Td2)
@@ -147,6 +149,7 @@ if __name__ == '__main__':
     priors = [model.log_prior(s) for s in sampler.chain.reshape(-1, ndim)]
     logliks = sampler.lnprobability.reshape(-1) - priors
     print(filename)
+    
     np.savez_compressed(
         filename,
         chain=sampler.chain,
@@ -158,5 +161,10 @@ if __name__ == '__main__':
         var_names=model.var_names,
         start_date=str(start_date)
     )
-    copyfile(sys.argv[0], os.path.join(output_folder, sys.argv[0])) # we persist the source code of the current file for each experiment
 
+    # we persist the source code of the current files for each experiment
+    if not os.path.exists(os.path.join(output_folder,'src')):
+        os.mkdir(os.path.join(output_folder,'src'))
+    copyfile(sys.argv[0], os.path.join(output_folder,'src', sys.argv[0])) 
+    rmtree(os.path.join(output_folder,'src', 'model'))
+    copytree('model', os.path.join(output_folder,'src', 'model'))
