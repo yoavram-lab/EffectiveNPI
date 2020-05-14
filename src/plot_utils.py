@@ -25,7 +25,7 @@ from inference import get_first_NPI_date, get_last_NPI_date, params_bounds, para
 def load_data(file_name, country_name, burn_fraction=0.6, lim_steps=None):
     # it's the only global point. we initialize all the params here once and don't update it later (only when load_data again for different file_name)
     # TODO PLEASE DONT USE global anywhere in your code
-    global official_τ_date, official_τ, incidences, start_date, var_names, nsteps, ndim, N, Td1, Td2, ndays, sample, lnprobability, logliks, model_type, model
+    global first_NPI, last_NPI, incidences, start_date, var_names, nsteps, ndim, N, Td1, Td2, ndays, sample, lnprobability, logliks, model_type, model
     data = np.load(file_name)
     incidences = data['incidences']
     start_date = data['start_date']
@@ -42,8 +42,8 @@ def load_data(file_name, country_name, burn_fraction=0.6, lim_steps=None):
         sample = chain[:, int(lim_steps * burn_fraction):lim_steps, :].reshape(-1, ndim)
         lnprobability = data['lnprobability'][:, int(lim_steps * burn_fraction):lim_steps]
         logliks = data['logliks'].reshape(nwalkers,nsteps)[:,int(lim_steps * burn_fraction):lim_steps].reshape(-1)
-    official_τ_date = get_last_NPI_date(country_name)
-    official_τ = (official_τ_date - pd.to_datetime(start_date)).days
+    last_NPI = (get_last_NPI_date(country_name) - pd.to_datetime(start_date)).days
+    first_NPI = (get_first_NPI_date(country_name) - pd.to_datetime(start_date)).days
 
     ModelClass = get_model_class(model_type)
     model = ModelClass(country_name, incidences, pd.to_datetime(start_date), N, get_last_NPI_date(country_name), get_first_NPI_date(country_name), params_bounds, Td1, Td2)
@@ -56,7 +56,7 @@ def write_csv_header(file_name):
 
     with open(file_name, mode='w') as file: # use pd to write csv files?
         writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(['country','DIC','loglik(MAP)','loglik(mean)','loglik(median)','N','p_steps','p_model_type','p_Td1','p_Td2','official_τ','τ mean','τ median','τ MAP','official τ from 1 Jan','τ mean from 1 Jan','τ median from 1 Jan','τ MAP from 1 Jan','τ CI median (75%)','τ CI median (95%)','τ CI mean (75%)','τ CI mean (95%)', *params_headers])
+        writer.writerow(['country','DIC using median', 'DIC using mean', 'DIC using MAP','loglik(MAP)','loglik(mean)','loglik(median)','N','p_steps','p_model_type','p_Td1','p_Td2','official_τ','τ mean','τ median','τ MAP','official τ from 1 Jan','τ mean from 1 Jan','τ median from 1 Jan','τ MAP from 1 Jan','τ CI median (75%)','τ CI median (95%)','τ CI mean (75%)','τ CI mean (95%)', *params_headers])
 
 def write_csv_data(file_name):
     #params means and medians
@@ -71,7 +71,7 @@ def write_csv_data(file_name):
     τ_median =  format(τ_to_string(np.median(τ_posterior)))
     τ_MAP =  format(τ_to_string(MAPs[var_names.index('τ')]))
 
-    τ_official_from1Jar = (pd.to_datetime(start_date) - pd.Timestamp('2020-01-01')).days + official_τ
+    τ_official_from1Jar = (pd.to_datetime(start_date) - pd.Timestamp('2020-01-01')).days + last_NPI
     τ_mean_from1Jar = (pd.to_datetime(start_date) - pd.Timestamp('2020-01-01')).days + τ_posterior.mean()
     τ_median_from1Jar =  (pd.to_datetime(start_date) - pd.Timestamp('2020-01-01')).days + np.median(τ_posterior)
     τ_MAP_from1Jar =  (pd.to_datetime(start_date) - pd.Timestamp('2020-01-01')).days + MAPs[var_names.index('τ')]
@@ -81,12 +81,12 @@ def write_csv_data(file_name):
     τ_MAP_from1Jar = round(τ_MAP_from1Jar,2)
     with open(file_name, mode='a') as file:
         writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow([country_name, '{:.2f}'.format(calc_DIC()), '{:.2f}'.format(calc_LoglikMAP()),'{:.2f}'.format(calc_Loglik_mean()),'{:.2f}'.format(calc_Loglik_median()), N, nsteps, model_type, Td1, Td2,
-                         τ_to_string(official_τ),
+        writer.writerow([country_name, '{:.2f}'.format(calc_DIC(calc_loglik_median)), '{:.2f}'.format(calc_DIC(calc_Loglik_mean)), '{:.2f}'.format(calc_DIC(calc_LoglikMAP)), '{:.2f}'.format(calc_LoglikMAP()),'{:.2f}'.format(calc_Loglik_mean()),'{:.2f}'.format(calc_Loglik_median()), N, nsteps, model_type, Td1, Td2,
+                         τ_to_string(last_NPI),
                          τ_mean, τ_median, τ_MAP, τ_official_from1Jar,  τ_mean_from1Jar, τ_median_from1Jar, τ_MAP_from1Jar, '{:.2f}'.format(calc_τ_CI_median()),'{:.2f}'.format(calc_τ_CI_median(0.95)), '{:.2f}'.format(calc_τ_CI_mean()),'{:.2f}'.format(calc_τ_CI_mean(0.95)), *params_values])
 
-def calc_DIC():
-    loglik_E = calc_Loglik_median()
+def calc_DIC(loglik_E_func):
+    loglik_E = loglik_E_func()
     E_loglik = logliks.mean()
     DIC = 2*loglik_E - 4*E_loglik
     return DIC
@@ -220,17 +220,21 @@ def plot_τ(ax=None):
         τ_posterior = sample[:,ind].astype(int)
 
     ax.hist(τ_posterior, bins=np.arange(ndays), density=True, color='k', align='left', width=1)
-    ax.axvline(official_τ, color='k', ls='--', alpha=0.75)
+    ax.axvline(first_NPI, color='k', ls='--', alpha=0.75)
+    ax.axvline(last_NPI, color='k', ls='--', alpha=0.75)
     # plt.axvline(τ_median, color=red)
 
     days = list(range(0, ndays, round(ndays/10)))
     xticklabels = [τ_to_string(d) for d in days]
     ax.set_xticks(days)
     ax.set_xticklabels(xticklabels, rotation=45)
-    try:
-        ax.set_xlim(τ_posterior.min(), τ_posterior.max()+2)
-    except:
-        None #it's okey for model with fixed τ
+
+    # TODO do we need it?
+    # try:
+    #     ax.set_xlim(τ_posterior.min(), τ_posterior.max()+2)
+    # except:
+    #     None #it's okey for model with fixed τ
+
     ax.set_ylim(0, 1)
 #     ax.text(14.2, 0.9, confidence, fontsize=16)
     ax.set_ylabel(r'Posterior probability')
@@ -312,7 +316,8 @@ def plot_incidences_and_dates(ax=None):
           incidences.__str__(),
           '',
           'start_date {}'.format(τ_to_string(0)),
-          'official tau {}'.format(τ_to_string(official_τ)),
+          'first NPI {}'.format(τ_to_string(first_NPI)),
+          'official tau (last NPI) {}'.format(τ_to_string(last_NPI)),
            ''
           ]
 
@@ -326,7 +331,7 @@ def plot_incidences_and_dates(ax=None):
         lst.append('τ MAP = {}'.format(τ_to_string(τ_MAP)))
         lst.append('τ CI median 75%: {:.2f}'.format(calc_τ_CI_median(0.75)))
         lst.append('τ CI median 95%: {:.2f}'.format(calc_τ_CI_median(0.95)))
-        confidence = 'P(τ > {}) = {:.2%}'.format(τ_to_string(official_τ), (τ_posterior > official_τ).mean())
+        confidence = 'P(τ > {}) = {:.2%}'.format(τ_to_string(last_NPI), (τ_posterior > last_NPI).mean())
         lst.append(confidence)
     except:
         None # there are models without τ of with fixed τ
@@ -337,7 +342,7 @@ def plot_incidences_and_dates(ax=None):
     lst.append('P(α2 > α1) = {:.2%}'.format((Δα_posterior > 0).mean()))
 
     lst.append('')
-    lst.append('DIC: {:.2f}'.format(calc_DIC()))
+    lst.append('DIC (using median): {:.2f}'.format(calc_DIC(calc_Loglik_median)))
     lst.append('loglik of MAP: {:.2f}'.format(calc_LoglikMAP()))
     lst.append('loglik of mean: {:.2f}'.format(calc_Loglik_mean()))
     lst.append('loglik of median: {:.2f}'.format(calc_Loglik_median()))
