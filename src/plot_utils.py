@@ -66,22 +66,38 @@ def write_csv_data(file_name):
     params_values = [e for l in zip(means,medians,MAPs) for e in l]
 
     #tau
-    τ_posterior = sample[:,var_names.index('τ')].astype(int)
-    τ_mean = format(τ_to_string(τ_posterior.mean()))
-    τ_median =  format(τ_to_string(np.median(τ_posterior)))
-    τ_MAP =  format(τ_to_string(MAPs[var_names.index('τ')]))
+    try:
+        τ_posterior = sample[:,var_names.index('τ')].astype(int)
+        τ_mean = format(τ_to_string(τ_posterior.mean()))
+        τ_median =  format(τ_to_string(np.median(τ_posterior)))
+        τ_MAP =  format(τ_to_string(MAPs[var_names.index('τ')]))
+        τ_MAP_i = MAPs[var_names.index('τ')]
+    except ValueError: # model with fixed τ
+        try:
+            τ_posterior = model.τ
+            τ_mean = model.τ
+            τ_median =  model.τ
+            τ_MAP =  model.τ
+            τ_MAP_i = model.τ
+        except AttributeError: #model without τ
+            τ_posterior =np.array([0])
+            τ_mean = 0
+            τ_median =  0
+            τ_MAP =  0
+            τ_MAP_i = 0
 
     τ_official_from1Jar = (pd.to_datetime(start_date) - pd.Timestamp('2020-01-01')).days + last_NPI
     τ_mean_from1Jar = (pd.to_datetime(start_date) - pd.Timestamp('2020-01-01')).days + τ_posterior.mean()
     τ_median_from1Jar =  (pd.to_datetime(start_date) - pd.Timestamp('2020-01-01')).days + np.median(τ_posterior)
-    τ_MAP_from1Jar =  (pd.to_datetime(start_date) - pd.Timestamp('2020-01-01')).days + MAPs[var_names.index('τ')]
+    τ_MAP_from1Jar =  (pd.to_datetime(start_date) - pd.Timestamp('2020-01-01')).days + τ_MAP_i
 
     τ_mean_from1Jar = round(τ_mean_from1Jar,2)
     τ_median_from1Jar = round(τ_median_from1Jar,2)
     τ_MAP_from1Jar = round(τ_MAP_from1Jar,2)
+
     with open(file_name, mode='a') as file:
         writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow([country_name, '{:.2f}'.format(calc_DIC(calc_loglik_median)), '{:.2f}'.format(calc_DIC(calc_Loglik_mean)), '{:.2f}'.format(calc_DIC(calc_LoglikMAP)), '{:.2f}'.format(calc_LoglikMAP()),'{:.2f}'.format(calc_Loglik_mean()),'{:.2f}'.format(calc_Loglik_median()), N, nsteps, model_type, Td1, Td2,
+        writer.writerow([country_name, '{:.2f}'.format(calc_DIC(calc_loglik_median)), '{:.2f}'.format(calc_DIC(calc_loglik_mean)), '{:.2f}'.format(calc_DIC(calc_loglikMAP)), '{:.2f}'.format(calc_loglikMAP()),'{:.2f}'.format(calc_loglik_mean()),'{:.2f}'.format(calc_loglik_median()), N, nsteps, model_type, Td1, Td2,
                          τ_to_string(last_NPI),
                          τ_mean, τ_median, τ_MAP, τ_official_from1Jar,  τ_mean_from1Jar, τ_median_from1Jar, τ_MAP_from1Jar, '{:.2f}'.format(calc_τ_CI_median()),'{:.2f}'.format(calc_τ_CI_median(0.95)), '{:.2f}'.format(calc_τ_CI_mean()),'{:.2f}'.format(calc_τ_CI_mean(0.95)), *params_values])
 
@@ -94,29 +110,35 @@ def calc_DIC(loglik_E_func):
 def get_MAP():
     return sample[lnprobability.argmax()]
 
-def calc_LoglikMAP():
+def calc_loglikMAP():
     res = model.log_likelihood(get_MAP())
     return res
 
-def calc_Loglik_median():
+def calc_loglik_median():
     medians = [np.median(sample[:,i]) for i in range(len(var_names))]
     res = model.log_likelihood(medians)
     return res
 
-def calc_Loglik_mean():
+def calc_loglik_mean():
     means = [sample[:,i].mean() for i in range(len(var_names))]
     res = model.log_likelihood(means)
     return res
 
 def calc_τ_CI_median(p=0.75):
-    tau_samples = sample.T[var_names.index('τ')]
+    try:
+        tau_samples = sample.T[var_names.index('τ')]
+    except ValueError: #model without τ
+        return 0
     tau_samples_hat = np.median(tau_samples)
 
     res = np.quantile(abs(tau_samples - tau_samples_hat), p)
     return res
 
 def calc_τ_CI_mean(p=0.75):
-    tau_samples = sample.T[var_names.index('τ')]
+    try:
+        tau_samples = sample.T[var_names.index('τ')]
+    except ValueError: #model without τ
+        return 0
     tau_samples_hat = tau_samples.mean()
 
     res = np.quantile(abs(tau_samples - tau_samples_hat), p)
@@ -342,10 +364,10 @@ def plot_incidences_and_dates(ax=None):
     lst.append('P(α2 > α1) = {:.2%}'.format((Δα_posterior > 0).mean()))
 
     lst.append('')
-    lst.append('DIC (using median): {:.2f}'.format(calc_DIC(calc_Loglik_median)))
-    lst.append('loglik of MAP: {:.2f}'.format(calc_LoglikMAP()))
-    lst.append('loglik of mean: {:.2f}'.format(calc_Loglik_mean()))
-    lst.append('loglik of median: {:.2f}'.format(calc_Loglik_median()))
+    lst.append('DIC (using median): {:.2f}'.format(calc_DIC(calc_loglik_median)))
+    lst.append('loglik of MAP: {:.2f}'.format(calc_loglikMAP()))
+    lst.append('loglik of mean: {:.2f}'.format(calc_loglik_mean()))
+    lst.append('loglik of median: {:.2f}'.format(calc_loglik_median()))
 
     txt = '\n'.join(lst)
     plt.text(0,0,txt,fontsize=10)
