@@ -36,6 +36,11 @@ def load_data(file_name, country_name, burn_fraction=0.6, lim_steps=None):
     ndays = len(incidences)
     nburn = int(nsteps * burn_fraction)
     sample = chain[:, nburn:, :].reshape(-1, ndim)
+    try:
+        sample[:,var_names.index('τ')] = sample[:,var_names.index('τ')].astype(int) #in inference we allways convert it to int
+        sample[:,var_names.index('Δt0')] = sample[:,var_names.index('Δt0')].astype(int) #in inference we allways convert it to int
+    except ValueError: #if the model doesn't have such parameters
+        None
     lnprobability = data['lnprobability'][:, nburn:]
     logliks = data['logliks'].reshape(nwalkers,nsteps)[:,nburn:].reshape(-1)
     if lim_steps:
@@ -69,12 +74,12 @@ def write_csv_data(file_name):
     try:
         τ_posterior = sample[:,var_names.index('τ')].astype(int)
         τ_mean = format(τ_to_string(τ_posterior.mean()))
-        τ_median =  format(τ_to_string(np.median(τ_posterior)))
+        τ_median = format(τ_to_string(np.median(τ_posterior)))
         τ_MAP =  format(τ_to_string(MAPs[var_names.index('τ')]))
         τ_MAP_i = MAPs[var_names.index('τ')]
     except ValueError: # model with fixed τ
         try:
-            τ_posterior = model.τ
+            τ_posterior = np.array([model.τ])
             τ_mean = model.τ
             τ_median =  model.τ
             τ_MAP =  model.τ
@@ -310,14 +315,14 @@ def plot_all():
     plot_incidences(fig.add_subplot(gs[2, 0]))
     ax = plot_α2_minus_α1(fig.add_subplot(gs[2, 1]))
     
-    plot_text(fig.add_subplot(gs[3, 0]))
-    plot_incidences_and_dates(fig.add_subplot(gs[3, 1]))
+    plot_τ_dist(fig.add_subplot(gs[3, 0]))
+    plot_info(fig.add_subplot(gs[3, 1]))
 #     fig_panel_labels(np.array(fig.axes), xcoord=0.01)
     fig.tight_layout()
     
     return fig
 
-def plot_text(ax=None):
+def plot_τ_dist(ax=None):
     if ax is None: fig, ax = plt.subplots(figsize=(0.01,0.01))
     # means = [sample[:,i].mean() for i in range(len(var_names))]
     # medians = [np.median(sample[:,i]) for i in range(len(var_names))]
@@ -331,7 +336,7 @@ def plot_text(ax=None):
     plt.text(0,0,txt,fontsize=10)
     plt.setp(ax, frame_on=False, xticks=(), yticks=());
 
-def plot_incidences_and_dates(ax=None):
+def plot_info(ax=None):
     if ax is None: fig, ax = plt.subplots(figsize=(0.01,0.01))
 
     lst = ['Cases',
