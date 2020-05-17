@@ -220,38 +220,31 @@ This model is inspired by \citet{Li2020} and \citet{Pei2020}, who used a similar
 
 %%% Likelihood %%%
 \paragraph*{Likelihood function.}
-The \emph{expected} cumulative number of reported infected individuals until day $t$ is 
+% TODO update
+For a given vector $\theta$ of model parameters the \emph{expected} cumulative number of reported infected individuals ($I_r$) until day $t$ is, following~\autoref{eq:model},
 \begin{equation} \label{eq:Yt}
-Y_t=\int_{0}^{t}{\alpha_s \frac{E(s)}{Z} \; ds}, \quad Y_0 = 0.
+Y_t(\theta) = \int_{0}^{t}{\alpha_s \frac{E(s)}{Z} \; ds}, \quad Y_0 = 0.
 \end{equation}
 We assume that reported infected individuals are confirmed and therefore observed in the daily case report of day $t$ with probability $p_t$ (note that an individual can only be observed once, and that $p_t$ may change over time, but $t$ is a specific date rather than the time elapsed since the individual was infected).
-Hence, we assume that the number of confirmed cases in day $t$ is binomially distributed,
-$$
-X_t \sim \mathit{Bin}\big(n_t, p_t\big),
-$$
-where $n_t$ is the \emph{realized} (rather than expected) number of reported infected individuals yet to appear in daily reports by day~$t$.
-The cumulative number of confirmed cases until day $t$ is
-$$
-\tilde{X}_t=\sum_{i=1}^{t}X_i, \quad X_0=0.
-$$
-Given $\tilde{X}_{t-1}$, we assume $n_t$ is Poisson distributed,
-$$
-\big(n_t \mid \tilde{X}_{t-1}\big) \sim \mathit{Poi}\Big( Y_t - \tilde{X}_{t-1} \Big), 
-\quad n_1 \sim \mathit{Poi}(Y_1).
-$$ 
-Therefore, $\big(X_t \mid \tilde{X}_{t-1} \big)$ is a binomial conditioned on a Poisson, which reduces to a Poisson with
-\begin{equation} \label{eq:P(Xt|Xt-1)}
-\big(X_t \mid \tilde{X}_{t-1} \big) \sim \mathit{Poi}\Big( \big( Y_t - \tilde{X}_{t-1} \big) \cdot p_t \Big), 
-\quad X_1 \sim \mathit{Poi}(Y_1 \cdot p_1).
+We denote by $X_t$ the number of confirmed cases in day $t$, and by $\tilde{X}_t$ the cumulative number of confirmed cases until day $t$,
+\begin{equation} \label{eq:Xsumt}
+\tilde{X}_t=\sum_{i=1}^{t}X_i.
 \end{equation}
+Therefore, at day $t$ the number of reported infected yet-to-be confirmed individuals is
+$(Y_t(\theta) - \tilde{X}_{t-1})$.
+We therefore assume that $X_t$ conditioned on $\tilde{X}_{t-1}$ is Poisson distributed,
+\begin{equation} \label{eq:Xt} \begin{aligned}
+\Big(X_1 \mid \theta \Big) & \sim \mathit{Poi}\big( Y_1(\theta) \cdot p_1 \big), \\
+\Big(X_t \mid \tilde{X}_{t-1}, \theta \Big) & \sim 
+\mathit{Poi}\Big( \big(Y_t(\theta) - \tilde{X}_{t-1}\big) \cdot p_t \Big), \quad t>1.
+\end{aligned}\end{equation}
 
-For given vector $\theta$ of model parameters (\autoref{eq:theta}), we compute the expected cumulative number of reported infected individuals $\{Y_t\}_{t=1}^{T}$ for each day (\autoref{eq:Yt}). Then, since $\tilde{X}_{t-1}$ is a function of $X_1, \ldots, X_{t-1}$, we can use \autoref{eq:P(Xt|Xt-1)} to write the probability to observe the confirmed case data $\vec{X} = (X_1, \ldots, X_T)$ as 
+Hence, the \emph{likelihood function} $\mathbb{L}(\theta \mid \vec{X})$ for the parameter vector $\theta$ given the confirmed case data $\vec{X} = (X_1, \ldots, X_T)$ is defined by the probability to observe  $\vec{X}$ given $\theta$,
 \begin{equation} \label{eq:likelihood}
 \mathbb{L}(\theta \mid \vec{X}) = 
 P(\vec{X} \mid \theta) = 
 P(X_1 \mid \theta) \cdot P(X_2 \mid \tilde{X_1}, \theta) \cdots P(X_T \mid \tilde{X}_{T-1}, \theta).
 \end{equation}
-This defines a \emph{likelihood function} $\mathbb{L}(\theta \mid \vec{X})$ for the parameter vector $\theta$ given the data $\vec{X}$.
 
 
 
@@ -275,22 +268,21 @@ p_t = \begin{cases}
 \end{cases},
 \end{equation}
 where $0 < \lambda < 1$.
-The values for $p_t$ follow \citet{Li2020}, who estimated the average time between infection and reporting in Wuhan, China, at 9 days before the start of NPIs (Jan 23, 2020) and 6 days after start of NPIs.
-The parameter $\tau$ is then added to the parameter vector $\theta$ (\autoref{eq:theta}).
+The values for $p_t$ follow \citet{Li2020}, who estimated the average time between infection and reporting in Wuhan, China, at 9 days before the start of NPIs and 6 days after start of NPIs.
 
 
 
 %%% Model fitting %%%
 \paragraph*{Parameter estimation.}
-To estimate the parameters of our model from the data $\vec{X}$, we apply a Bayesian inference approach.
-We start our model $\Delta t$ days before the outbreak (defined as consecutive days with increasing confirmed cases) in each country~\citep{Gatto2020}.
+To estimate the model parameters from the daily case data $\vec{X}$, we apply a Bayesian inference approach.
+We start our model $\Delta t$ days~\citep{Gatto2020} before the outbreak (defined as consecutive days with increasing confirmed cases) in each country.
 The model in \autoref{eq:model} is parameterized by the vector $\theta$, where
 \begin{equation} \label{eq:theta}
 \theta=\Big(Z, D, \mu, \{\beta_t\}, \{\alpha_t\}, \{p_t\}, E(0), I_u(0), \tau, \Delta t \Big).
 \end{equation} 
 
 The likelihood function is defined in \autoref{eq:likelihood}.
-The posterior distribution of the model parameters $P(\theta \mid \vec{X})$ is estimated using an \textit{affine-invariant ensemble sampler for Markov chain Monte Carlo} (MCMC) implemented in the \texttt{emcee} Python package~\citep{Foreman-Mackey2013}.
+The posterior distribution of the model parameters $P(\theta \mid \vec{X})$ is estimated using an \textit{affine-invariant ensemble sampler for Markov chain Monte Carlo} (MCMC)~\citep{Goodman2010} implemented in the \texttt{emcee} Python package~\citep{Foreman-Mackey2013}.
 
 We defined the following prior distributions on the model parameters $P(\theta)$: 
 \begin{equation} \label{eq:priors}
@@ -331,7 +323,7 @@ We compare models by reporting their relative DIC; lower is better.
 
 %%% Source code %%%
 \paragraph*{Source code.} 
-We use Python 3 (Anaconda) with the NumPy, Matplotlib, SciPy, Pandas, Seaborn, and emcee packages.
+We use Python 3 with the NumPy, Matplotlib, SciPy, Pandas, Seaborn, and emcee packages.
 All source code will be publicly available under a permissive open-source license at \href{http://github.com/yoavram-lab/EffectiveNPI}{github.com/yoavram-lab/EffectiveNPI}.
 
 
@@ -504,7 +496,6 @@ This finding may also suggest that severe NPIs, such as lockdowns, were unnecess
 Attempts to asses the effect of NPIs~\citep{Flaxman2020,Banholzer2020} generally assume a 7 day delay between the implementation of the intervention and the observable change in dynamics, due to the characteristic serial interval of COVID\=/19~\citep{Gatto2020}.
 However, the late and early effects we have estimated can confuse these assessments and lead to wrong conclusions about the effects of NPIs (\autoref{fig:fig4}). 
 
-
 We have found that the evidence supports a model in which the parameters change at a specific time point $\tau$ over a model without such a change-point. It may be interesting to investigate if the evidence favors a model with \emph{two} change-points, rather than one. 
 Two such change-points could reflect escalating NPIs (e.g. school closures followed by lockdowns), a mix of NPIs and changes in weather, a mix of domestic and international effects on risk perception, or other similar factors.
 
@@ -512,7 +503,7 @@ As several countries (e.g. Austria, Israel) begin to relieve lockdowns and ease 
 
 \paragraph*{Conclusions.}
 We have estimated the effective start date of NPIs and found that they often differ from the official dates.
-Our results emphasize the complex interaction between personal, regional, and global determinants of behavioral. Thus, our results highlight the need to further study variability in compliance and behavior over both time and space. This can be accomplished both by surveying differences in compliance within and between populations~\citep{Atchison2020}, and by incorporating specific behavioral models into epidemiological models~\citep{Fenichela2011,Arthur2020}.
+Our results emphasize the complex interaction between personal, regional, and global determinants of behavioral. Thus, our results highlight the need to further study variability in compliance and behavior over both time and space. This can be accomplished both by surveying differences in compliance within and between populations~\citep{Atchison2020}, and by incorporating specific behavioral models into epidemiological models~\citep{Fenichela2011,Walters2013,Arthur2020}.
 
 %\pagebreak
 % Acknowledgements
