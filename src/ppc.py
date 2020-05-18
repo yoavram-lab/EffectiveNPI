@@ -17,7 +17,6 @@ sns.set_context('paper', font_scale=1.3)
 red, blue, green = sns.color_palette('Set1', 3)
 colors = {'red':red, 'blue':blue, 'green':green}
 
-from rakott.mpl import fig_panel_labels, fig_xlabel, fig_ylabel, savefig_bbox
 from click_spinner import spinner
 
 from inference import get_last_NPI_date
