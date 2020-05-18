@@ -38,9 +38,13 @@ def load_data(file_name, country_name, burn_fraction=0.6, lim_steps=None):
     sample = chain[:, nburn:, :].reshape(-1, ndim)
     try:
         sample[:,var_names.index('τ')] = sample[:,var_names.index('τ')].astype(int) #in inference we allways convert it to int
-        sample[:,var_names.index('Δt0')] = sample[:,var_names.index('Δt0')].astype(int) #in inference we allways convert it to int
-    except ValueError: #if the model doesn't have such parameters
+    except ValueError: #if the model doesn't have such parameter
         None
+    try:
+        sample[:,var_names.index('Δt0')] = sample[:,var_names.index('Δt0')].astype(int) #in inference we allways convert it to int
+    except ValueError:#if the model doesn't have such parameter
+        None
+
     lnprobability = data['lnprobability'][:, nburn:]
     logliks = data['logliks'].reshape(nwalkers,nsteps)[:,nburn:].reshape(-1)
     if lim_steps:
@@ -401,7 +405,7 @@ def print_τ_dist():
     s = sorted(arr, key=lambda t: t[1], reverse=True)[:10]
     return sorted(s,key=lambda t: pd.Timestamp('2020 '+t[0]))
 
-def plot_incidences(ax=None, color=blue):
+def plot_incidences(ax=None, color=blue, title=country_name ):
     if ax is None: fig, ax = plt.subplots()
 
     np.random.seed(10)
@@ -416,6 +420,8 @@ def plot_incidences(ax=None, color=blue):
         daily_cases.append(y)
 
     t = np.arange(ndays)
+    if title:
+        plt.title(title)
     plt.plot(t, np.median(daily_cases,axis=0), color=color)
     plt.plot(t, incidences, '.', color=red)
 
