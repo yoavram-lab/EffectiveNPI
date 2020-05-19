@@ -32,6 +32,8 @@ if __name__ == '__main__':
 	     'Δt0': r'$\Delta t$', 'E0': r'$E(0)$', 'Iu0': r'$I_u(0)$', 'μ': r'$\mu$', 'β': r'$\beta$', 'λ': r'$\lambda$', 
 	     'α1': r'$\alpha_1$', 'α2': r'$\alpha_2$', 'Z': '$Z$', 'D': '$D$'
 	    })
+	table = table.sort_values('Country')
+	table.loc[table['Country'] == 'Wuhan', 'Country'] = 'Wuhan, China'
 	table.columns = ["\ccell{"+x+"}" for x in table.columns]
 
 	csv_filename = '../figures/Table2.csv'
