@@ -22,7 +22,7 @@ from click_spinner import spinner
 from inference import get_last_NPI_date
 from inference import get_first_NPI_date
 from inference import params_bounds
-from inference import find_start_day
+from inference import get_model_class
 from model.normal_prior_model import NormalPriorModel
 from model.fixed_tau_model import FixedTauModel
 
@@ -42,34 +42,22 @@ def date_to_date(x):
 def τ_to_string(τ, start_date):
     return (pd.to_datetime(start_date) + timedelta(days=τ)).strftime('%b %d')
 
-
-def load_data(country):
-	url = 'https://github.com/ImperialCollegeLondon/covid19model/raw/v1.0/data/COVID-19-up-to-date.csv'
-	fname = '../data/COVID-19-up-to-date.csv'
-	if not os.path.exists(fname):
-	    urllib.request.urlretrieve(url, fname)
-	data = pd.read_csv(fname, encoding='iso-8859-1')
-	data['date'] = pd.to_datetime(data['dateRep'], format='%d/%m/%Y')
-	data = data[data['countriesAndTerritories'] == country]
-	N = data.iloc[0]['popData2018']
-	cases_and_dates = data.iloc[::-1][['cases','date']]
-	start_date = find_start_day(cases_and_dates)
-	X = np.array(cases_and_dates[cases_and_dates['date'] >= start_date]['cases'])	
-	return X, start_date, N
-
-def load_chain(job_id):
+def load_chain(job_id, burn_fraction=0.6):
 	with spinner():
 		fname = os.path.join(output_folder, job_id, 'inference', '{}.npz'.format(country))
 		inference_data = np.load(fname)
 		chain = inference_data['chain']
 		var_names = inference_data['var_names']
+		nsteps, ndim, N, Td1, Td2, model_type = inference_data['params']
+		X = inference_data['incidences']
+		start_date = inference_data['start_date']
 		# print("Loaded {} with parameters:".format(fname))
 		# print(var_names)
 		nchains, nsteps, ndim = chain.shape
-		chain = chain[:, nsteps//2:, :]
+		nburn = int(nsteps * burn_fraction)
+		chain = chain[:, nburn:, :]
 		chain = chain.reshape((-1, ndim))
-		return chain, var_names
-
+		return chain, Td1, Td2, model_type, X, start_date, N
 
 def posterior_prediction(chain, model, nreps):
 	θ = chain[np.random.choice(chain.shape[0], nreps)]
@@ -77,11 +65,9 @@ def posterior_prediction(chain, model, nreps):
 		model.generate_daily_cases(θi) for θi in θ
 	])
 
-
-
 if __name__ == '__main__':
 	nreps = 1000
-	output_folder = r'/Users/yoavram/Library/Mobile Documents/com~apple~CloudDocs/EffectiveNPI-Data/output/'
+	output_folder = r'../output/'
 	job_id = sys.argv[1]	
 	country = sys.argv[2]
 	if len(sys.argv) > 2:
@@ -90,17 +76,12 @@ if __name__ == '__main__':
 			color = colors[color]
 	else:
 		color = blue
-	X, start_date, N = load_data(country)
+	chain, Td1, Td2, model_type, X, start_date, N = load_chain(job_id)
 	ndays = len(X)
 	X_mean = scipy.signal.savgol_filter(X, 3, 1)
-
-	chain, var_names = load_chain(job_id)
 	
-	if 'τ' in var_names:
-		model_class = NormalPriorModel
-	else:
-		model_class = FixedTauModel
-	model = model_class(country, X, start_date, N, get_last_NPI_date(country), get_first_NPI_date(country), params_bounds, 9, 6)
+	model_class = get_model_class(model_type)
+	model = model_class(country, X, pd.to_datetime(start_date), N, get_last_NPI_date(country), get_first_NPI_date(country), params_bounds, Td1, Td2)
 	X_pred = posterior_prediction(chain, model, nreps)
 
 	ϵ = 1
@@ -127,4 +108,4 @@ if __name__ == '__main__':
 	plt.show()
 	fig_filename = os.path.join(output_folder, job_id, 'figures', '{}_ppc.pdf'.format(country))
 	print("Saving to {}".format(fig_filename))
-	fig.savefig(fig_filename)
+	# fig.savefig(fig_filename)

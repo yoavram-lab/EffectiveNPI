@@ -22,10 +22,12 @@ from model.normal_prior_model import NormalPriorModel
 from model.uniform_prior_model import UniformPriorModel
 from inference import get_first_NPI_date, get_last_NPI_date, params_bounds, params_bounds, get_model_class
 
-def load_data(file_name, country_name, burn_fraction=0.6, lim_steps=None):
+country_name = None
+def load_data(file_name, _country_name, burn_fraction=0.6, lim_steps=None):
     # it's the only global point. we initialize all the params here once and don't update it later (only when load_data again for different file_name)
     # TODO PLEASE DONT USE global anywhere in your code
-    global first_NPI, last_NPI, incidences, start_date, var_names, nsteps, ndim, N, Td1, Td2, ndays, sample, lnprobability, logliks, model_type, model
+    global first_NPI, last_NPI, incidences, start_date, var_names, nsteps, ndim, N, Td1, Td2, ndays, sample, lnprobability, logliks, model_type, model, country_name
+    country_name = _country_name
     data = np.load(file_name)
     incidences = data['incidences']
     start_date = data['start_date']
