@@ -30,6 +30,7 @@ headheight=12pt
 \usepackage{booktabs}
 \usepackage{pgfplotstable} % http://mirrors.ctan.org/graphics/pgf/contrib/pgfplots/doc/pgfplotstable.pdf
 \usepackage{subcaption}
+\captionsetup[subfigure]{labelformat=empty}
 \usepackage{dcolumn}
 \newcolumntype{d}[1]{D{.}{.}{#1}}
 \newcommand\ccell[1]{\multicolumn{1}{c}{#1}} % a wild guess...
@@ -526,6 +527,121 @@ This work was supported in part by the Israel Science Foundation 552/19 and 1399
 \section*{Supplementary Material}
 \beginsupplement % https://support.authorea.com/en-us/article/how-to-create-an-appendix-section-or-supplementary-information-1g25i5a/
 
+%%% Fig PPC %%%
+\begin{figure}[h]
+    \centering
+	\subcaption{Austria}
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../figures/ppc/fixed/Austria_ppc.pdf}
+    \end{subfigure}
+    ~
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../figures/ppc/free/Austria_ppc.pdf}
+    \end{subfigure}
+    %%%
+	\subcaption{Belgium}    
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../figures/ppc/fixed/Belgium_ppc.pdf}
+    \end{subfigure}
+    ~
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../figures/ppc/free/Belgium_ppc.pdf}
+    \end{subfigure}
+    %%%
+	\subcaption{Denmark}    
+     \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../figures/ppc/fixed/Denmark_ppc.pdf}
+    \end{subfigure}
+    ~
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../figures/ppc/free/Denmark_ppc.pdf}
+    \end{subfigure}
+\end{figure}
+    %%%
+\begin{figure}
+    \ContinuedFloat 
+	\subcaption{France}    
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../figures/ppc/fixed/France_ppc.pdf}
+    \end{subfigure}
+    ~
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../figures/ppc/free/France_ppc.pdf}
+    \end{subfigure}
+    %%%  
+	\subcaption{Germany}    
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../figures/ppc/fixed/Germany_ppc.pdf}
+    \end{subfigure}
+    ~
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../figures/ppc/free/Germany_ppc.pdf}
+    \end{subfigure}
+    %%% 
+	\subcaption{Italy}    
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../figures/ppc/fixed/Italy_ppc.pdf}
+    \end{subfigure}
+    ~
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../figures/ppc/free/Italy_ppc.pdf}
+    \end{subfigure}
+    %%% 
+	\subcaption{Norway}    
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../figures/ppc/fixed/Norway_ppc.pdf}
+    \end{subfigure}
+    ~
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../figures/ppc/free/Norway_ppc.pdf}
+    \end{subfigure}
+\end{figure}
+    %%%
+\begin{figure}
+    \ContinuedFloat   
+	\subcaption{Spain}     
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../figures/ppc/fixed/Spain_ppc.pdf}
+    \end{subfigure}
+    ~
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../figures/ppc/free/Spain_ppc.pdf}
+    \end{subfigure}
+    %%%  
+	\subcaption{Sweden}    
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../figures/ppc/fixed/Sweden_ppc.pdf}
+    \end{subfigure}
+    ~
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../figures/ppc/free/Sweden_ppc.pdf}
+    \end{subfigure}
+    %%%  
+	\subcaption{Switzerland}    
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../figures/ppc/fixed/Switzerland_ppc.pdf}
+    \end{subfigure}
+    ~
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../figures/ppc/free/Switzerland_ppc.pdf}
+    \end{subfigure}
+    %%%  
+	\subcaption{United Kingdom}    
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../figures/ppc/fixed/United_Kingdom_ppc.pdf}
+    \end{subfigure}
+    ~
+    \begin{subfigure}{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../figures/ppc/free/United_Kingdom_ppc.pdf}
+    \end{subfigure}
+    %%%
+    \caption{
+     \textbf{Figure S1. Posterior predictive plots.}
+	}
+	\label{fig:ppc}
+\end{figure}
+
+\pagebreak
 
 %%% Fig Fr-vs-Es %%%
 \begin{figure}[h]
