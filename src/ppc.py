@@ -42,9 +42,10 @@ def date_to_date(x):
 def τ_to_string(τ, start_date):
     return (pd.to_datetime(start_date) + timedelta(days=τ)).strftime('%b %d')
 
-def load_chain(job_id, burn_fraction=0.6):
+def load_chain(job_id=None, fname=None, burn_fraction=0.6):
 	with spinner():
-		fname = os.path.join(output_folder, job_id, 'inference', '{}.npz'.format(country))
+		if fname is None:
+			fname = os.path.join(output_folder, job_id, 'inference', '{}.npz'.format(country))
 		inference_data = np.load(fname)
 		chain = inference_data['chain']
 		var_names = inference_data['var_names']
@@ -76,7 +77,8 @@ if __name__ == '__main__':
 			color = colors[color]
 	else:
 		color = blue
-	chain, Td1, Td2, model_type, X, start_date, N = load_chain(job_id)
+	chain_fname = os.path.join(output_folder, job_id, 'inference', '{}.npz'.format(country))
+	chain, Td1, Td2, model_type, X, start_date, N = load_chain(fname=chain_fname)
 	ndays = len(X)
 	X_mean = scipy.signal.savgol_filter(X, 3, 1)
 	
