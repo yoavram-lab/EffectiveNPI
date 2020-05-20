@@ -22,13 +22,13 @@ if __name__ == '__main__':
 
 	data = pd.read_csv(os.path.join(output_folder, 'tables', 'all-countries-{}.csv'.format(job_id)))
 	features = ['country', 'official_τ', 'τ median', 'τ CI median (75%)', 'τ CI median (95%)']
-	features += [x for x in data.columns if 'median' in x and 'τ' not in x and 'loglik' not in x]
+	features += [x for x in data.columns if 'median' in x and 'τ' not in x and 'loglik' not in x and 'DIC' not in x]
 
 	table = data[features].copy()
 	table['country'] = [x.replace('_', ' ') for x in table['country']]
 	table.columns = [x.replace(' median', '') for x in table.columns]
 	table = table.rename(columns=
-	    {'country': 'Country', 'official_τ': r'$\tau^*$', 'τ' : r'$\tau$', 'τ CI (75%)': '75\% CI', 'τ CI (95%)': '95\% CI', 
+	    {'country': 'Country', 'official_τ': r'$\tau^*$', 'τ' : r'$\tau$', 'τ CI (75%)': '$CI_{75\%}$', 'τ CI (95%)': '$CI_{95\%}$', 
 	     'Δt0': r'$\Delta t$', 'E0': r'$E(0)$', 'Iu0': r'$I_u(0)$', 'μ': r'$\mu$', 'β': r'$\beta$', 'λ': r'$\lambda$', 
 	     'α1': r'$\alpha_1$', 'α2': r'$\alpha_2$', 'Z': '$Z$', 'D': '$D$'
 	    })

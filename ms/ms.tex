@@ -100,10 +100,11 @@ headheight=12pt
 }
      
 % NatBib
-\usepackage[numbers,super,sort&compress]{natbib}
+\usepackage[super]{natbib}
+%\usepackage[numbers,super,sort&compress]{natbib}
 %\usepackage[round,colon,authoryear]{natbib}
 \renewcommand{\bibsection}{}
-\renewcommand{\bibfont}{\small}
+%\renewcommand{\bibfont}{\small}
 
 % unbreakable dashes
 \usepackage[shortcuts]{extdash}
@@ -114,14 +115,14 @@ headheight=12pt
 % Authors
 \renewcommand\Affilfont{\small}
 
-\author[a]{Ilia Kohanovski}
-\author[b,c]{Uri Obolski}
-\author[a,*]{Yoav Ram}
+\author[1]{Ilia Kohanovski}
+\author[2,3]{Uri Obolski}
+\author[1,a]{Yoav Ram}
 
-\affil[a]{School of Computer Science, Interdisciplinary Center Herzliya, Herzliya 4610101, Israel}
-\affil[b]{School of Public Health, Tel Aviv University, Tel Aviv 6997801, Israel}{
-\affil[c]{Porter School of the Environment and Earth Sciences, Tel Aviv University, Tel Aviv 6997801, Israel}
-\affil[*]{Corresponding author: yoav@yoavram.com}
+\affil[1]{School of Computer Science, Interdisciplinary Center Herzliya, Herzliya 4610101, Israel}
+\affil[2]{School of Public Health, Tel Aviv University, Tel Aviv 6997801, Israel}{
+\affil[3]{Porter School of the Environment and Earth Sciences, Tel Aviv University, Tel Aviv 6997801, Israel}
+\affil[a]{Corresponding author: yoav@yoavram.com}
 
 % Document
 \begin{document}
@@ -331,7 +332,7 @@ We perform model selection using two methods.
 First, we compute WAIC (widely applicable information criterion)~\citep{gelman2013bayesian},
 \begin{equation} \label{eq:WAIC}
 \begin{aligned}
-WAIC(\theta, \vec{X}) &= -2\log\mathbb{E}[\mathcal{L}(\theta \mid \vec{X})] + 2\mathbb{V}[\log\mathcal{L}(\theta \mid \vec{X})]
+\mathit{WAIC}(\theta, \vec{X}) &= -2\log\mathbb{E}[\mathcal{L}(\theta \mid \vec{X})] + 2\mathbb{V}[\log\mathcal{L}(\theta \mid \vec{X})]
 \end{aligned}
 \end{equation}
 where $\mathbb{E}[\cdot]$ and $\mathbb{V}[\cdot]$ are the expectation and variance operators taken over the posterior distribution $P(\theta \mid \vec{X})$.
@@ -360,7 +361,7 @@ Files containing samples from the posterior distributions will be deposited on F
     \caption{
     \textbf{Official and effective start of non-pharmaceutical interventions.}
     	The difference between $\hat{\tau}$ the effective and $\tau^*$ the official start of NPI is shown for different regions. The effective NPI dates in Italy and Wuhan are significantly delayed compared to the official dates, whereas in Denmark, France, Spain, and Germany, the effective date is earlier than the official date.
-	$\hat{\tau}$ is the posterior median, see \autoref{table:estimated-params}. $\tau^*$ is the last NPI date, see \autoref{table:NPI_dates}. Thin and bold lines show 95\% and 75\% credible intervals (area in which $P(|\tau - \hat{\tau}| \mid \vec{X}) = 0.95$ and $0.75$.)
+	$\hat{\tau}$ is the posterior median, see \autoref{table:estimated-params}. $\tau^*$ is the last NPI date, see \autoref{table:NPI_dates}. Thin and bold lines show 95\% and 75\% credible intervals, respectively (area in which $P(|\tau - \hat{\tau}| \mid \vec{X}) = 0.95$ and $0.75$.)
     }
     \label{fig:fig1}
 \end{figure}
@@ -410,7 +411,8 @@ In both Wuhan, China, and in Italy we find that our estimated effective start of
 
 In Italy, the first case was officially confirmed on Feb~21. School closures were implemented on Mar~5~\citep{Flaxman2020}, a lockdown was declared in Northern Italy on Mar~8, with social distancing implemented in the rest of the country, and the lockdown was extended to the entire nation on Mar 11~\citep{Gatto2020}.
 That is, the first and last official dates are Mar~8 and Mar~11.
-However, we estimate the effective date $\hat{\tau}$ at Mar~16 ($\pm$0.47 days 95\% CI ; \autoref{fig:late}).
+However, we estimate the effective date $\hat{\tau}$ at Mar~16 ($\pm$0.47 days 95\% CI ; \autoref{fig:late}). 
+
 Similarly, in Wuhan, China, a lockdown was ordered on Jan 23~\citep{Li2020}, but we estimate the effective start of NPIs to be several days layer at Feb~2 ($\pm$2.85 days 95\% CI \autoref{fig:late}).
 
 
@@ -483,7 +485,7 @@ Indeed, the posterior median $\hat{\tau}$ is Mar~20 ($\pm$8.46 days 95\% CI), an
 \textbf{Parameter estimates for different regions.}
 See \autoref{eq:model} for model parameters.
 All estimates are posterior medians.
-75\% and 95\% credible intervals given only for $\tau$, in days.
+75\% and 95\% credible intervals given for $\tau$, in days.
 $\tau^*$ is the official last NPI date, see \autoref{table:NPI_dates}.
 }
 \label{table:estimated-params}
@@ -563,17 +565,44 @@ This work was supported in part by the Israel Science Foundation 552/19 and 1399
 
 
 
-\begin{multicols}{2}[\section*{References}]
+\section*{References}
 \nolinenumbers
-\bibliographystyle{agsm}
+\bibliographystyle{Science}
 %\bibliography{/Users/yoavram/Documents/library}
 \bibliography{ms}
-\end{multicols}
+
+
 
 \pagebreak
 \section*{Supplementary Material}
 \beginsupplement % https://support.authorea.com/en-us/article/how-to-create-an-appendix-section-or-supplementary-information-1g25i5a/
 
+
+%%% Fig Fr-vs-Es %%%
+\begin{figure}[h]
+    \centering
+	\includegraphics[width=\textwidth]{../figures/Fig-fr-vs-es.pdf}
+    \caption{
+    \textbf{COVID\=/19 confirmed cases in France and Spain.}
+    Number of cases proportional to population size (as of 2018). 
+    Vertical line shows Mar~8, the effective start of NPIs $\hat{\tau}$ in both countries.
+    } 
+    \label{fig:fig-fr-vs-es}
+\end{figure}
+
+
+
+%%% Fig Switzerland %%%
+ \begin{figure}[h]
+     \centering
+         \includegraphics[width=0.75\textwidth]{../figures/posterior/Switzerland_τ_posterior.pdf}
+     \caption{
+ 	\textbf{Effective date of non-pharmaceutical interventions in Switzerland matches the official date}
+     Posterior distribution of $\tau$, the effective start date of NPI, is shown as a histogram of MCMC samples. Red line shows the official last NPI date $\tau^*$. Black line shows the estimated $\hat{\tau}$. Shaded area shows a 95\% credible interval (area in which $P(|\tau - \hat{\tau}| \mid \vec{X}) = 0.95$). 
+     }
+     \label{fig:Switzerland}
+ \end{figure}
+ 
 
 
 %%% Fig PPC %%%
@@ -695,39 +724,10 @@ This work was supported in part by the Israel Science Foundation 552/19 and 1399
     \end{subfigure}
     %%%
     \caption{
-    \textbf{Figure S2. Posterior prediction check plots}
+    \textbf{Figure S3. Posterior prediction check plots}
     Markers represent data ($\vec{X}$). Black line represent a smoothing of the data points using a Savitzky-Golay filter. Color lines represent posterior predictions from a model with fixed $\tau$, in red, and free $\tau$, in blue. These predictions are made by drawing 1,000 samples from the parameter posterior distribution and then generating a daily case count using the SEIR model in \autoref{eq:model}. Note the differences in the y-axis scale.
     }	
 \end{figure}
-
-\pagebreak
-
-
-
-%%% Fig Fr-vs-Es %%%
-\begin{figure}[h]
-    \centering
-	\includegraphics[width=\textwidth]{../figures/Fig-fr-vs-es.pdf}
-    \caption{
-    \textbf{COVID\=/19 confirmed cases in France and Spain.}
-    Number of cases proportional to population size (as of 2018). 
-    Vertical line shows Mar~8, the effective start of NPIs $\hat{\tau}$ in both countries.
-    } 
-    \label{fig:fig-fr-vs-es}
-\end{figure}
-
-
-
-%%% Fig Switzerland %%%
- \begin{figure}[h]
-     \centering
-         \includegraphics[width=0.75\textwidth]{../figures/posterior/Switzerland_τ_posterior.pdf}
-     \caption{
- 	\textbf{Effective date of non-pharmaceutical interventions in Switzerland matches the official date}
-     Posterior distribution of $\tau$, the effective start date of NPI, is shown as a histogram of MCMC samples. Red line shows the official last NPI date $\tau^*$. Black line shows the estimated $\hat{\tau}$. Shaded area shows a 95\% credible interval (area in which $P(|\tau - \hat{\tau}| \mid \vec{X}) = 0.95$). 
-     }
-     \label{fig:Switzerland}
- \end{figure}
 
 
 
