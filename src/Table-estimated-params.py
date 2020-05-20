@@ -36,8 +36,8 @@ if __name__ == '__main__':
 	table.loc[table['Country'] == 'Wuhan', 'Country'] = 'Wuhan, China'
 	table.columns = ["\ccell{"+x+"}" for x in table.columns]
 
-	csv_filename = '../figures/Table2.csv'
-	tex_filename = '../figures/Table2.tex'
+	csv_filename = '../figures/Table-estimated-params.csv'
+	tex_filename = '../figures/Table-estimated-params.tex'
 	table.to_csv(csv_filename, index=False)
 	with open(tex_filename, 'wt') as f:
 	    print(table.to_latex(escape=False, index=False), file=f)
