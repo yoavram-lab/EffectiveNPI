@@ -169,5 +169,7 @@ if __name__ == '__main__':
     if not os.path.exists(os.path.join(output_folder,'src')):
         os.mkdir(os.path.join(output_folder,'src'))
     copyfile(sys.argv[0], os.path.join(output_folder,'src', sys.argv[0])) 
-    rmtree(os.path.join(output_folder,'src', 'model'))
-    copytree('model', os.path.join(output_folder,'src', 'model'))
+    model_path = os.path.join(output_folder,'src', 'model')
+    if os.path.exists(model_path): 
+        rmtree(model_path)
+    copytree('model', model_path)
