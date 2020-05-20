@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import urllib
 
 import matplotlib as mpl
+mpl.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats
@@ -23,6 +24,7 @@ from inference import get_last_NPI_date
 from inference import get_first_NPI_date
 from inference import params_bounds
 from inference import get_model_class
+from inference import find_start_day
 from model.normal_prior_model import NormalPriorModel
 from model.fixed_tau_model import FixedTauModel
 
@@ -66,9 +68,39 @@ def posterior_prediction(chain, model, nreps):
 		model.generate_daily_cases(θi) for θi in θ
 	])
 
+
+def load_data(country_name, up_to_date=None):
+	if country_name=='Wuhan':
+	    df = pd.read_csv('../data/Incidence.csv')
+	    df['date'] = pd.to_datetime(df['Date'], dayfirst=True)
+	    df['cases'] = df[country_name]
+	    df = df[::-1] # TODO why?
+	    N = pd.read_csv('../data/pop.csv', index_col='City').loc[country_name].values[0]
+	else:
+	    url = 'https://github.com/ImperialCollegeLondon/covid19model/raw/master/data/COVID-19-up-to-date.csv'
+	    fname = '../data/COVID-19-up-to-date_master.csv'
+	    if not os.path.exists(fname):
+	        urllib.request.urlretrieve(url, fname)
+	    df = pd.read_csv(fname, encoding='iso-8859-1')
+	    df['date'] = pd.to_datetime(df['dateRep'], format='%d/%m/%Y')
+	    df = df[df['countriesAndTerritories'] == country_name]
+	    N = df.iloc[0]['popData2018']
+
+	cases_and_dates = df.iloc[::-1][['cases','date']]
+	if up_to_date:
+	    cases_and_dates = cases_and_dates[cases_and_dates['date']<=up_to_date]
+	start_date = find_start_day(cases_and_dates)
+	X = cases_and_dates.loc[cases_and_dates['date'] >= start_date, 'cases'].values
+	T = cases_and_dates.loc[cases_and_dates['date'] >= start_date, 'date']
+	return X, T
+
+
 if __name__ == '__main__':
 	nreps = 1000
-	output_folder = r'../output/'
+	date_threshold = datetime(2020, 3, 28)
+	last_date = datetime(2020, 3, 28) + timedelta(7)
+
+	output_folder = r'/Users/yoavram/Library/Mobile Documents/com~apple~CloudDocs/EffectiveNPI-Data/output'
 	job_id = sys.argv[1]	
 	country = sys.argv[2]
 	if len(sys.argv) > 2:
@@ -77,37 +109,47 @@ if __name__ == '__main__':
 			color = colors[color]
 	else:
 		color = blue
-	chain_fname = os.path.join(output_folder, job_id, 'inference', '{}.npz'.format(country))
-	chain, Td1, Td2, model_type, X, start_date, N = load_chain(fname=chain_fname)
+	
+	X, T = load_data(country, up_to_date=last_date)
+	idx = date_threshold < T 
 	ndays = len(X)
+	
+	chain_fname = os.path.join(output_folder, job_id, 'inference', '{}.npz'.format(country))
+	chain, Td1, Td2, model_type, _, start_date, N = load_chain(fname=chain_fname)
 	X_mean = scipy.signal.savgol_filter(X, 3, 1)
 	
 	model_class = get_model_class(model_type)
 	model = model_class(country, X, pd.to_datetime(start_date), N, get_last_NPI_date(country), get_first_NPI_date(country), params_bounds, Td1, Td2)
 	X_pred = posterior_prediction(chain, model, nreps)
 
-	ϵ = 1
-	loss = ((X_pred - X_mean + ϵ)**2 / (X_pred + ϵ)**2).mean()
 
-	print("Loss: {:.2g}".format(loss))
+	pvalue = (X_pred[:,idx].max(axis=1) > X[idx].max()).mean() # P(max(X_pred) > max(X))
+	pvalue_file = os.path.join(output_folder, job_id, 'figures', 'ppc_pvalue.txt'.format(country))
+	with open(pvalue_file, 'at') as f:
+		print("{}\t{:.4g}".format(country, pvalue), file=f)
 
 	fig, ax = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
+	ymax = min(X.max()*2, max(X.max(), X_pred.max()))
 
 	t = np.arange(0, ndays)
-	ax.plot(t, X, '*', color='k', alpha=0.5)
-	ax.plot(t, X_mean, '-', color='k')
+	ax.plot(t[~idx], X[~idx], 'o', color='k', alpha=0.5)
+	ax.plot(t[~idx], X_mean[~idx], '-', color='k')
+	ax.plot(t[idx], X[idx], '*', color='k', alpha=0.5)
+	ax.plot(t[idx], X_mean[idx], '--', color='k')
 	    
 	ax.plot(X_pred.T, color=color, alpha=0.01)
 	
+	ax.axvline((date_threshold-pd.to_datetime(start_date)).days, color='k', ls='--', lw=2)
+
 	labels = [τ_to_string(int(d), start_date) for d in t[::5]]	
 	ax.set_xticks(t[::5])
 	ax.set_xticklabels(labels, rotation=45)
-	ax.set(ylabel='Daily cases')	
+	ax.set(ylabel='Daily cases', ylim=(-10, ymax))
 
 	# fig.suptitle(country.replace('_', ' '))
 	fig.tight_layout()
 	sns.despine()
-	plt.show()
-	fig_filename = os.path.join(output_folder, job_id, 'figures', '{}_ppc.pdf'.format(country))
+	# plt.show()
+	fig_filename = os.path.join(output_folder, job_id, 'figures', '{}_ppc_long.pdf'.format(country))
 	print("Saving to {}".format(fig_filename))
-	# fig.savefig(fig_filename)
+	fig.savefig(fig_filename)
