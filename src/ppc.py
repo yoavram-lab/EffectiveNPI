@@ -54,13 +54,16 @@ def load_chain(job_id=None, fname=None, burn_fraction=0.6):
 		nsteps, ndim, N, Td1, Td2, model_type = inference_data['params']
 		X = inference_data['incidences']
 		start_date = inference_data['start_date']
+		logliks = inference_data['logliks']
 		# print("Loaded {} with parameters:".format(fname))
 		# print(var_names)
 		nchains, nsteps, ndim = chain.shape
 		nburn = int(nsteps * burn_fraction)
 		chain = chain[:, nburn:, :]
 		chain = chain.reshape((-1, ndim))
-		return chain, Td1, Td2, model_type, X, start_date, N
+		logliks = logliks.reshape((nchains, nsteps))
+		logliks = logliks[:, nburn:].ravel()
+		return chain, logliks, Td1, Td2, model_type, X, start_date, N
 
 def posterior_prediction(chain, model, nreps):
 	θ = chain[np.random.choice(chain.shape[0], nreps)]
@@ -115,7 +118,7 @@ if __name__ == '__main__':
 	ndays = len(X)
 	
 	chain_fname = os.path.join(output_folder, job_id, 'inference', '{}.npz'.format(country))
-	chain, Td1, Td2, model_type, _, start_date, N = load_chain(fname=chain_fname)
+	chain, _, Td1, Td2, model_type, _, start_date, N = load_chain(fname=chain_fname)
 	X_mean = scipy.signal.savgol_filter(X, 3, 1)
 	
 	model_class = get_model_class(model_type)
