@@ -359,10 +359,10 @@ For example, \citet{Li2020} estimate the dynamics in China before and after $\ta
 Here we estimate the posterior distribution $P(\tau \mid \vec{X})$ of the \emph{effective} start date of the NPIs by jointly estimating $\tau, \beta, \lambda, \alpha_1, \alpha_2$ on the entire data per region (e.g. Italy, Austria), rather than splitting the data at $\tau^*$.
 We then estimate the posterior probability $P(\tau \mid \vec{X})$ by marginalizing the joint posterior, and estimate $\hat{\tau}$ as the posterior median.
 
-We find that a model that considers an NPI (\autoref{eq:NPI_model}) is a better fit to the data than a model without an NPI, i.e. with constant $\beta$ and $\alpha$ (\hl{???}.)
-We compare the official $\tau^*$ and effective $\hat{\tau}$ start of NPIs and find that in most regions the effective start of NPI  significantly differs from the official date (\autoref{fig:fig1}). Indeed, the credible interval on $\hat{\tau}$ does not include $\tau^*$ (\autoref{fig:fig1}).
-Moreover, we compared the posterior predictive plots of a model with a free $\tau$ with those of a model with $\tau$ fixed at $\tau^*$. The model with free $\tau$ clearly produces better and less variable predictions (\autoref{fig:ppc}).
+We compared the \hl{posterior predictive plots} of a model with a free $\tau$ with those of a model with $\tau$ fixed at $\tau^*$ and without $\tau$. The model with free $\tau$ clearly produces better and less variable predictions~(\autoref{fig:ppc}). \hl{A similar comparison to no $\tau$.}
+However, when we compared the models using WAIC~(\autoref{table:WAIC}), the model with a free parameter for the start of the NPI was better than the other models only in half of the regions.
 
+We compare the official $\tau^*$ and effective $\hat{\tau}$ start of NPIs and find that in most regions the effective start of NPI  significantly differs from the official date (\autoref{fig:fig1}). Indeed, the credible interval on $\hat{\tau}$ does not include $\tau^*$ (\autoref{fig:fig1}).
 In the following, we describe our findings on late and early effective start of NPI in detail.
 
 
@@ -525,8 +525,8 @@ This work was supported in part by the Israel Science Foundation 552/19 and 1399
 \begin{multicols}{2}[\section*{References}]
 \nolinenumbers
 \bibliographystyle{agsm}
-%\bibliography{/Users/yoavram/Documents/library}
-\bibliography{ms}
+\bibliography{/Users/yoavram/Documents/library}
+%\bibliography{ms}
 \end{multicols}
 
 \pagebreak
