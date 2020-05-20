@@ -71,9 +71,9 @@ def write_csv_header(file_name):
 
 def write_csv_data(file_name):
     #params means and medians
-    means = [round(sample[:,i].mean(),2) for i in range(len(var_names))]
-    medians = [round(np.median(sample[:,i]),2) for i in range(len(var_names))]
-    MAPs = [round(m,2) for m in get_MAP()]
+    means = [round(sample[:,i].mean(),4) for i in range(len(var_names))]
+    medians = [round(np.median(sample[:,i]),4) for i in range(len(var_names))]
+    MAPs = [round(m,4) for m in get_MAP()]
     params_values = [e for l in zip(means,medians,MAPs) for e in l]
 
     #tau
@@ -102,15 +102,15 @@ def write_csv_data(file_name):
     τ_median_from1Jar =  (pd.to_datetime(start_date) - pd.Timestamp('2020-01-01')).days + np.median(τ_posterior)
     τ_MAP_from1Jar =  (pd.to_datetime(start_date) - pd.Timestamp('2020-01-01')).days + τ_MAP_i
 
-    τ_mean_from1Jar = round(τ_mean_from1Jar,2)
-    τ_median_from1Jar = round(τ_median_from1Jar,2)
-    τ_MAP_from1Jar = round(τ_MAP_from1Jar,2)
+    τ_mean_from1Jar = round(τ_mean_from1Jar,4)
+    τ_median_from1Jar = round(τ_median_from1Jar,4)
+    τ_MAP_from1Jar = round(τ_MAP_from1Jar,4)
 
     with open(file_name, mode='a') as file:
         writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow([country_name, '{:.2f}'.format(calc_DIC(calc_loglik_median)), '{:.2f}'.format(calc_DIC(calc_loglik_mean)), '{:.2f}'.format(calc_DIC(calc_loglikMAP)), '{:.2f}'.format(calc_loglikMAP()),'{:.2f}'.format(calc_loglik_mean()),'{:.2f}'.format(calc_loglik_median()), N, nsteps, model_type, Td1, Td2,
+        writer.writerow([country_name, '{:.4f}'.format(calc_DIC(calc_loglik_median)), '{:.4f}'.format(calc_DIC(calc_loglik_mean)), '{:.4f}'.format(calc_DIC(calc_loglikMAP)), '{:.4f}'.format(calc_loglikMAP()),'{:.4f}'.format(calc_loglik_mean()),'{:.4f}'.format(calc_loglik_median()), N, nsteps, model_type, Td1, Td2,
                          τ_to_string(last_NPI),
-                         τ_mean, τ_median, τ_MAP, τ_official_from1Jar,  τ_mean_from1Jar, τ_median_from1Jar, τ_MAP_from1Jar, '{:.2f}'.format(calc_τ_CI_median()),'{:.2f}'.format(calc_τ_CI_median(0.95)), '{:.2f}'.format(calc_τ_CI_mean()),'{:.2f}'.format(calc_τ_CI_mean(0.95)), *params_values])
+                         τ_mean, τ_median, τ_MAP, τ_official_from1Jar,  τ_mean_from1Jar, τ_median_from1Jar, τ_MAP_from1Jar, '{:.4f}'.format(calc_τ_CI_median()),'{:.4f}'.format(calc_τ_CI_median(0.95)), '{:.4f}'.format(calc_τ_CI_mean()),'{:.4f}'.format(calc_τ_CI_mean(0.95)), *params_values])
 
 def calc_DIC(loglik_E_func):
     loglik_E = loglik_E_func()

@@ -379,9 +379,9 @@ Here we estimate the posterior distribution $P(\tau \mid \vec{X})$ of the \emph{
 We then estimate the posterior probability $P(\tau \mid \vec{X})$ by marginalizing the joint posterior, and estimate $\hat{\tau}$ as the posterior median.
 
 We compared the posterior predictive plots of a model with a free $\tau$ with those of a model with $\tau$ fixed at $\tau^*$ and without $\tau$. The model with free $\tau$ clearly produces better and less variable predictions~(\autoref{fig:ppc}). 
-When we compared the models using WAIC~(\autoref{table:WAIC}), the model with a free parameter for the start of the NPI was better than the other models in 8 out of 11 of the regions; the exceptions are Austria, Belgium, Norway, and United Kingdom.
+When we compared the models using WAIC~(\autoref{table:WAIC}), the model with a free parameter for the start of the NPI was better than the other models in 8 out of 12 of the regions; the exceptions are Austria, Belgium, Norway, and United Kingdom.
 
-We compare the official $\tau^*$ and effective $\hat{\tau}$ start of NPIs and find that in most regions the effective start of NPI  significantly differs from the official date (\autoref{fig:fig1}),; that is, the credible interval on $\hat{\tau}$ does not include $\tau^*$ (\autoref{fig:fig1}). The exceptions are, as with the comparison to the simpler models, Austria, Belgium, and United Kingdom, as well another country (see below). Norway also has a relatively wide credible interval, which could be expected as it has the longest duration between the first and last NPIs~(\autoref{table:NPI_dates}).
+We compare the official $\tau^*$ and effective $\hat{\tau}$ start of NPIs and find that in most regions the effective start of NPI  significantly differs from the official date (\autoref{fig:fig1}), that is, the credible interval on $\hat{\tau}$ does not include $\tau^*$ (\autoref{fig:fig1}). The exceptions are, as with the comparison to the simpler models, Austria, Belgium, and United Kingdom, as well another country (see below). Norway also has a relatively wide credible interval, which could be expected as it has the longest duration between the first and last NPIs~(\autoref{table:NPI_dates}).
 In the following, we describe our findings on late and early effective start of NPI in detail.
 
 
@@ -542,7 +542,7 @@ Indeed, the evidence supports a change in transmission dynamics (i.e. a model wi
 Attempts to asses the effect of NPIs~\citep{Flaxman2020,Banholzer2020} generally assume a seven-day delay between the implementation of the intervention and the observable change in dynamics, due to the characteristic serial interval of COVID\=/19~\citep{Gatto2020}.
 However, the late and early effects we have estimated can confuse these assessments and lead to wrong conclusions about the effects of NPIs (\autoref{fig:fig4}).
 
-We have found that the evidence supports a model in which the parameters change at a specific time point $\tau$ over a model without such a change-point in 9 out of 11 regions (\autoref{table:WAIC}).
+We have found that the evidence supports a model in which the parameters change at a specific time point $\tau$ over a model without such a change-point in 9 out of 12 regions (\autoref{table:WAIC}).
 It will be interesting to check if the evidence favors a model with \emph{two} change-points, rather than one. 
 Two such change-points could reflect escalating NPIs (e.g. school closures followed by lockdowns), an NPI followed by a relaxation of the intervention, or a mix of NPIs and other events, such as weather, or domestic and international events that affect risk perception.
 
