@@ -66,6 +66,10 @@ headheight=12pt
 \species{\calbicans}{Candida albicans}{C.~albicans}
 \species{\cneoformans}{Cryptococcus neoformans}{C.~neoformans}
 
+% COVID-19
+\newcommand{\covid}{COVID\=/19 }
+\newcommand{\sars}{SARS\=/CoV\=/2 }
+
 % line numbers
  \usepackage[displaymath, mathlines]{lineno}
  \renewcommand\linenumberfont{\normalfont\small\sffamily}
@@ -110,7 +114,7 @@ headheight=12pt
 \usepackage[shortcuts]{extdash}
 
 % Title page
-\title{Inferring the effective start dates of non-pharmaceutical interventions during COVID-19 outbreaks}
+\title{Inferring the effective start dates of non-pharmaceutical interventions during \covid outbreaks}
 
 % Authors
 \renewcommand\Affilfont{\small}
@@ -131,7 +135,7 @@ headheight=12pt
 % Abstract
 \begin{abstract}
 
-During February and March 2020, several countries implemented non-pharmaceutical interventions, such as school closures and lockdowns, with variable schedules to control the COVID\=/-19 pandemic caused by the SARA\=/CoV\=/2 virus.
+During February and March 2020, several countries implemented non-pharmaceutical interventions, such as school closures and lockdowns, with variable schedules to control the \covid pandemic caused by the \sars virus.
 Overall, these interventions seem to have successfully reduced the spread of the pandemic.
 We hypothesize that the official and effective start date of such interventions can significantly differ, for example due to slow diffusion of guidelines in the population, or due to unpreparedness of the authorities and the public.
 We use an SEIR epidemiological model and an MCMC inference framework to estimate the effective start of NPIs in several countries, and compare these effective dates to the official dates.
@@ -151,13 +155,13 @@ Adoption of public health recommendations is often critical for effective respon
 However, behavioral and social change does not occur immediately, but rather requires time to diffuse in the population through media, social networks, and social interactions. 
 Moreover, compliance to NPIs may differ between different interventions and between people.
 For example, in a survey of 2,108 adults in the UK during Mar 2020, \citet{Atchison2020} found that those over 70 years old were more likely to adopt social distancing than young adults (18-34 years old), and that those with lower income were less likely to be able to work from home and to self-isolate.
-Similarly, compliance to NPIs may be impacted by personal experiences. \citet{Smith2020} have surveyed 6,149 UK adults in late April and found that people who believe they have already had COVID\=/19 are more likely to think they are immune, and less likely to comply with social distancing measures. 
+Similarly, compliance to NPIs may be impacted by personal experiences. \citet{Smith2020} have surveyed 6,149 UK adults in late April and found that people who believe they have already had \covid are more likely to think they are immune, and less likely to comply with social distancing measures. 
 Compliance may also depend on risk perception as perceived by the the number of domestic cases or even by reported cases in other regions and countries.
-Interestingly, the perceived risk of COVID\=/19 infection has likely caused a reduction in the number of influenza-like illness cases in the US starting from mid-February~\citep{Zipfel2020}.
+Interestingly, the perceived risk of \covid infection has likely caused a reduction in the number of influenza-like illness cases in the US starting from mid-February~\citep{Zipfel2020}.
 
 Here, we hypothesize that there is a significant difference between the official start of NPIs and their adoption by the public and therefore their effect on transmission dynamics.
 We use a \textit{Susceptible-Exposed-Infected-Recovered} (SEIR) epidemiological model and \textit{Markov Chain Monte Carlo} (MCMC) parameter estimation framework to estimate the effective start date of NPIs from publicly available COVID-19 case data in several geographical regions.
-We compare these estimates to the official dates and find both late and early effects of NPIs on COVID\=/19 transmission dynamics.
+We compare these estimates to the official dates and find both late and early effects of NPIs on \covid transmission dynamics.
 We conclude by demonstrating how differences between the official and effective start of NPIs can confuse assessments of the effectiveness of the NPIs in a simple epidemic control framework. % TODO explain why important
 
 
@@ -232,7 +236,7 @@ The model is described by the following equations:
 \end{aligned}
 \end{equation}
 The initial numbers of exposed $E(0)$ and unreported infected $I_u(0)$ are considered model parameters, whereas the initial number of reported infected is assumed to be zero $I_r(0)=0$, and the number of susceptible is $S(0)=N-E(0)-I_u(0)$.
-This model is inspired by \citet{Li2020} and \citet{Pei2020}, who used a similar model with multiple regions and constant transmission $\beta$ and reporting rate $\alpha$ to infer COVID\=/19 dynamics in China and the continental US, respectively.
+This model is inspired by \citet{Li2020} and \citet{Pei2020}, who used a similar model with multiple regions and constant transmission $\beta$ and reporting rate $\alpha$ to infer \covid dynamics in China and the continental US, respectively.
 
 
 
@@ -536,12 +540,12 @@ This difference might be explained by low compliance: In Italy, for example, the
 Late effect of NPIs might also be due to the time required by both the government and the citizens to organize for a lockdown, and for the new guidelines to diffuse in the population.
  
 In contrast, in most investigated countries (e.g., Spain and France), we infer reduced transmission rates even before official lockdowns were implemented (\autoref{fig:early}).
-An early effective date might be due to adoption of social distancing and similar behavioral adaptations in parts of the population, maybe in response to increased risk perception due to domestic or international COVID\=/19-related reports.
+An early effective date might be due to adoption of social distancing and similar behavioral adaptations in parts of the population, maybe in response to increased risk perception due to domestic or international \covid-related reports.
 This finding may also suggest that severe NPIs, such as lockdowns, were unnecessary, and that less extreme measures adopted by the population could have been sufficient for epidemic control.
 These less extreme measures may have been implemented due to government recommendations, media coverage, and social networks, rather than official NPIs.
 Indeed, the evidence supports a change in transmission dynamics (i.e. a model with free $\tau$) even for Sweden~(\autoref{fig:ppc}), in which a lockdown was not implemented\footnote{Sweden banned public events on Mar~12, encouraged social distancing on Mar~16, and closed schools on Mar~18~\citep{Flaxman2020}.}, suggesting that lockdowns may not be necessary if other NPIs are adopted early enough during the outbreak~\citep{Banholzer2020}.
 
-Attempts to asses the effect of NPIs~\citep{Flaxman2020,Banholzer2020} generally assume a seven-day delay between the implementation of the intervention and the observable change in dynamics, due to the characteristic serial interval of COVID\=/19~\citep{Gatto2020}.
+Attempts to asses the effect of NPIs~\citep{Flaxman2020,Banholzer2020} generally assume a seven-day delay between the implementation of the intervention and the observable change in dynamics, due to the characteristic serial interval of \covid~\citep{Gatto2020}.
 However, the late and early effects we have estimated can confuse these assessments and lead to wrong conclusions about the effects of NPIs (\autoref{fig:fig4}).
 
 We have found that the evidence supports a model in which the parameters change at a specific time point $\tau$ over a model without such a change-point in 9 out of 12 regions (\autoref{table:WAIC}).
@@ -583,7 +587,7 @@ This work was supported in part by the Israel Science Foundation 552/19 and 1399
     \centering
 	\includegraphics[width=\textwidth]{../figures/Fig-fr-vs-es.pdf}
     \caption{
-    \textbf{COVID\=/19 confirmed cases in France and Spain.}
+    \textbf{\covid confirmed cases in France and Spain.}
     Number of cases proportional to population size (as of 2018). 
     Vertical line shows Mar~8, the effective start of NPIs $\hat{\tau}$ in both countries.
     } 
