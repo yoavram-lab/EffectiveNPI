@@ -1,15 +1,17 @@
 #!/usr/bin/env python
 # coding: utf-8
+import os
+from datetime import datetime, timedelta
+import sys
+
 import matplotlib as mpl
-mpl.use("Agg")s
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-import os
-from datetime import datetime, timedelta
+from arviz import hpd
+
 from rakott.mpl import savefig_bbox
-import sys
 
 sns.set_context('paper', font_scale=1.3)
 red, blue, green = sns.color_palette('Set1', 3)
@@ -21,6 +23,7 @@ if __name__ == '__main__':
 	job_id = sys.argv[1]
 	output_folder = r'/Users/yoavram/Library/Mobile Documents/com~apple~CloudDocs/EffectiveNPI-Data/output/{}/'.format(job_id)
 	country = sys.argv[2]
+	quiet = len(sys.argv) > 3 and sys.argv[3] == '-q'	
 
 	NPI_dates = pd.read_csv('../data/NPI_dates.csv')
 
@@ -40,9 +43,10 @@ if __name__ == '__main__':
 		sample = data['chain']
 		log_posterior = data['lnprobability']
 
-		official_date = pd.to_datetime(NPI_dates.loc[NPI_dates['Country'] == country.replace('_', ' '), 'Last'].values[0])
-
-		official_date_days = (official_date - start_date).days
+		first_date = pd.to_datetime(NPI_dates.loc[NPI_dates['Country'] == country.replace('_', ' '), 'First'].values[0])
+		last_date = pd.to_datetime(NPI_dates.loc[NPI_dates['Country'] == country.replace('_', ' '), 'Last'].values[0])
+		first_date_days = (first_date - start_date).days
+		last_date_days = (last_date - start_date).days
 
 		τ_sample = sample[:, :, -1]
 		nburn = τ_sample.shape[1]//2
@@ -53,20 +57,20 @@ if __name__ == '__main__':
 		plt.xlabel('Iteration')
 		plt.title('Trace plot: {}'.format(country));
 		plt.axvline(nburn/thin, color='k');
-		plt.show()
+		if not quiet: plt.show()
 
 		plt.plot(τ_sample[:,nburn::thin].T)
 		plt.ylabel('τ')
 		plt.xlabel('Iteration')
 		plt.title('Trace plot (burnin): {}'.format(country));
-		plt.show()
+		if not quiet: plt.show()
 
 		fig, ax = plt.subplots()
 		for i in range(τ_sample.shape[0]):
 		    ax.hist(τ_sample[i, nburn:], density=False, alpha=0.4)
 		ax.set(xlabel='τ', ylabel='Posterior probability')
 		ax.set_title('Posterior: {}'.format(country))
-		plt.show()
+		if not quiet: plt.show()
 
 		idx_max = log_posterior[:, nburn:].ravel().argmax()
 		τ_sample = τ_sample[:, nburn:].ravel()
@@ -79,14 +83,20 @@ if __name__ == '__main__':
 		quantile = 0.95
 		τ_ci = np.quantile(abs(τ_sample - τ_med), quantile)
 		print("+-{:.2f} days for {:.2f} quantile".format(τ_ci, quantile))
+		# hpi_ = hpd(τ_sample, quantile)#, multimodal=True)
+		# print("HPI {:.2f}-{:.2f} for {:.2f} confidence".format(*hpi_, quantile))
 
 		fig, ax = plt.subplots(figsize=(6, 3))
-		xmax = max(official_date_days, np.ceil(τ_sample.max())) + 2.5
+		xmax = max(last_date_days, np.ceil(τ_sample.max())) + 2.5
 		density, bins, _ = ax.hist(τ_sample, bins=np.arange(0, xmax, 1), density=True, align='mid')
 		ymax = density.max() * 1.2
 		ax.axvline(τ_med, color='k')
 		ax.fill_between([τ_med - τ_ci, τ_med + τ_ci], 0, ymax, alpha=0.4, color='k')
-		ax.axvline(official_date_days, color=red)
+		# for hpi_ in hpis:
+		# ax.fill_between([hpi_[0], hpi_[1]], 0, ymax, alpha=0.4, color='k')
+		# ax.axvline(first_date_days, color=red)
+		# ax.axvline(last_date_days, color=red)		
+		ax.fill_between([first_date_days, last_date_days], 0, ymax, alpha=0.4, color=red)
 		ax.set(xlabel=r'Effective start of NPI, $\tau$', 
 		       ylabel=r'Posterior density, $(P(\tau \mid \vec{X})$', 
 		       xlim=(τ_sample.min()-1, τ_sample.max()+1),
@@ -97,12 +107,13 @@ if __name__ == '__main__':
 		ax.set_xticks(days);
 		txt = ax.set_xticklabels([(start_date + d).strftime('%b %d') for d in deltas], rotation=45)
 
-		ax.annotate(r'$\hat{\tau}$', (τ_med+0.1, ymax*0.875))
-		ax.annotate(r'$\tau^*$', (official_date_days+0.1, ymax*0.875))
+		# ax.annotate(r'$\hat{\tau}$', (τ_med+0.1, ymax*0.875))
+		# ax.annotate(r'$\tau^0$', (first_date_days+0.1, ymax*0.875))
+		# ax.annotate(r'$\tau^*$', (last_date_days+0.1, ymax*0.875))
 
 		ax.set_title(country.replace('_', ' '))
 		sns.despine()
 		plt.show()
-		fig_filename = os.path.join(output_folder, 'figures', '{}_τ_posterior.pdf'.format(country))
-		print("Saving to", fig_filename)
-		fig.savefig(fig_filename, dpi=100, **savefig_bbox(*txt))
+		# fig_filename = os.path.join(output_folder, 'figures', '{}_τ_posterior.pdf'.format(country))
+		# print("Saving to", fig_filename)
+		# fig.savefig(fig_filename, dpi=100, **savefig_bbox(*txt))
