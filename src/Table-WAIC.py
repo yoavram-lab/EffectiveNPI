@@ -88,14 +88,19 @@ if __name__ == '__main__':
     df.loc[df['Country']=='Wuhan', 'Country'] = 'Wuhan China'
     
     df = pd.pivot(df, index='Country', columns='Model')
-    
+    print(df)
+
     df = df.drop(columns='WAIC1')
     df = df.droplevel(0, axis=1)
 
-    idx = df['Free']==df.min(axis=1)
-    df.loc[idx, 'Free'] = ['\\textbf{'+'{:.2f}'.format(x)+'}' for x in df.loc[idx, 'Free']] 
-    df.loc[~idx, 'Free'] = ['{:.2f}'.format(x) for x in df.loc[~idx, 'Free']] 
+    for country, row in df.iterrows():
+        if row['Free'] + 2 < min(row['Fixed'], row['No']):
+            df.loc[country, 'Free'] = '\\textbf{'+'{:.2f}'.format(row['Free'])+'}**'
+        elif row['Free'] < min(row['Fixed'], row['No']):
+            df.loc[country, 'Free'] = '\\textbf{'+'{:.2f}'.format(row['Free'])+'}*'
+        else:
+            df.loc[country, 'Free'] ='{:.2f}'.format(row['Free'])
     
-    df.to_csv('../figures/Table-WAIC.csv', index='Country', float_format="%.2f")
+    df.to_csv('../figures/Table-WAIC_tmp.csv', index='Country', float_format="%.2f")
     print("Saved to ../figures/Table-WAIC.csv")
     
