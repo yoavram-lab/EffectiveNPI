@@ -95,8 +95,8 @@ if __name__ == '__main__':
 		# for hpi_ in hpis:
 		# ax.fill_between([hpi_[0], hpi_[1]], 0, ymax, alpha=0.4, color='k')
 		# ax.axvline(first_date_days, color=red)
-		# ax.axvline(last_date_days, color=red)		
-		ax.fill_between([first_date_days, last_date_days], 0, ymax, alpha=0.4, color=red)
+		ax.axvline(last_date_days, color=red)		
+		# ax.fill_between([first_date_days, last_date_days], 0, ymax, alpha=0.4, color=red)
 		ax.set(xlabel=r'Effective start of NPI, $\tau$', 
 		       ylabel=r'Posterior density, $(P(\tau \mid \vec{X})$', 
 		       xlim=(τ_sample.min()-1, τ_sample.max()+1),
@@ -107,9 +107,9 @@ if __name__ == '__main__':
 		ax.set_xticks(days);
 		txt = ax.set_xticklabels([(start_date + d).strftime('%b %d') for d in deltas], rotation=45)
 
-		# ax.annotate(r'$\hat{\tau}$', (τ_med+0.1, ymax*0.875))
+		ax.annotate(r'$\hat{\tau}$', (τ_med+0.1, ymax*0.875))
 		# ax.annotate(r'$\tau^0$', (first_date_days+0.1, ymax*0.875))
-		# ax.annotate(r'$\tau^*$', (last_date_days+0.1, ymax*0.875))
+		ax.annotate(r'$\tau^*$', (last_date_days+0.1, ymax*0.875))
 
 		ax.set_title(country.replace('_', ' '))
 		sns.despine()
