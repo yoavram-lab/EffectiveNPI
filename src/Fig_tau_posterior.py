@@ -113,7 +113,7 @@ if __name__ == '__main__':
 
 		ax.set_title(country.replace('_', ' '))
 		sns.despine()
-		plt.show()
-		# fig_filename = os.path.join(output_folder, 'figures', '{}_τ_posterior.pdf'.format(country))
-		# print("Saving to", fig_filename)
-		# fig.savefig(fig_filename, dpi=100, **savefig_bbox(*txt))
+		if not quiet: plt.show()
+		fig_filename = os.path.join(output_folder, 'figures', '{}_τ_posterior.pdf'.format(country))
+		print("Saving to", fig_filename)
+		fig.savefig(fig_filename, dpi=100, **savefig_bbox(*txt))
