@@ -108,7 +108,8 @@ if __name__ == '__main__':
         df = df[::-1] # TODO why?
         N = pd.read_csv('../data/pop.csv', index_col='City').loc[country_name].values[0]
     else:
-        url = 'https://github.com/ImperialCollegeLondon/covid19model/raw/v1.0/data/COVID-19-up-to-date.csv'
+        # url = 'https://github.com/ImperialCollegeLondon/covid19model/raw/v1.0/data/COVID-19-up-to-date.csv'
+        url = 'https://raw.githubusercontent.com/ImperialCollegeLondon/covid19model/master/data/COVID-19-up-to-date.csv'
         fname = '../data/COVID-19-up-to-date.csv'
         if not os.path.exists(fname):
             urllib.request.urlretrieve(url, fname)
