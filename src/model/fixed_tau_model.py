@@ -4,7 +4,7 @@ import numpy as np
 class FixedTauModel(NormalPriorModel):
     def __init__(self, country_name, X, start_date, N, last_NPI_date, first_NPI_date, params_bounds, Td1, Td2):
         super().__init__(country_name, X, start_date, N, last_NPI_date, first_NPI_date, params_bounds, Td1, Td2)
-        self.var_names = ['Z', 'D', 'μ', 'β', 'α1', 'λ', 'α2', 'E0', 'Iu0','Δt0'] #no 
+        self.var_names = ['Z', 'D', 'μ', 'β', 'α1', 'λ', 'α2', 'E0', 'Iu0','Δt0'] #no τ
         self.τ = (last_NPI_date - start_date).days
     
     def _prior(self):

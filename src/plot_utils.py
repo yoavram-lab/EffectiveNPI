@@ -38,14 +38,14 @@ def load_data(file_name, _country_name, burn_fraction=0.6, lim_steps=None):
     ndays = len(incidences)
     nburn = int(nsteps * burn_fraction)
     sample = chain[:, nburn:, :].reshape(-1, ndim)
-    try:
-        sample[:,var_names.index('τ')] = sample[:,var_names.index('τ')].astype(int) #in inference we allways convert it to int
-    except ValueError: #if the model doesn't have such parameter
-        None
-    try:
-        sample[:,var_names.index('Δt0')] = sample[:,var_names.index('Δt0')].astype(int) #in inference we allways convert it to int
-    except ValueError:#if the model doesn't have such parameter
-        None
+    # try:
+    #     sample[:,var_names.index('τ')] = sample[:,var_names.index('τ')].astype(int) #in inference we allways convert it to int
+    # except ValueError: #if the model doesn't have such parameter
+    #     None
+    # try:
+    #     sample[:,var_names.index('Δt0')] = sample[:,var_names.index('Δt0')].astype(int) #in inference we allways convert it to int
+    # except ValueError:#if the model doesn't have such parameter
+    #     None
 
     lnprobability = data['lnprobability'][:, nburn:]
     logliks = data['logliks'].reshape(nwalkers,nsteps)[:,nburn:].reshape(-1)
