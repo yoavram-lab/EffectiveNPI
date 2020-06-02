@@ -39,7 +39,7 @@ def get_model_class(model_type):
         return None
 
 params_bounds = {
-    'Z' : (2, 5),
+    'Z' : (2, 17),
     'D' : (2, 5),
     'μ' : (0.2, 1),
     'β' : (0.8, 1.5),

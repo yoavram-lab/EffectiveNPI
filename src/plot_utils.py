@@ -7,6 +7,7 @@ import urllib.request
 import os
 import seaborn as sns
 import scipy.stats
+from scipy.special import logsumexp
 from corner import corner 
 red, blue, green, purple, orange = sns.color_palette('Set1', 5)
 from datetime import timedelta, datetime
@@ -67,7 +68,7 @@ def write_csv_header(file_name):
 
     with open(file_name, mode='w') as file: # use pd to write csv files?
         writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(['country','DIC using median', 'DIC using mean', 'DIC using MAP','loglik(MAP)','loglik(mean)','loglik(median)','N','p_steps','p_model_type','p_Td1','p_Td2','official_τ','τ mean','τ median','τ MAP','official τ from 1 Jan','τ mean from 1 Jan','τ median from 1 Jan','τ MAP from 1 Jan','τ CI median (75%)','τ CI median (95%)','τ CI mean (75%)','τ CI mean (95%)', *params_headers])
+        writer.writerow(['country','WAIC', 'DIC using median', 'DIC using mean', 'DIC using MAP','loglik(MAP)','loglik(mean)','loglik(median)','N','p_steps','p_model_type','p_Td1','p_Td2','official_τ','τ mean','τ median','τ MAP','official τ from 1 Jan','τ mean from 1 Jan','τ median from 1 Jan','τ MAP from 1 Jan','τ CI median (75%)','τ CI median (95%)','τ CI mean (75%)','τ CI mean (95%)', *params_headers])
 
 def write_csv_data(file_name):
     #params means and medians
@@ -108,7 +109,7 @@ def write_csv_data(file_name):
 
     with open(file_name, mode='a') as file:
         writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow([country_name, '{:.4f}'.format(calc_DIC(calc_loglik_median)), '{:.4f}'.format(calc_DIC(calc_loglik_mean)), '{:.4f}'.format(calc_DIC(calc_loglikMAP)), '{:.4f}'.format(calc_loglikMAP()),'{:.4f}'.format(calc_loglik_mean()),'{:.4f}'.format(calc_loglik_median()), N, nsteps, model_type, Td1, Td2,
+        writer.writerow([country_name,'{:.4f}'.format(calc_WAIC()), '{:.4f}'.format(calc_DIC(calc_loglik_median)), '{:.4f}'.format(calc_DIC(calc_loglik_mean)), '{:.4f}'.format(calc_DIC(calc_loglikMAP)), '{:.4f}'.format(calc_loglikMAP()),'{:.4f}'.format(calc_loglik_mean()),'{:.4f}'.format(calc_loglik_median()), N, nsteps, model_type, Td1, Td2,
                          τ_to_string(last_NPI),
                          τ_mean, τ_median, τ_MAP, τ_official_from1Jar,  τ_mean_from1Jar, τ_median_from1Jar, τ_MAP_from1Jar, '{:.4f}'.format(calc_τ_CI_median()),'{:.4f}'.format(calc_τ_CI_median(0.95)), '{:.4f}'.format(calc_τ_CI_mean()),'{:.4f}'.format(calc_τ_CI_mean(0.95)), *params_values])
 
@@ -117,6 +118,30 @@ def calc_DIC(loglik_E_func):
     E_loglik = logliks.mean()
     DIC = 2*loglik_E - 4*E_loglik
     return DIC
+
+def inliers(logliks, PLOT=False):
+    chain_mean_loglik = logliks.mean(axis=1)
+    std_mean_loglikg = chain_mean_loglik.std(ddof=1)
+    mean_mean_loglikg = chain_mean_loglik.mean()
+    idx = abs(chain_mean_loglik - mean_mean_loglikg) < 3*std_mean_loglikg
+    if PLOT:
+        if idx.any():
+            plt.plot(logliks[idx, ::1000].T, '.k', label='inliers')
+        if (~idx).any():
+            plt.plot(logliks[~idx, ::1000].T, '.r', label='outliers')
+        plt.ylabel('Log-likelihood')
+        plt.legend()
+    return idx
+
+def calc_WAIC():
+    nwalkers = logliks.size//nsteps
+    l_logliks = logliks.reshape(nwalkers,nsteps)
+    l_logliks = l_logliks[inliers(l_logliks)]
+    S = l_logliks.size
+    llpd = -np.log(S) + logsumexp(l_logliks)
+    p1 = 2*(-np.log(S) + logsumexp(l_logliks) - l_logliks.mean())
+    p2 = np.var(l_logliks, ddof=1)
+    return -2*(llpd + -p2)
 
 def get_MAP():
     return sample[lnprobability.argmax()]
@@ -278,6 +303,7 @@ def plot_τ(ax=None):
 def dist(sample,param_name):
     ind = var_names.index(param_name)
     return sample[:,ind]
+    
 def plot_hists():
     def hist_param(sample, a):
         d1 = dist(sample,a)
@@ -308,6 +334,31 @@ def plot_hists():
                 break
             fig.add_subplot(spec[r, c])
             hist_param(sample,var_names[i])
+
+def plot_joint_dists(randindxs=None, title=None): 
+    if not randindxs:
+        np.random.seed(10)
+        randindxs = np.random.choice(len(sample),20000,replace=False)
+        
+    def hex_wrapper(*args, **kwargs):
+        kwargs['color'] = None
+        return plt.hexbin(*args,**kwargs)
+    
+    post_sample = sample[randindxs]
+    #dirty trick to ensure the axis is in [min,max]
+    for i,var in enumerate(var_names[:-1]):
+        post_sample[0,i] = params_bounds[var][0]
+        post_sample[1,i] = params_bounds[var][1]
+    # post_sample[0,var_names.index('τ')] = 5
+    # post_sample[1,var_names.index('τ')] = 40
+    df = pd.DataFrame(post_sample)
+    df.columns=var_names    
+
+    g = sns.PairGrid(df, y_vars=["τ"], x_vars=var_names[:-1], height=6)
+    cmap = sns.cubehelix_palette(8,start=10,light=1, as_cmap=True)
+    g = g.map(hex_wrapper, gridsize=47,cmap=cmap) #'Greys'
+    g.fig.suptitle(title)
+    return g.fig
 
 def plot_all():
     fig = plt.figure(figsize=(12, 16))
@@ -375,6 +426,7 @@ def plot_info(ax=None):
     lst.append('P(α2 > α1) = {:.2%}'.format((Δα_posterior > 0).mean()))
 
     lst.append('')
+    lst.append('WAIC: {:.2f}'.format(calc_WAIC()))
     lst.append('DIC (using median): {:.2f}'.format(calc_DIC(calc_loglik_median)))
     lst.append('loglik of MAP: {:.2f}'.format(calc_loglikMAP()))
     lst.append('loglik of mean: {:.2f}'.format(calc_loglik_mean()))
@@ -440,6 +492,9 @@ def plot_incidences(ax=None, color=blue, title=country_name ):
     else:
         plt.axvline(τ, color=purple, linewidth=1, linestyle='--')
 
+    ax.axvline(first_NPI, color='k', ls='--', alpha=0.25)
+    ax.axvline(last_NPI, color='k', ls='--', alpha=0.25)
+    
     days = list(range(0, ndays, round(ndays/10)))
     labels = [τ_to_string(d) for d in days]
     plt.xticks(days,labels,rotation=90);
