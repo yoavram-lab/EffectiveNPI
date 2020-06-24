@@ -59,6 +59,7 @@ if __name__ == '__main__':
 	df['τ official days'] = [date_to_int(x) for x in df['τ official']]
 	df['τ official - mean days'] = df['τ official days'] - df['τ mean days']
 	df['τ official - median days'] = df['τ official days'] - df['τ median days']
+	df['τ median - official days'] = df['τ median days'] - df['τ official days']
 	df['τ official - MAP days'] = df['τ official days'] - df['τ MAP days']
 	df['τ mean'] = [date_to_date(x) for x in df['τ mean']]
 	df['τ median'] = [date_to_date(x) for x in df['τ median']]
@@ -78,33 +79,36 @@ if __name__ == '__main__':
 		plt.plot(np.arange(30, 90), np.arange(30, 90), ls='--', color='k')
 		plt.show()
 
-	col = 'τ official - median days'
+	col = 'τ median - official days'
 	ci75_col = 'τ CI median (75%)'
 	ci95_col = 'τ CI median (95%)'
 
 	fig, ax = plt.subplots(figsize=(6, 6))
-	df_ = df.sort_values(col)
+	df_ = df.sort_values(col, ascending=False)
 
-	val = -df_[col]
+	val = df_[col]
 	ci75 = df_[ci75_col]
 	ci95 = df_[ci95_col]
 	country = df_['country']
 	ax.hlines(country, val-ci95, val+ci95)
 	ax.hlines(country, val-ci75, val+ci75, lw=3)
 
-	idx = df_[col] >= 1
-	val = -df_.loc[idx, col]
+	# idx = df_[col] >= 1
+	idx = df_[col] + ci75 < 0
+	val = df_.loc[idx, col]
 	country = df_.loc[idx, 'country']
 	ax.plot(val, country, 'o', markersize=10, color=blue)
 
 
-	idx = df_[col] <= -1
-	val = -df_.loc[idx, col]
+	# # idx = df_[col] <= -1
+	idx = 0 < df_[col] - ci75
+	val = df_.loc[idx, col]
 	country = df_.loc[idx, 'country']
 	ax.plot(val, country, 'o', markersize=10, color=red)
 
-	idx = (-1 < df_[col]) & (df_[col] < 1)
-	val = -df_.loc[idx, col]
+	# # idx = (-1 < df_[col]) & (df_[col] < 1)
+	idx = (0 <= df_[col] + ci75) & (df_[col] - ci75 <= 0)
+	val = df_.loc[idx, col]
 	country = df_.loc[idx, 'country']
 	ax.plot(val, country, 'o', markersize=10, color='k')
 
