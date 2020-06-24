@@ -48,7 +48,6 @@ def inliers(logliks, PLOT=False):
         plt.legend()
     return idx
 
-
 def WAIC(logliks):
     logliks = logliks[inliers(logliks)]
     S = logliks.size

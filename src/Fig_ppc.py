@@ -103,7 +103,7 @@ if __name__ == '__main__':
 	date_threshold = datetime(2020, 3, 28)
 	last_date = datetime(2020, 3, 28) + timedelta(7)
 
-	output_folder = r'/Users/yoavram/Library/Mobile Documents/com~apple~CloudDocs/EffectiveNPI-Data/output'
+	output_folder = r'../output'
 	job_id = sys.argv[1]	
 	country = sys.argv[2]
 	if len(sys.argv) > 2:

@@ -14,14 +14,15 @@ from arviz import hpd
 from rakott.mpl import savefig_bbox
 
 sns.set_context('paper', font_scale=1.3)
-red, blue, green = sns.color_palette('Set1', 3)
+red, blue, green, purple = sns.color_palette('Set1', 4)
+colors = {'red':red, 'blue':blue, 'green':green, 'purple':purple}
 
 def int_to_dt(t):
     return pd.to_datetime(start_date) + timedelta(days=t)
 
 if __name__ == '__main__':
 	job_id = sys.argv[1]
-	output_folder = r'/Users/yoavram/Library/Mobile Documents/com~apple~CloudDocs/EffectiveNPI-Data/output/{}/'.format(job_id)
+	output_folder = r'../output/{}/'.format(job_id)
 	country = sys.argv[2]
 	quiet = len(sys.argv) > 3 and sys.argv[3] == '-q'	
 

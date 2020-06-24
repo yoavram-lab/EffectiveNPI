@@ -15,6 +15,7 @@ from model.normal_prior_model import NormalPriorModel
 from model.uniform_prior_model import UniformPriorModel
 from model.no_tau_model import NoTauModel
 from model.fixed_tau_model import FixedTauModel
+from model.normal_prior_free_p_model import NormalPriorFreepModel
 
 np.random.seed(10)    
 now = datetime.now().strftime('%Y-%m-%d')
@@ -32,11 +33,13 @@ def get_model_class(model_type):
         return NoTauModel
     elif model_type == 4:
         return FixedTauModel
+    elif model_type == 5:
+        return NormalPriorFreepModel
     else:
         return None
 
 params_bounds = {
-    'Z' : (2, 5),
+    'Z' : (2, 17),
     'D' : (2, 5),
     'μ' : (0.2, 1),
     'β' : (0.8, 1.5),
@@ -45,7 +48,9 @@ params_bounds = {
     'α2' : (0.02, 1),
     'E0' : (0, seed_max),
     'Iu0' : (0, seed_max),
-    'Δt0' : (1,5) #how much zeros before the first incident
+    'Δt0' : (1,5), #how much zeros before the first incident
+    'Td1' : (1,15), 
+    'Td2' : (1,15) 
 }
 
 def get_first_NPI_date(country_name):
@@ -90,7 +95,7 @@ if __name__ == '__main__':
     parser.add_argument('-w', '--walkers',type=int,help='you can provide number of walkers, othewise the default is taken')
     parser.add_argument('-c', '--cores',type=int,help='by default 1 core')
     parser.add_argument('-d', '--ver-desc',type=str,help='short description of the version - will be part of the dir name')
-    parser.add_argument('-m', '--tau-model',type=int,help='1 - uniform prior, 2 (default) - normal prior, 3 - no tau, 4 - fixed tau (on lockdown date)')
+    parser.add_argument('-m', '--tau-model',type=int,help='1 - uniform prior, 2 (default) - normal prior, 3 - no tau, 4 - fixed tau (on lockdown date), 5 - normal with free Td1 and Td2')
     parser.add_argument('--up-to-date',type=str, help='you can provide the last date (including). The format yyyy-mm-dd')
     args = parser.parse_args()
     country_name = args.country_name
@@ -108,7 +113,8 @@ if __name__ == '__main__':
         df = df[::-1] # TODO why?
         N = pd.read_csv('../data/pop.csv', index_col='City').loc[country_name].values[0]
     else:
-        url = 'https://github.com/ImperialCollegeLondon/covid19model/raw/v1.0/data/COVID-19-up-to-date.csv'
+        # url = 'https://github.com/ImperialCollegeLondon/covid19model/raw/v1.0/data/COVID-19-up-to-date.csv'
+        url = 'https://raw.githubusercontent.com/ImperialCollegeLondon/covid19model/master/data/COVID-19-up-to-date.csv'
         fname = '../data/COVID-19-up-to-date.csv'
         if not os.path.exists(fname):
             urllib.request.urlretrieve(url, fname)
