@@ -88,6 +88,7 @@ if __name__ == '__main__':
 		# print("HPI {:.2f}-{:.2f} for {:.2f} confidence".format(*hpi_, quantile))
 
 		fig, ax = plt.subplots(figsize=(6, 3))
+		xmin = τ_sample.min()-2.5
 		xmax = max(last_date_days, np.ceil(τ_sample.max())) + 2.5
 		density, bins, _ = ax.hist(τ_sample, bins=np.arange(0, xmax, 1), density=True, align='mid')
 		ymax = density.max() * 1.2
@@ -103,7 +104,7 @@ if __name__ == '__main__':
 		       xlim=(τ_sample.min()-1, τ_sample.max()+1),
 		       ylim=(0, ymax)
 		)
-		days = np.arange(0, xmax, 3)
+		days = np.arange(xmin, xmax, 3)
 		deltas = [timedelta(int(x)) for x in days]
 		ax.set_xticks(days);
 		txt = ax.set_xticklabels([(start_date + d).strftime('%b %d') for d in deltas], rotation=45)

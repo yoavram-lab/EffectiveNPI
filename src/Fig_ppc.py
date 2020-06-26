@@ -27,6 +27,7 @@ from inference import get_model_class
 from inference import find_start_day
 from model.normal_prior_model import NormalPriorModel
 from model.fixed_tau_model import FixedTauModel
+from sklearn.metrics import mean_squared_error
 
 
 def int_to_dt(t):
@@ -101,7 +102,7 @@ def load_data(country_name, up_to_date=None):
 if __name__ == '__main__':
 	nreps = 1000
 	date_threshold = datetime(2020, 3, 28)
-	last_date = datetime(2020, 3, 28) + timedelta(7)
+	last_date = datetime(2020, 3, 28) + timedelta(15)
 
 	output_folder = r'../output'
 	job_id = sys.argv[1]	
@@ -130,6 +131,15 @@ if __name__ == '__main__':
 	pvalue_file = os.path.join(output_folder, job_id, 'figures', 'ppc_pvalue.txt'.format(country))
 	with open(pvalue_file, 'at') as f:
 		print("{}\t{:.4g}".format(country, pvalue), file=f)
+
+	#RMSE
+	unseen_idxs_14 = T > date_threshold
+	unseen_idxs_7 = (T > date_threshold) & (T < date_threshold+timedelta(8))
+	rmse7 = np.sqrt([mean_squared_error(X[unseen_idxs_7],pred) for pred in X_pred[:,unseen_idxs_7]]).mean()
+	rmse14 = np.sqrt([mean_squared_error(X[unseen_idxs_14],pred) for pred in X_pred[:,unseen_idxs_14]]).mean()
+	rmse_file = os.path.join(output_folder, job_id, 'figures', 'ppc_rmse.csv'.format(country))
+	with open(rmse_file, 'at') as f:
+		print("{}\t{:.4g}\t{:.4g}".format(country, rmse7, rmse14), file=f)
 
 	fig, ax = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
 	ymax = min(X.max()*2, max(X.max(), X_pred.max()))
