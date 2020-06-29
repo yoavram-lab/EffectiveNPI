@@ -101,8 +101,8 @@ def load_data(country_name, up_to_date=None):
 
 if __name__ == '__main__':
 	nreps = 1000
-	date_threshold = datetime(2020, 3, 28)
-	last_date = datetime(2020, 3, 28) + timedelta(15)
+	date_threshold = datetime(2020, 4, 11)
+	last_date = datetime(2020, 4, 11) + timedelta(15)
 
 	output_folder = r'../output'
 	job_id = sys.argv[1]	

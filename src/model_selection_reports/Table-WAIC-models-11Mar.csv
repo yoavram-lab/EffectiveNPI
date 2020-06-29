@@ -1,0 +1,12 @@
+Country,no tau,fixed tau,free tau
+Austria,219.49,95.07,\textbf{35.96}
+Belgium,148.37,98.42,\textbf{49.16}
+Denmark,44.36,\textbf{40.30},43.11
+France,581.59,255.14,\textbf{172.08}
+Germany,1029.36,327.5,\textbf{174.90}
+Italy,898452.34,5484.56,\textbf{80.18}
+Norway,70.03,42.04,\textbf{39.79}
+Spain,1476.46,647.34,\textbf{128.58}
+Sweden,32.53,\textbf{30.06},31.11
+Switzerland,265.80,83.95,\textbf{63.89}
+United Kingdom,258.18,117.55,\textbf{68.17}
