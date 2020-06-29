@@ -203,7 +203,7 @@ We conclude by demonstrating how differences between the official and effective 
     	The difference between $\hat{\tau}$ the effective and $\tau^*$ the official start of NPIs is shown for different regions. The effective date is delayed in UK, Austria, Italy, France, Belgium, Spain, and Wuhan, China, compared to the official date (red markers). In contrast, the effective dates in Sweden, Denmark, and Germany are earlier than the official dates (blue markers), although this is significant only for Germany (i.e., zero is not included in 75\% CI). 
 	Here, $\hat{\tau}$ is the posterior median, see \autoref{table:estimated-params}. $\tau^*$ is the last NPI date (\autoref{table:NPI_dates}). Thin and bold lines show 95\% and 75\% credible intervals, respectively (i.e. interval in which $P(|\tau - \hat{\tau}| \mid \vec{X}) = 0.95$ and $0.75$.) \autoref{fig:tau-summary-mar28} shows a similar summary when estimating $\hat{\tau}$ using case data up to Mar~28, rather then Apr~11, 2020.
     }
-    \label{fig:tau-summary}
+    \label{fig:tau-summary} %TODO maybe to put some footnote about the realibility of the result for Sweden and Denmark?
 \end{figure}
 
 
@@ -216,13 +216,13 @@ For example, \citet{Li2020} estimate the infection dynamics in China before and 
 Here, we estimate the joint posterior distribution of the \emph{effective} start date of the NPIs $\tau$ and the transmission and reporting rates before and after $\tau$ from the entire data, rather than splitting the data at~$\tau$. 
 We then estimate the marginal posterior probability of $\tau$ by marginalising the joint posterior, and estimate $\hat{\tau}$ as the posterior median.
 
-We compare the posterior predictive plots of a model with a free $\tau$ with those of a model with~$\tau$ fixed at~$\tau^*$ and a model without~$\tau$ (i.e. transmission and reporting rates are constant). The model with free~$\tau$ clearly produces better and less variable predictions~(\autoref{fig:ppc}). 
-When we compare the models using WAIC~(\autoref{eq:WAIC}, \autoref{table:WAIC}), the model with a free~$\tau$ is preferred in 8 out of 12 of the regions (although only narrowly for 5 of the 8).
-The exceptions are Austria, Belgium, Norway, and United Kingdom. % TODO UPDATE
+We compare the posterior predictive plots of a model with a free $\tau$ with those of a model with~$\tau$ fixed at~$\tau^*$ and a model without~$\tau$ (i.e. transmission and reporting rates are constant). The model with free~$\tau$ clearly produces better and less variable predictions~(\autoref{fig:ppc}).  
+For all of the 11 European countries the out-of-sample root mean squared error (RMSE) is lower for the model with a free~$\tau$ (\autoref{table:RMSE}). We don't check it for Wuhan, China, because we have no out-of-sample data for it.  % TODO reference? ; add table ; find more data for Wuhan?
+When we compare the models using WAIC~(\autoref{eq:WAIC}, \autoref{table:WAIC}), the model with a free~$\tau$ is strongly preferred in all of 12 countries except Sweden and Denmark. Both Sweden and Denmark, don't have one visual peak in daily cases for the dates the models are evaluated, so probably it is not enough data for the free~$\tau$ model.
 
 We compare the official $\tau^*$ and effective $\hat{\tau}$ start of NPIs and find that in most regions (10 of 12) the effective start of NPIs  significantly differs from the official date (\autoref{fig:tau-summary}), that is, the 75\% credible interval on $\hat{\tau}$ does not include $\tau^*$ (\autoref{fig:tau-summary}).
 The exceptions are%, as with the comparison to the simpler models, % TODO UPDATE
-Switzerland (see below), and Norway. The latter also has a relatively wide credible interval, maybe because it has the longest duration between the first and last NPIs~(\autoref{table:NPI_dates}).
+ Switzerland (see below), and Norway. The latter also has a relatively wide credible interval, maybe because it has the longest duration between the first and last NPIs~(\autoref{table:NPI_dates}).
 In the following, we describe our findings in more detail.
 
 
@@ -235,7 +235,7 @@ In Italy, the first case was officially confirmed on Feb~21. School closures wer
 That is, the first and last official NPI dates are Mar~8 and Mar~11.
 However, we estimate the effective date $\hat{\tau}$ at Mar~17 ($\pm$2.99 days 95\% CI ; \autoref{fig:late}). 
 
-In Wuhan, China, a lockdown was ordered on Jan 23~\citep{Li2020}, but we estimate the effective start of NPIs to be more than a week later, at Feb~2 ($\pm$2.85 days 95\% CI; \autoref{fig:late}). % TODO CHECK
+In Wuhan, China, a lockdown was ordered on Jan 23~\citep{Li2020}, but we estimate the effective start of NPIs to be more than a week later, at Feb~3 ($\pm$2.85 days 95\% CI; \autoref{fig:late}). % TODO CHECK
 
 In Spain, social distancing was encouraged starting on Mar~8~\citep{Flaxman2020}, but mass gatherings still occurred on Mar~8, including a march of 120,000 people for the \href{https://www.nytimes.com/2020/03/13/world/europe/spain-coronavirus-emergency.html}{International Women's Day}, and a  football match between \href{https://www.espn.com/soccer/match?gameId=550350}{Real Betis and Real Madrid} (final score: 2--1) with a crowd of 50,965 in Seville.
 A national lockdown was only announced on Mar~14~\citep{Flaxman2020}.
@@ -279,13 +279,9 @@ This may suggest correlations between effective starts of NPIs due to global or 
 %%% Early
 \paragraph*{Early effective start of NPIs.}
 In contrast, in some regions we estimate an effective start of NPIs $\hat{\tau}$ that is \emph{earlier} then the official date $\tau^*$ (\autoref{fig:tau-summary}).
-
-Germany... 
-
-Sweden...
-
-Denmark...
-
+Germany... %TODO
+Sweden and Denmark show early effective start of NPIs. However, for both of the contries, the dataset that we use doesn't contain dates with the peak of the pandemic. WAIC model comparison method doesn't prefer the model with a free~$\tau$ on the model with a fixed~$\tau$.
+Therefore we can't trust in the outcome of the free~$\tau$ model for those countries.
 
 
 %%% Fig - Early %%% 
@@ -374,7 +370,7 @@ Indeed, the evidence supports a change in infection dynamics (i.e. a model with 
 Attempts to asses the effect of NPIs~\citep{Banholzer2020,Flaxman2020} generally assume a seven-day delay between the implementation of the intervention and the observable change in dynamics, due to the characteristic serial interval of \covid\citep{Gatto2020}.
 However, late and early effects such as we have inferred may bias these assessments and lead to wrong conclusions about the effects of NPIs (\autoref{fig:prediction}).
 
-We have found that the evidence supports a model in which the parameters change at a specific time point $\tau$ over a model without such a change-point in 9 out of 12 regions (i.e. free or fixed model in \autoref{table:WAIC}). %TODO check
+We have found that the evidence supports a model in which the parameters change at a specific time point $\tau$ over a model without such a change-point in 10 out of 12 regions (i.e. free or fixed model in \autoref{table:WAIC}). 
 It could be interesting to check if the evidence favors a model with \emph{two} change-points, rather than one. 
 Two such change-points could reflect escalating NPIs (e.g. school closures followed by lockdowns), or an intervention followed by a relaxation.
 However, interpretation of such models will be harder, as two change-points can also reflect a mix of NPIs and other events, such as changing weather, news of new treatments, and international outbreaks.
