@@ -59,7 +59,7 @@ def WAIC(logliks):
 if __name__ == '__main__':    
     output_folder = r'/Users/yoavram/Library/Mobile Documents/com~apple~CloudDocs/EffectiveNPI-Data/output'
     
-    job_ids = ['2020-05-14-n1-normal-1M', '2020-05-14-n1-notau-1M', '2020-05-15-n1-fixed-tau-1M']
+    job_ids = ['2020-05-26-Apr11', '2020-06-27-Apr11-notau', '2020-06-25-Apr11-fixedtau']
     print('Job IDs:')
     print(job_ids)    
     countries = 'Austria Belgium Denmark France Germany Italy Norway Spain Sweden Switzerland United_Kingdom Wuhan'.split(' ')
@@ -79,9 +79,9 @@ if __name__ == '__main__':
             ))
 
     df = pd.DataFrame(results)
-    df.loc[df['job_id'] == '2020-05-14-n1-normal-1M', 'job_id'] = 'Free'
-    df.loc[df['job_id'] == '2020-05-14-n1-notau-1M', 'job_id'] = 'No'
-    df.loc[df['job_id'] == '2020-05-15-n1-fixed-tau-1M', 'job_id'] = 'Fixed'
+    df.loc[df['job_id'] == '2020-05-26-Apr11', 'job_id'] = 'Free'
+    df.loc[df['job_id'] == '2020-06-27-Apr11-notau', 'job_id'] = 'No'
+    df.loc[df['job_id'] == '2020-06-25-Apr11-fixedtau', 'job_id'] = 'Fixed'
     df = df.rename(columns={'country':'Country', 'job_id':'Model'})
     df['Country'] = [x.replace('_', ' ') for x in df['Country']]
     df.loc[df['Country']=='Wuhan', 'Country'] = 'Wuhan China'
