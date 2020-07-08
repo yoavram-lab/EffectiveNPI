@@ -16,7 +16,8 @@ def bold_all(df, columns):
     minidxs = df.idxmin(axis=1)
     for i in columns:
         idx = i==minidxs
-        df.loc[idx, i] = ['\\textbf{'+'{:.2f}'.format(x)+'}' for x in df.loc[idx, i]] 
+        df.loc[~idx, i] = ['{:.1f}'.format(x) for x in df.loc[~idx, i]] 
+        df.loc[idx, i] = ['\\textbf{'+'{:.1f}'.format(x)+'}' for x in df.loc[idx, i]] 
 
 df_out.set_index('Country', inplace=True)
 bold_all(df_out, df_out.columns)
