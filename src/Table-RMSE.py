@@ -20,4 +20,6 @@ def bold_all(df, columns):
 
 df_out.set_index('Country', inplace=True)
 bold_all(df_out, df_out.columns)
-df_out.to_csv('../figures/Table-RMSE_tmp.csv',index='Country')
+output_fname = '../figures/Table-RMSE.csv'
+df_out.to_csv(output_fname,index='Country')
+print(output_fname)
