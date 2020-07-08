@@ -99,7 +99,7 @@ if __name__ == '__main__':
             df.loc[idx, i] = ['\\textbf{'+'{:.2f}'.format(x)+'}' for x in df.loc[idx, i]] 
 
     bold_all(df, df.columns)
-    df=df[df.columns.reindex(['No','Fixed','Free'])[0]]
+    df = df[df.columns.reindex(['No','Fixed','Free'])[0]]
 
     # for country, row in df.iterrows():
     #     if row['Free'] + 2 < min(row['Fixed'], row['No']):
@@ -109,6 +109,7 @@ if __name__ == '__main__':
     #     else:
     #         df.loc[country, 'Free'] ='{:.2f}'.format(row['Free'])
     
-    df.to_csv('../figures/Table-WAIC_tmp.csv', index='Country', float_format="%.2f")
-    print("Saved to ../figures/Table-WAIC_tmp.csv")
+    output_fname = "../figures/Table-WAIC.csv"
+    df.to_csv(output_fname, index='Country', float_format="%.2f")
+    print(output_fname)
     
