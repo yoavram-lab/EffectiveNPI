@@ -57,7 +57,7 @@ def WAIC(logliks):
     return -2*(llpd + -p1), -2*(llpd + -p2)
 
 if __name__ == '__main__':    
-    output_folder = r'/Users/yoavram/Library/Mobile Documents/com~apple~CloudDocs/EffectiveNPI-Data/output'
+    output_folder = r'../output'
     
     job_ids = ['2020-05-26-Apr11', '2020-06-27-Apr11-notau', '2020-06-25-Apr11-fixedtau']
     print('Job IDs:')
@@ -92,14 +92,23 @@ if __name__ == '__main__':
     df = df.drop(columns='WAIC1')
     df = df.droplevel(0, axis=1)
 
-    for country, row in df.iterrows():
-        if row['Free'] + 2 < min(row['Fixed'], row['No']):
-            df.loc[country, 'Free'] = '\\textbf{'+'{:.2f}'.format(row['Free'])+'}**'
-        elif row['Free'] < min(row['Fixed'], row['No']):
-            df.loc[country, 'Free'] = '\\textbf{'+'{:.2f}'.format(row['Free'])+'}*'
-        else:
-            df.loc[country, 'Free'] ='{:.2f}'.format(row['Free'])
+    def bold_all(df, columns):
+        minidxs = df.idxmin(axis=1)
+        for i in columns:
+            idx = i==minidxs
+            df.loc[idx, i] = ['\\textbf{'+'{:.2f}'.format(x)+'}' for x in df.loc[idx, i]] 
+
+    bold_all(df, df.columns)
+    df=df[df.columns.reindex(['No','Fixed','Free'])[0]]
+
+    # for country, row in df.iterrows():
+    #     if row['Free'] + 2 < min(row['Fixed'], row['No']):
+    #         df.loc[country, 'Free'] = '\\textbf{'+'{:.2f}'.format(row['Free'])+'}**'
+    #     elif row['Free'] < min(row['Fixed'], row['No']):
+    #         df.loc[country, 'Free'] = '\\textbf{'+'{:.2f}'.format(row['Free'])+'}*'
+    #     else:
+    #         df.loc[country, 'Free'] ='{:.2f}'.format(row['Free'])
     
     df.to_csv('../figures/Table-WAIC_tmp.csv', index='Country', float_format="%.2f")
-    print("Saved to ../figures/Table-WAIC.csv")
+    print("Saved to ../figures/Table-WAIC_tmp.csv")
     
