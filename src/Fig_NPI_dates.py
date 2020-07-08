@@ -48,5 +48,6 @@ if __name__ == '__main__':
 	ax.grid(True)
 	txt = ax.get_yticklabels()
 	sns.despine()
-	fig.savefig('../figures/Fig-NPI_dates.pdf', dpi=100, **savefig_bbox(*txt))
-	print("Saved NPI dates to ../figures/Fig-NPI_dates.pdf")
+	output_fname = "../figures/Fig-NPI_dates.pdf"
+	fig.savefig(output_fname, dpi=100, **savefig_bbox(*txt))
+	print(output_fname)
