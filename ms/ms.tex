@@ -601,6 +601,7 @@ This work was supported in part by the Israel Science Foundation 3811/19 and 139
 
 
 %%%% Fig - NPI dates %%%
+% generated with /python Fig_NPI_dates.py/
 \begin{figure}[h]
     \centering
 	\includegraphics[width=0.5\textwidth]{../figures/Fig-NPI_dates.pdf}
@@ -613,10 +614,11 @@ This work was supported in part by the Israel Science Foundation 3811/19 and 139
 
 
 
-% Table - WAIC %%% TODO regenerate table
+% Table - WAIC 
 % generated with /python Table-WAIC.py 2020-05-26-Apr11/
 \begin{table}[h]
 \centering
+\caption*{\textbf{WAIC}}
 \pgfplotstabletypeset[
     col sep=comma,
     string type,
@@ -635,6 +637,7 @@ This work was supported in part by the Israel Science Foundation 3811/19 and 139
 % generated with /python Table-RMSE.py 2020-05-26-Apr11/
 \begin{table}[h]
 \centering
+\caption*{\textbf{RMSE}}
 \pgfplotstabletypeset[
     col sep=comma,
     string type,
@@ -646,7 +649,8 @@ This work was supported in part by the Israel Science Foundation 3811/19 and 139
 	Expected posterior predictive RMSE (root mean squared error) for models  with: no $\tau$ at all, \emph{No}; $\tau$ fixed at the official last NPI date $\tau^*$, \emph{Fixed}; and free parameter $\tau$, \emph{Free}.
 	In all cases, the model with free parameter $\tau$ has the lowest RMSE.
 	Models were fitted to case data up to Apr~11, 2020, and then used to generate 1,000 predictions from Apr~12 to Apr~24 by sampling model parameters from the posterior distribution.
-	These predictions were then compared to the real data using RMSE, and the mean RMSE value is shown in the table for each country and model.
+	These predictions were then compared to the real data using RMSE, and the mean RMSE value is shown in the table for each country and model. 
+	Bold values emphasize cases in which the \emph{Free} model has the lowest RMSE.
 }
 \label{table:RMSE}
 \end{table}
@@ -683,45 +687,45 @@ This work was supported in part by the Israel Science Foundation 3811/19 and 139
  
 
 
-%%% Fig PPC %%% TODO UPDATE
+%%% Fig PPC
 % generated with ppc.sh
 \begin{figure}[h]	
     \centering
 	\subcaption{Austria}
     \begin{subfigure}{0.45\textwidth}
-        \includegraphics[width=\textwidth]{../figures/ppc/fixed/Austria_ppc.pdf}
+        \includegraphics[width=\textwidth]{../figures/ppc/fixed/Austria_ppc_long.pdf}
     \end{subfigure}
     \label{fig:ppc}
     ~
     \begin{subfigure}{0.45\textwidth}
-        \includegraphics[width=\textwidth]{../figures/ppc/free/Austria_ppc.pdf}
+        \includegraphics[width=\textwidth]{../figures/ppc/free/Austria_ppc_long.pdf}
     \end{subfigure}
     %%%
 	\subcaption{Belgium}    
     \begin{subfigure}{0.45\textwidth}
-        \includegraphics[width=\textwidth]{../figures/ppc/fixed/Belgium_ppc.pdf}
+        \includegraphics[width=\textwidth]{../figures/ppc/fixed/Belgium_ppc_long.pdf}
     \end{subfigure}
     ~
     \begin{subfigure}{0.45\textwidth}
-        \includegraphics[width=\textwidth]{../figures/ppc/free/Belgium_ppc.pdf}
+        \includegraphics[width=\textwidth]{../figures/ppc/free/Belgium_ppc_long.pdf}
     \end{subfigure}
     %%%
 	\subcaption{Denmark}    
      \begin{subfigure}{0.45\textwidth}
-        \includegraphics[width=\textwidth]{../figures/ppc/fixed/Denmark_ppc.pdf}
+        \includegraphics[width=\textwidth]{../figures/ppc/fixed/Denmark_ppc_long.pdf}
     \end{subfigure}
     ~
     \begin{subfigure}{0.45\textwidth}
-        \includegraphics[width=\textwidth]{../figures/ppc/free/Denmark_ppc.pdf}
+        \includegraphics[width=\textwidth]{../figures/ppc/free/Denmark_ppc_long.pdf}
     \end{subfigure}
 	%%%
 	\subcaption{France}    
     \begin{subfigure}{0.45\textwidth}
-        \includegraphics[width=\textwidth]{../figures/ppc/fixed/France_ppc.pdf}
+        \includegraphics[width=\textwidth]{../figures/ppc/fixed/France_ppc_long.pdf}
     \end{subfigure}
     ~
     \begin{subfigure}{0.45\textwidth}
-        \includegraphics[width=\textwidth]{../figures/ppc/free/France_ppc.pdf}
+        \includegraphics[width=\textwidth]{../figures/ppc/free/France_ppc_long.pdf}
     \end{subfigure}
 \end{figure}
     %%%
@@ -729,38 +733,38 @@ This work was supported in part by the Israel Science Foundation 3811/19 and 139
     \ContinuedFloat 
 	\subcaption{Germany}    
     \begin{subfigure}{0.45\textwidth}
-        \includegraphics[width=\textwidth]{../figures/ppc/fixed/Germany_ppc.pdf}
+        \includegraphics[width=\textwidth]{../figures/ppc/fixed/Germany_ppc_long.pdf}
     \end{subfigure}
     ~
     \begin{subfigure}{0.45\textwidth}
-        \includegraphics[width=\textwidth]{../figures/ppc/free/Germany_ppc.pdf}
+        \includegraphics[width=\textwidth]{../figures/ppc/free/Germany_ppc_long.pdf}
     \end{subfigure}
     %%% 
 	\subcaption{Italy}    
     \begin{subfigure}{0.45\textwidth}
-        \includegraphics[width=\textwidth]{../figures/ppc/fixed/Italy_ppc.pdf}
+        \includegraphics[width=\textwidth]{../figures/ppc/fixed/Italy_ppc_long.pdf}
     \end{subfigure}
     ~
     \begin{subfigure}{0.45\textwidth}
-        \includegraphics[width=\textwidth]{../figures/ppc/free/Italy_ppc.pdf}
+        \includegraphics[width=\textwidth]{../figures/ppc/free/Italy_ppc_long.pdf}
     \end{subfigure}
     %%% 
 	\subcaption{Norway}    
     \begin{subfigure}{0.45\textwidth}
-        \includegraphics[width=\textwidth]{../figures/ppc/fixed/Norway_ppc.pdf}
+        \includegraphics[width=\textwidth]{../figures/ppc/fixed/Norway_ppc_long.pdf}
     \end{subfigure}
     ~
     \begin{subfigure}{0.45\textwidth}
-        \includegraphics[width=\textwidth]{../figures/ppc/free/Norway_ppc.pdf}
+        \includegraphics[width=\textwidth]{../figures/ppc/free/Norway_ppc_long.pdf}
     \end{subfigure}
     %%%  
 	\subcaption{Spain}     
     \begin{subfigure}{0.45\textwidth}
-        \includegraphics[width=\textwidth]{../figures/ppc/fixed/Spain_ppc.pdf}
+        \includegraphics[width=\textwidth]{../figures/ppc/fixed/Spain_ppc_long.pdf}
     \end{subfigure}
     ~
     \begin{subfigure}{0.45\textwidth}
-        \includegraphics[width=\textwidth]{../figures/ppc/free/Spain_ppc.pdf}
+        \includegraphics[width=\textwidth]{../figures/ppc/free/Spain_ppc_long.pdf}
     \end{subfigure}
 \end{figure}
     %%%
@@ -768,43 +772,37 @@ This work was supported in part by the Israel Science Foundation 3811/19 and 139
     \ContinuedFloat 
 	\subcaption{Sweden}    
     \begin{subfigure}{0.45\textwidth}
-        \includegraphics[width=\textwidth]{../figures/ppc/fixed/Sweden_ppc.pdf}
+        \includegraphics[width=\textwidth]{../figures/ppc/fixed/Sweden_ppc_long.pdf}
     \end{subfigure}
     ~
     \begin{subfigure}{0.45\textwidth}
-        \includegraphics[width=\textwidth]{../figures/ppc/free/Sweden_ppc.pdf}
+        \includegraphics[width=\textwidth]{../figures/ppc/free/Sweden_ppc_long.pdf}
     \end{subfigure}
     %%%  
 	\subcaption{Switzerland}    
     \begin{subfigure}{0.45\textwidth}
-        \includegraphics[width=\textwidth]{../figures/ppc/fixed/Switzerland_ppc.pdf}
+        \includegraphics[width=\textwidth]{../figures/ppc/fixed/Switzerland_ppc_long.pdf}
     \end{subfigure}
     ~
     \begin{subfigure}{0.45\textwidth}
-        \includegraphics[width=\textwidth]{../figures/ppc/free/Switzerland_ppc.pdf}
+        \includegraphics[width=\textwidth]{../figures/ppc/free/Switzerland_ppc_long.pdf}
     \end{subfigure}
     %%%  
 	\subcaption{United Kingdom}    
     \begin{subfigure}{0.45\textwidth}
-        \includegraphics[width=\textwidth]{../figures/ppc/fixed/United_Kingdom_ppc.pdf}
+        \includegraphics[width=\textwidth]{../figures/ppc/fixed/United_Kingdom_ppc_long.pdf}
     \end{subfigure}
     ~
     \begin{subfigure}{0.45\textwidth}
-        \includegraphics[width=\textwidth]{../figures/ppc/free/United_Kingdom_ppc.pdf}
+        \includegraphics[width=\textwidth]{../figures/ppc/free/United_Kingdom_ppc_long.pdf}
     \end{subfigure}
-%    %%%  
-%	\subcaption{Wuhan, China}    
-%    \begin{subfigure}{0.45\textwidth}
-%        \includegraphics[width=\textwidth]{../figures/ppc/fixed/Wuhan_ppc.pdf}
-%    \end{subfigure}
-%    ~
-%    \begin{subfigure}{0.45\textwidth}
-%        \includegraphics[width=\textwidth]{../figures/ppc/free/Wuhan_ppc.pdf}
-%    \end{subfigure}
-    %%%
     \caption{
-    \textbf{Figure S4. Posterior prediction plots.}
-    Markers represent data ($\vec{X}$): circles for data up to Apr~11, 2020, and stars after Apr~12; Apr~11 is represented using a vertical dashed line. Black line represents a smoothing of the data points using a Savitzky-Golay filter. Coloured lines represent posterior predictions from a model with fixed $\tau$ in red, and free $\tau$ in blue. The models were fitted with data up to Apr~11. The predictions are generated by drawing 1,000 parameters sets from the posterior distribution, and then generating a daily case count using the SEIR model in \autoref{eq:model}. Note the differences in the y-axis scale.
+    \textbf{Figure S4. Posterior prediction plots for 11 European countries.}
+    Circles and stars represent daily case data up to and after Apr~11, 2020, respectively, and the vertical dashed line represents Apr~11.
+    Black lines represents a smoothing of the data points using a Savitzky-Golay filter. 
+    Colored lines represent posterior predictions from a model with fixed $\tau$ -- blue -- and free $\tau$ -- green. Models were fitted with data up to Apr~11. The predictions are generated by drawing 1,000 parameters sets from the posterior distribution, and then generating a daily case count using the SEIR model in \autoref{eq:model}. Note the differences in the y-axis scale.
+    Posterior predictions with the free $\tau$ model are good for all countries except Denmark and Sweden, but poor for the fixed $\tau$ model.
+    The predictions of the model without $\tau$ (not shown) are even worse.
     }	
 \end{figure}
 
