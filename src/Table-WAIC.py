@@ -96,6 +96,7 @@ if __name__ == '__main__':
         minidxs = df.idxmin(axis=1)
         for i in columns:
             idx = i==minidxs
+            df.loc[~idx, i] = ['{:.2f}'.format(x) for x in df.loc[~idx, i]] 
             df.loc[idx, i] = ['\\textbf{'+'{:.2f}'.format(x)+'}' for x in df.loc[idx, i]] 
 
     bold_all(df, df.columns)
