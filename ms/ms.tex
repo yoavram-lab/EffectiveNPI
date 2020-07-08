@@ -221,9 +221,6 @@ We compare the posterior predictive plots of a model with a free $\tau$ with tho
 All three models were fitted to case data up to Apr~11, used to predict out-of-sample case data up to Apr~23, and these predictions were then compared to the real case data. 
 The model with free~$\tau$ clearly produces better and less variable predictions~(\autoref{fig:ppc}):
 In all 11 of the European countries, the expected posterior RMSE (root mean squared error) of the out-of-sample predictions is lowest for the model with a free~$\tau$ (\autoref{table:RMSE}).
-% TODO RMSE reference? (Ilia)
-% TODO add table for RMSE (Ilia)
-% TODO consider dropping WAIC for RMSE (both)
 When we compare the models using WAIC~(\autoref{eq:WAIC}, \autoref{table:WAIC}), the model with a free~$\tau$ is strongly preferred in 9 out of 12 countries, the exceptions being Norway (only slight preference), Sweden, and Denmark. Notably, the data for Sweden and Denmark does not have a peak during the evaluated dates, possibly leading to wide 95\% confidence intervals on $\hat{tau}$ (\autoref{fig:tau-summary}) and poor WAIC in the model with free~$\tau$, whereas the duration between the first and last interventions was especially long in Norway (\autoref{table:NPI_dates}).
 
 We compare the official $\tau^*$ and effective $\hat{\tau}$ start of NPIs and find that in most regions (10 of 12) the effective start of NPIs  significantly differs from the official date (\autoref{fig:tau-summary}), that is, the 75\% credible interval on $\hat{\tau}$ does not include $\tau^*$ (\autoref{fig:tau-summary}).
@@ -284,11 +281,12 @@ This may suggest correlations between effective starts of NPIs due to global or 
 
 %%% Early
 \paragraph*{Early effective start of NPIs.}
-In contrast, in some regions we estimate an effective start of NPIs $\hat{\tau}$ that is \emph{earlier} then the official date $\tau^*$ (\autoref{fig:tau-summary}).
+In some regions we estimate an effective start of NPIs $\hat{\tau}$ that is \emph{earlier} then the official date $\tau^*$ (\autoref{fig:tau-summary}).
+The only significant early case is Germany, in which we estimate the effective start of NPIs at Mar~19 ($\pm$1.05 days 95 \%CI; \autoref{fig:early}).
+This date occurs between the the first and last official NPI dates, which are Mar~12 and Mar~22 (\autoref{table:NPI_dates}). Therefore, when we refer to this case as "early", we mean that the effective date (Mar~19) occurs \emph{before} the official lockdown date (Mar~22), not that it occurs before all the NPIs.
+Interestingly, Germany has the longest duration between first and last NPIs except in Norway (10 and 12 days, respectively; see \autoref{table:NPI_dates}).Nevertheless, the credible intervals for the effective date in Germany is very narrow ($\pm$1.05 days 95 \%CI; \autoref{fig:early}), whereas they are very wide in Norway (XXX).
 
-Germany... %TODO (Yoav) \autoref{fig:early}
-
-Sweden and Denmark show early effective start of NPIs. However, for both countries, the casa data does not include a "peak", that is, the number of daily cases continues to grow during the evaluated dates. We suspect this increases the uncertainty in our inference.
+We also estimate early effective start of NPIs in Sweden and Denmark. However, in both countries, the casa data does not include a "peak", that is, the number of daily cases continues to grow during the evaluated dates. We suspect this increases the uncertainty in our inference.
 Accordingly, WAIC of our model with a free $\tau$ parameter was higher (less fit) than the WAIC of a model with $\tau$ fixed at $\tau^*$ the official date.
 
 
@@ -384,8 +382,7 @@ It may be interesting to check if the evidence favors a model with \emph{two} ch
 Two such change-points could reflect escalating NPIs (e.g. school closures followed by lockdowns), or an intervention followed by a relaxation.
 However, interpretation of such models will be harder, as two change-points can also reflect a mix of NPIs and other events, such as changing weather, news of new treatments, and international outbreaks.
 
-% UPDATE
-As countries relieve lockdowns and ease restrictions and the number of cases increases, we expect similar delays and advances to occur: in some countries the population will behave as if restrictions were eased even before the official date, and in some countries the population will continue to self-restrict even after restrictions are officially removed.
+As different countries experiment with various interventions strategies, we expect similar delays and advances to occur: in some cases the population will be late to comply with are guidelines, whereas in other cases the population will adopt restrictions or relaxations even before they are formally declared.
 
 \paragraph*{Conclusions.}
 We have inferred the effective start date of NPIs and found that they often differ from the official dates.
@@ -617,7 +614,7 @@ This work was supported in part by the Israel Science Foundation 3811/19 and 139
 
 
 % Table - WAIC %%% TODO regenerate table
-% generated with /python Table-WAIC.py/
+% generated with /python Table-WAIC.py 2020-05-26-Apr11/
 \begin{table}[h]
 \centering
 \pgfplotstabletypeset[
@@ -634,25 +631,25 @@ This work was supported in part by the Israel Science Foundation 3811/19 and 139
 \end{table}
 
 
-% Table - RMSE %%% TODO regenerate table
-% generated with /python Table-RMSE.py/
-%\begin{table}[h]
-%\centering
-%\pgfplotstabletypeset[
-%    col sep=comma,
-%    string type,
-%    every head row/.style={before row=\hline,after row=\hline},
-%    every last row/.style={after row=\hline},
-%    ]{../figures/Table-RMSE.csv}
-%\caption{
-%\textbf{Posterior RMSE of out-of-sample predictions with the different models.}
-%	Expected posterior predictive RMSE (root mean squared error) for models  with: no $\tau$ at all, \emph{No}; $\tau$ fixed at the official last NPI date $\tau^*$, \emph{Fixed}; and free parameter $\tau$, \emph{Free}.
-%	In all cases, the model with free parameter $\tau$ has the lowest RMSE.
-%	Models were fitted to case data up to Apr~11, 2020, and then used to generate 1,000 predictions from Apr~12 to Apr~24 by sampling model parameters from the posterior distribution.
-%	These predictions were then compared to the real data using RMSE, and the mean RMSE value is shown in the table for each country and model.
-%}
-%\label{table:RMSE}
-%\end{table}
+% Table - RMSE 
+% generated with /python Table-RMSE.py 2020-05-26-Apr11/
+\begin{table}[h]
+\centering
+\pgfplotstabletypeset[
+    col sep=comma,
+    string type,
+    every head row/.style={before row=\hline,after row=\hline},
+    every last row/.style={after row=\hline},
+    ]{../figures/Table-RMSE.csv}
+\caption{
+\textbf{Posterior RMSE of out-of-sample predictions with the different models.}
+	Expected posterior predictive RMSE (root mean squared error) for models  with: no $\tau$ at all, \emph{No}; $\tau$ fixed at the official last NPI date $\tau^*$, \emph{Fixed}; and free parameter $\tau$, \emph{Free}.
+	In all cases, the model with free parameter $\tau$ has the lowest RMSE.
+	Models were fitted to case data up to Apr~11, 2020, and then used to generate 1,000 predictions from Apr~12 to Apr~24 by sampling model parameters from the posterior distribution.
+	These predictions were then compared to the real data using RMSE, and the mean RMSE value is shown in the table for each country and model.
+}
+\label{table:RMSE}
+\end{table}
 
 
 %%% Fig - tau summary Mar 28 %%%
