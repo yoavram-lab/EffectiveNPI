@@ -135,11 +135,11 @@ headheight=12pt
 % Abstract
 \begin{abstract}
 
-During February and March 2020, several countries implemented non-pharmaceutical interventions, such as school closures and lockdowns, with variable schedules, to control the \covid pandemic caused by the \sars virus.
+During Feb-Apr 2020, many countries implemented non-pharmaceutical interventions, such as school closures and lockdowns, with variable schedules, to control the \covid pandemic caused by the \sars virus.
 Overall, these interventions seem to have successfully reduced the spread of the pandemic.
-We hypothesise that the official and effective start date of such interventions can significantly differ, for example due to slow adoption by the population, or due to unpreparedness of the authorities and the public.
+We hypothesise that the official and effective start date of such interventions can significantly differ, for example due to slow adoption by the population, or because the authorities and the public are unprepared.
 We fit an SEIR model to case data from~12 countries to infer the effective start dates of interventions and contrast them with the official dates.
-We find both late and early effects of interventions. For example, Italy implemented a nationwide lockdown on Mar~11, but we infer the effective date on Mar~16 ($\pm$0.47 days 95\% CI). In contrast, Spain announced a lockdown on Mar~14, but we infer an effective start date on Mar~8 ($\pm$ 1.08 days 95\% CI).
+We find mostly late, but also early effects of interventions. For example, Italy implemented a nationwide lockdown on Mar~11, but we infer the effective date on Mar~17 ($\pm$2.99 days 95\% CI). In contrast, Germany announced a lockdown on Mar~22, but we infer an effective start date on Mar~19 ($\pm$ 1.05 days 95\% CI).
 We discuss potential causes and consequences of our results.
 
 \end{abstract}
@@ -283,11 +283,15 @@ This may suggest correlations between effective starts of NPIs due to global or 
 \paragraph*{Early effective start of NPIs.}
 In some regions we estimate an effective start of NPIs $\hat{\tau}$ that is \emph{earlier} then the official date $\tau^*$ (\autoref{fig:tau-summary}).
 The only significant early case is Germany, in which we estimate the effective start of NPIs at Mar~19 ($\pm$1.05 days 95 \%CI; \autoref{fig:early}).
-This date occurs between the the first and last official NPI dates, which are Mar~12 and Mar~22 (\autoref{table:NPI_dates}). Therefore, when we refer to this case as "early", we mean that the effective date (Mar~19) occurs \emph{before} the official lockdown date (Mar~22), not that it occurs before all the NPIs.
-Interestingly, Germany has the longest duration between first and last NPIs except in Norway (10 and 12 days, respectively; see \autoref{table:NPI_dates}).Nevertheless, the credible intervals for the effective date in Germany is very narrow ($\pm$1.05 days 95 \%CI; \autoref{fig:early}), whereas they are very wide in Norway (XXX).
+This estimate falls between the first and last official NPI dates, Mar~12 and Mar~22 (\autoref{table:NPI_dates}). Therefore, when we refer to this case as "early", we mean that the effective date (Mar~19) occurs \emph{before} the official lockdown date (Mar~22), not that it occurs before all the NPIs.
+Interestingly, Germany has the second longest duration between first and last NPIs after Norway (10 and 12 days respectively; see \autoref{table:NPI_dates}).
+Nevertheless, the credible interval for the effective date in Germany is narrow ($\pm$1.05 days 95 \%CI), whereas it is quite wide in Norway ($\pm$10.79 days; \autoref{fig:early}).
 
-We also estimate early effective start of NPIs in Sweden and Denmark. However, in both countries, the casa data does not include a "peak", that is, the number of daily cases continues to grow during the evaluated dates. We suspect this increases the uncertainty in our inference.
-Accordingly, WAIC of our model with a free $\tau$ parameter was higher (less fit) than the WAIC of a model with $\tau$ fixed at $\tau^*$ the official date.
+We also estimate early effective start of NPIs in Sweden and Denmark.
+However, the credible intervals are quite wide (\autoref{fig:tau-summary}), and the fit of the model with free $\tau$ wasn't significantly better than the fit of the model with $\tau$ fixed at the official date (\autoref{table:RMSE}, \autoref{table:WAIC}).
+In Sweden, the data does not "peak", i.e., the number of daily cases continues to grow up to Apr~11 (\autoref{fig:ppc}). 
+In Denmark, the opposite occurs: there are seemingly two "peaks", on Mar~11 and on Apr~8 (\autoref{fig:ppc}); the first "peak" may be a result of stochastic events, for example due to a large cluster of cases or an accumulation of tests.
+We suspect that these missing and additional "peaks" increase the uncertainty in our inference.
 
 
 
@@ -318,14 +322,14 @@ Accordingly, WAIC of our model with a free $\tau$ parameter was higher (less fit
 
 
 %%% Exact
-\paragraph*{Like a Swiss watch.}
-We find one case in which the official and effective dates match (and the credible interval is narrow): Switzerland ordered a national lockdown on Mar~20, after banning public evens and closing schools on Mar~13 and~14~\citep{Flaxman2020}.
+\paragraph*{Early effective start of NPIs.}
+We find one case in which the official and effective dates match "\emph{like a Swiss watch}", and the credible interval is narrow: Switzerland ordered a national lockdown on Mar~20, after banning public evens and closing schools on Mar~13 and~14~\citep{Flaxman2020}.
 Indeed, the posterior median $\hat{\tau}$ is Mar~19 ($\pm$2.51 days 95\% CI, see \autoref{fig:early}). It's also worth mentioning that Switzerland was the first to mandate self isolation of confirmed cases~\citep{Flaxman2020}.
 
 The estimated effective date in Norway is Mar~22 ($\pm$10.79 days 95\% CI), which doesn't significantly differ from the official date of Mar~24.
 However, the posterior distribution is very wide (\autoref{fig:early}): it covers the range between Mar~9, three days before the first NPI, and Mar~29, five days  after the last NPI (see 
 \autoref{table:NPI_dates} and \autoref{fig:NPI_dates} for NPI dates).
-The uncertainty in the estimate of the effective start of NPI may be due to the long duration between the first and last NPI; however, Germany had the second longest duration between first and last NPIs, but the corresponding posterior distribution is quite narrow (\autoref{fig:early}).
+The uncertainty in the estimate of the effective start of NPIs may be due to the long duration between the first and last NPI; however, Germany had the second longest duration between first and last NPIs, but the corresponding posterior distribution is quite narrow (\autoref{fig:early}).
 
 
 %%% Assessment
