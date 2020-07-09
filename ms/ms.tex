@@ -165,6 +165,8 @@ In all countries except Sweden, the date of the last intervention is for a lockd
 \label{table:NPI_dates}
 \end{table}
 
+%TODO 
+% clearly mention that you estimate an aggregated effect for all measures and a single date for when the effect of the measures begins, even though in real life the measures were spread out in time and each one probably has a different effect.
 
 
 % Introduction
@@ -215,7 +217,7 @@ They then fit the model once for time $t<\tau^*$ and once for time $t \ge \tau^*
 For example, \citet{Li2020} estimate the infection dynamics in China before and after $\tau^*$, which is set at Jan 23, 2020. Thereby, they effectively estimate the transmission and reporting rates before and after $\tau^*$ separately.
 
 Here, we estimate the joint posterior distribution of the \emph{effective} start date of the NPIs $\tau$ and the transmission and reporting rates before and after $\tau$ from the entire data, rather than splitting the data at~$\tau$. 
-We then estimate the marginal posterior probability of $\tau$ by marginalising the joint posterior, and estimate $\hat{\tau}$ as the posterior median.
+We then estimate $\hat{\tau}$ as the median of the marginal posterior distribution of $\tau$.
 
 We compare the posterior predictive plots of a model with a free $\tau$ with those of a model with~$\tau$ fixed at~$\tau^*$ and a model without~$\tau$ (i.e. transmission and reporting rates are constant).
 All three models were fitted to case data up to Apr~11, used to predict out-of-sample case data up to Apr~23, and these predictions were then compared to the real case data. 
@@ -235,7 +237,7 @@ In the following, we describe our findings in more detail.
 In half of the examined regions, we estimate that the effective start of NPIs $\hat{\tau}$ is significantly later than the official date $\tau^*$. 
 
 In Italy, the first case was officially confirmed on Feb~21. School closures were implemented on Mar~5~\citep{Flaxman2020}, a lockdown was declared in Northern Italy on Mar~8, with social distancing implemented in the rest of the country, and the lockdown was extended to the entire nation on Mar 11~\citep{Gatto2020}.
-That is, the first and last official NPI dates are Mar~8 and Mar~11.
+That is, the first and last official NPI dates are Mar~5 and Mar~11.
 However, we estimate the effective date $\hat{\tau}$ at Mar~17 ($\pm$2.99 days 95\% CI ; \autoref{fig:late}). 
 
 In Wuhan, China, a lockdown was ordered on Jan 23~\citep{Li2020}, but we estimate the effective start of NPIs to be more than a week later, at Feb~3 ($\pm$2.85 days 95\% CI; \autoref{fig:late}).
@@ -335,7 +337,7 @@ The uncertainty in the estimate of the effective start of NPIs may be due to the
 %%% Assessment
 \paragraph*{Consequences of late and early effect of NPIs on real-time assessment.}
 
-The success of non-pharmaceutical interventions is assessed by health officials using various metrics, such as the decline in the growth rate of daily cases. These assessments are made a specific number of days after the intervention began, to accommodate for the expected serial interval~\citep{Banholzer2020} (i.e. time between successive cases in a chain of transmission), which is estimated at about 4-7 days~\citep{Gatto2020}. % Gatto2020 Table 1
+The success of non-pharmaceutical interventions is assessed by health officials using various metrics, such as the decline in the growth rate of daily cases. These assessments are made a specific number of days after the intervention began, to accommodate for the expected generation interval (i.e. average time between infection events in a chain of transmission), which is estimated at about 4-7 days~\citep{Bar-On2020}.
 
 However, a significant difference between the beginning of the intervention and the effective change in transmission rates can invalidate assessments that assume a serial interval of 4-7 days and neglect the late or early population response to the NPI.
 This is illustrated in \autoref{fig:prediction} using data and parameters from Italy: a lockdown was officially ordered on Mar~10 ($\tau^*$), but its late effect on the infection dynamics starts on Mar~17 ($\hat{\tau}$). If health officials assumed the dynamics to immediately change at $\tau^*$, they will have expected the number of cases be within the red lines (posterior predictions assuming $\tau=\tau^*$).
@@ -413,14 +415,14 @@ For official NPI dates see \autoref{table:NPI_dates}.
 
 %%% SEIR model %%%%
 \paragraph*{SEIR model.} \label{sec:model}
-We model SARS\=/CoV\=/2 infection dynamics by following the number of susceptible $S$, exposed $E$, reported infected $I_r$, unreported infected $I_u$, and recovered $R$ individuals in a population of size $N$.
+We model \sars infection dynamics by following the number of susceptible $S$, exposed $E$, reported infected $I_r$, unreported infected $I_u$, and recovered $R$ individuals in a population of size $N$.
 This model distinguishes between reported and unreported infected individuals: the reported infected are those that have enough symptoms to eventually be tested and thus appear in daily case reports, to which we fit the model.
 This model is inspired by \citet{Li2020} and \citet{Pei2020}, who used a similar model with multiple regions and constant transmission and reporting rates to study \covid dynamics in China and in the continental US.
 
 Susceptible ($S$) individuals become exposed due to contact with reported or unreported infected individuals ($I_r$ or $I_u$) at a rate $\beta_t$ or $\mu \beta_t$, respectively.
 The parameter $0 < \mu < 1$ represents the decreased transmission rate from unreported infected individuals, who are often subclinical or even asymptomatic~\citep{Ferretti2020,Thompson2020}.
 The transmission rate $\beta_t \ge 0$ may change over  time $t$ due to behavioural changes of both susceptible and infected individuals.
-Exposed individuals, after an average incubation period of $Z$ days, become reported infected with probability $\alpha_t$ or unreported infected with probability $(1-\alpha_t)$.
+Exposed individuals, after an average latent period of $Z$ days, become reported infected with probability $\alpha_t$ or unreported infected with probability $(1-\alpha_t)$.
 The reporting rate $0 < \alpha_t < 1$ may also change over time due to changes in human behaviour.
 Infected individuals remain infectious for an average period of $D$ days, after which they either recover, or become ill enough to be quarantined.
 In either case, they no longer infect other individuals, and therefore effectively become recovered ($R$).
@@ -584,7 +586,7 @@ $\tau^*$ is the official last NPI date, see \autoref{table:NPI_dates}.
 % Acknowledgements
 {\small
 \section*{Acknowledgements}
-We thank Lilach Hadany and Oren Kolodny for discussions and comments.
+We thank Yinon M. Bar-On, Lilach Hadany and Oren Kolodny for discussions and comments.
 This work was supported in part by the Israel Science Foundation 3811/19 and 1399/17.
 }
 
@@ -593,8 +595,8 @@ This work was supported in part by the Israel Science Foundation 3811/19 and 139
 \section*{References}
 \nolinenumbers
 \bibliographystyle{agsm}
-%\bibliography{/Users/yoavram/Documents/library}
-\bibliography{ms}
+\bibliography{/Users/yoavram/Documents/library}
+%\bibliography{ms}
 
 
 
