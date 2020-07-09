@@ -50,7 +50,7 @@ if __name__ == '__main__':
 		last_date_days = (last_date - start_date).days
 
 		τ_sample = sample[:, :, -1]
-		nburn = τ_sample.shape[1]//2
+		nburn = τ_sample.shape[1]*0.6
 
 		thin = 100
 		plt.plot(τ_sample[:, ::thin].T)
@@ -100,7 +100,7 @@ if __name__ == '__main__':
 		ax.axvline(last_date_days, color=red)		
 		# ax.fill_between([first_date_days, last_date_days], 0, ymax, alpha=0.4, color=red)
 		ax.set(xlabel=r'Effective start of NPI, $\tau$', 
-		       ylabel=r'Posterior density, $(P(\tau \mid \vec{X})$', 
+		       ylabel=r'Posterior density, $P(\tau \mid \vec{X})$', 
 		       xlim=(τ_sample.min()-1, τ_sample.max()+1),
 		       ylim=(0, ymax)
 		)

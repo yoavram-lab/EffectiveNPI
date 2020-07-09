@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import urllib
 
 import matplotlib as mpl
-mpl.use("Agg")
+# mpl.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats
@@ -158,6 +158,14 @@ if __name__ == '__main__':
 	ax.set_xticks(t[::5])
 	ax.set_xticklabels(labels, rotation=45)
 	ax.set(ylabel='Daily cases', ylim=(-10, ymax))
+
+	NPI_dates = pd.read_csv('../data/NPI_dates.csv')
+	last_date = pd.to_datetime(NPI_dates.loc[NPI_dates['Country'] == country.replace('_', ' '), 'Last'].values[0])
+	last_date_days = (last_date - pd.to_datetime(start_date)).days
+	ax.annotate("", xy=(last_date_days, 0), xytext=(last_date_days-0.5, ymax*0.075),  arrowprops=dict(arrowstyle="-|>",facecolor='black'))
+	if model_type==2 or model_type==1: #have free param τ
+		τ_med = np.median(chain[:,-1])
+		ax.annotate(r'', xy=(τ_med, 0), xytext=(τ_med-0.5, ymax*0.075),  arrowprops=dict(arrowstyle="-|>",facecolor='white'))
 
 	# fig.suptitle(country.replace('_', ' '))
 	fig.tight_layout()
