@@ -79,13 +79,13 @@ def τ_to_string(τ, start_date):
 def log_posterior(θ, model):
     logpri = model.log_prior(θ)  
     if np.isinf(logpri): 
-        return logpri   
+        return logpri, logpri
 
-    assert not np.isnan(logpri), (logpri, θ)
+    # assert not np.isnan(logpri), (logpri, θ)
     loglik = model.log_likelihood(θ)
-    assert not np.isnan(loglik), (loglik, θ)
+    # assert not np.isnan(loglik), (loglik, θ)
     logpost = logpri + loglik
-    return logpost
+    return logpost, logpri #the second val goes to blobs
 
 
 if __name__ == '__main__':
@@ -105,6 +105,15 @@ if __name__ == '__main__':
     ModelClass = get_model_class(model_type)
     if not os.path.exists('../data'):
         os.mkdir('../data')
+
+    output_folder = '../output-tmp/{}{}/inference'.format(now,ver_desc) #tmp folder is not for production
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+    backend_filename =  '{}.h5'.format(country_name)
+    backend_filename = os.path.join(output_folder, backend_filename)
+    autocorr_filename = '{}.autocorr'.format(country_name)
+    autocorr_filename = os.path.join(output_folder, autocorr_filename)
+    print(backend_filename)
 
     if country_name=='Wuhan':
         df = pd.read_csv('../data/Incidence.csv')
@@ -138,25 +147,54 @@ if __name__ == '__main__':
     if args.steps:
         nsteps = args.steps
 
+    backend = emcee.backends.HDFBackend(backend_filename)
+    backend.reset(nwalkers, ndim)
+
+    def runit(sampler,guesses, nsteps):
+        # We'll track how the average autocorrelation time estimate changes
+        index = 0
+        autocorr = np.empty(nsteps)
+
+        # This will be useful to testing convergence
+        old_tau = np.inf
+
+        # Now we'll sample for up to max_n steps
+        for sample in sampler.sample(guesses, iterations=nsteps, progress=True):
+            # Only check convergence every 100 steps
+            if sampler.iteration % 200000:
+                continue
+
+            # Compute the autocorrelation time so far
+            # Using tol=0 means that we'll always get an estimate even
+            # if it isn't trustworthy
+            tau = sampler.get_autocorr_time(tol=0)
+            autocorr[index] = np.mean(tau)
+            index += 1
+            np.savetxt(autocorr_filename, autocorr)
+
+            # Check convergence
+            converged = np.all(tau * 100 < sampler.iteration)
+            converged &= np.all(np.abs(old_tau - tau) / tau < 0.01)
+            if converged:
+                break
+            old_tau = tau
+
     guesses = np.array([model.guess_one() for _ in range(nwalkers)])
     if cores and cores!=1:
         with Pool(cores) as pool:
-            sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[model], pool=pool)
-            sampler.run_mcmc(guesses, nsteps, progress=True);
+            sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[model], pool=pool, backend=backend)
+            # sampler.run_mcmc(guesses, nsteps, progress=True);
+            runit(sampler, guesses, nsteps)
     else:
-        sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[model])
-        sampler.run_mcmc(guesses, nsteps, progress=True);
+        sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[model],backend=backend)
+        runit(sampler, guesses, nsteps)
+        # sampler.run_mcmc(guesses, nsteps, progress=True);
 
     params = [nsteps, ndim, int(N), Td1, Td2, int(model_type)]
 
-    output_folder = '../output-tmp/{}{}/inference'.format(now,ver_desc) #tmp folder is not for production
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
     filename =  '{}.npz'.format(country_name)
     filename = os.path.join(output_folder, filename)
-    print('filling logliks')
-    priors = [model.log_prior(s) for s in sampler.chain.reshape(-1, ndim)]
-    logliks = sampler.lnprobability.reshape(-1) - priors
+    logliks = sampler.lnprobability.reshape(-1) - sampler.get_blobs().reshape(-1)
     print(filename)
     
     np.savez_compressed(
