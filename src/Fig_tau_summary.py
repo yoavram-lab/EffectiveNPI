@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import sys
 
 import matplotlib as mpl
-mpl.use("Agg")
+# mpl.use("	Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -41,7 +41,7 @@ if __name__ == '__main__':
 	job_id = sys.argv[1]
 	verbose = len(sys.argv) > 2 and sys.argv[2] == '-v'
 
-	output_folder = r'/Users/yoavram/Library/Mobile Documents/com~apple~CloudDocs/EffectiveNPI-Data/output/{}'.format(job_id)
+	output_folder = r'../output/{}'.format(job_id)
 	
 	official = get_official_dates()
 	table_path = os.path.join(output_folder, 'tables', 'all-countries-{}.csv'.format(job_id))
@@ -60,6 +60,16 @@ if __name__ == '__main__':
 	df['τ official - mean days'] = df['τ official days'] - df['τ mean days']
 	df['τ official - median days'] = df['τ official days'] - df['τ median days']
 	df['τ median - official days'] = df['τ median days'] - df['τ official days']
+
+	df['τ hpd 75% from days'] = [date_to_int(x) for x in df['τ hpd 75% from']]
+	df['τ hpd 75% to days'] = [date_to_int(x) for x in df['τ hpd 75% to']]
+	df['τ hpd 95% from days'] = [date_to_int(x) for x in df['τ hpd 95% from']]
+	df['τ hpd 95% to days'] = [date_to_int(x) for x in df['τ hpd 95% to']]
+	df['τ hpd 75% from - official days'] = df['τ hpd 75% from days'] - df['τ official days']
+	df['τ hpd 75% to - official days'] = df['τ hpd 75% to days'] - df['τ official days']
+	df['τ hpd 95% from - official days'] = df['τ hpd 95% from days'] - df['τ official days']
+	df['τ hpd 95% to - official days'] = df['τ hpd 95% to days'] - df['τ official days']
+
 	df['τ official - MAP days'] = df['τ official days'] - df['τ MAP days']
 	df['τ mean'] = [date_to_date(x) for x in df['τ mean']]
 	df['τ median'] = [date_to_date(x) for x in df['τ median']]
@@ -79,38 +89,77 @@ if __name__ == '__main__':
 		plt.plot(np.arange(30, 90), np.arange(30, 90), ls='--', color='k')
 		plt.show()
 
+	#### median CrI
+	# col = 'τ median - official days'
+	# ci75_col = 'τ CrI median (75%)'
+	# ci95_col = 'τ CrI median (95%)'
+
+	# fig, ax = plt.subplots(figsize=(6, 6))
+	# df_ = df.sort_values(col, ascending=False)
+
+	# val = df_[col]
+	# ci75 = df_[ci75_col]
+	# ci95 = df_[ci95_col]
+	# country = df_['country']
+	# ax.hlines(country, val-ci95, val+ci95, color='k')
+	# ax.hlines(country, val-ci75, val+ci75, lw=3, color='k')
+
+	# # idx = df_[col] >= 1
+	# idx = df_[col] + ci75 < 0
+	# val = df_.loc[idx, col]
+	# country = df_.loc[idx, 'country']
+	# ax.plot(val, country, 'o', markersize=10, color=blue)
+
+
+	# # # idx = df_[col] <= -1
+	# idx = 0 < df_[col] - ci75
+	# val = df_.loc[idx, col]
+	# country = df_.loc[idx, 'country']
+	# ax.plot(val, country, 'o', markersize=10, color=red)
+
+	# # # idx = (-1 < df_[col]) & (df_[col] < 1)
+	# idx = (0 <= df_[col] + ci75) & (df_[col] - ci75 <= 0)
+	# val = df_.loc[idx, col]
+	# country = df_.loc[idx, 'country']
+	# ax.plot(val, country, 'o', markersize=10, color='k')
+
 	col = 'τ median - official days'
-	ci75_col = 'τ CI median (75%)'
-	ci95_col = 'τ CI median (95%)'
+	ci75_from_col = 'τ hpd 75% from - official days'
+	ci75_to_col = 'τ hpd 75% to - official days'
+	ci95_from_col = 'τ hpd 95% from - official days'
+	ci95_to_col = 'τ hpd 95% to - official days'
 
 	fig, ax = plt.subplots(figsize=(6, 6))
 	df_ = df.sort_values(col, ascending=False)
 
 	val = df_[col]
-	ci75 = df_[ci75_col]
-	ci95 = df_[ci95_col]
+	ci75_from = df_[ci75_from_col]
+	ci75_to = df_[ci75_to_col]
+	ci95_from = df_[ci95_from_col]
+	ci95_to = df_[ci95_to_col]
 	country = df_['country']
-	ax.hlines(country, val-ci95, val+ci95)
-	ax.hlines(country, val-ci75, val+ci75, lw=3)
+	ax.hlines(country, ci95_from, ci95_to, color='k')
+	ax.hlines(country, ci75_from, ci75_to, lw=3, color='k')
 
 	# idx = df_[col] >= 1
-	idx = df_[col] + ci75 < 0
+	idx = ci75_from < 0
 	val = df_.loc[idx, col]
 	country = df_.loc[idx, 'country']
 	ax.plot(val, country, 'o', markersize=10, color=blue)
 
 
 	# # idx = df_[col] <= -1
-	idx = 0 < df_[col] - ci75
+	idx = 0 < ci75_to
 	val = df_.loc[idx, col]
 	country = df_.loc[idx, 'country']
 	ax.plot(val, country, 'o', markersize=10, color=red)
 
 	# # idx = (-1 < df_[col]) & (df_[col] < 1)
-	idx = (0 <= df_[col] + ci75) & (df_[col] - ci75 <= 0)
+	idx = (0 <= ci75_to) & (ci75_from <= 0)
 	val = df_.loc[idx, col]
 	country = df_.loc[idx, 'country']
 	ax.plot(val, country, 'o', markersize=10, color='k')
+
 
 	plt.axvline(0, ls='--', color='k')
 	ax.set(
@@ -121,6 +170,9 @@ if __name__ == '__main__':
 	sns.despine()
 	plt.tight_layout()
 	if verbose: plt.show()
-	fig.savefig('../figures/Fig-tau-summary.pdf', dpi=100)
-	print("Saved to ../figures/Fig-tau-summary.pdf")
+
+	fig_filename = os.path.join(output_folder, 'figures', 'Fig-tau-summary.pdf')
+
+	fig.savefig(fig_filename, dpi=100)
+	print("Saved to {}".format(fig_filename))
 

@@ -68,7 +68,10 @@ def write_csv_header(file_name):
 
     with open(file_name, mode='w') as file: # use pd to write csv files?
         writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(['country','WAIC', 'DIC using median', 'DIC using mean', 'DIC using MAP','loglik(MAP)','loglik(mean)','loglik(median)','N','p_steps','p_model_type','p_Td1','p_Td2','official_τ','τ mean','τ median','τ MAP','official τ from 1 Jan','τ mean from 1 Jan','τ median from 1 Jan','τ MAP from 1 Jan','τ CI median (75%)','τ CI median (95%)','τ CI mean (75%)','τ CI mean (95%)', *params_headers])
+        writer.writerow(['country','WAIC', 'DIC using median', 'DIC using mean', 'DIC using MAP','loglik(MAP)','loglik(mean)','loglik(median)','N','p_steps','p_model_type','p_Td1','p_Td2','official_τ','τ mean','τ median','τ MAP','τ hpd 75% from','τ hpd 75% to','τ hpd 95% from',
+        'τ hpd 95% to',
+        'official τ from 1 Jan','τ mean from 1 Jan','τ median from 1 Jan','τ MAP from 1 Jan','τ CrI median (75%)','τ CrI median (95%)','τ CrI mean (75%)','τ CrI mean (95%)', *params_headers,'τ hpd 75% from','τ hpd 75% to n','τ hpd 95% from n',
+        'τ hpd 95% to n', 'τ hpd CrI 75%', 'τ hpd CrI 95%' ])
 
 def write_csv_data(file_name):
     #params means and medians
@@ -82,6 +85,12 @@ def write_csv_data(file_name):
         τ_posterior = sample[:,var_names.index('τ')].astype(int)
         τ_mean = format(τ_to_string(τ_posterior.mean()))
         τ_median = format(τ_to_string(np.median(τ_posterior)))
+        τ_hpd_75_from, τ_hpd_75_to =  calc_τ_hpd(mass_frac=0.75)
+        τ_hpd_95_from, τ_hpd_95_to =  calc_τ_hpd(mass_frac=0.95)
+        τ_hpd_75_from_date = format(τ_to_string(τ_hpd_75_from))
+        τ_hpd_75_to_date = format(τ_to_string(τ_hpd_75_to))
+        τ_hpd_95_from_date = format(τ_to_string(τ_hpd_95_from))
+        τ_hpd_95_to_date = format(τ_to_string(τ_hpd_95_to))
         τ_MAP =  format(τ_to_string(MAPs[var_names.index('τ')]))
         τ_MAP_i = MAPs[var_names.index('τ')]
     except ValueError: # model with fixed τ
@@ -109,9 +118,13 @@ def write_csv_data(file_name):
 
     with open(file_name, mode='a') as file:
         writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
         writer.writerow([country_name,'{:.4f}'.format(calc_WAIC()), '{:.4f}'.format(calc_DIC(calc_loglik_median)), '{:.4f}'.format(calc_DIC(calc_loglik_mean)), '{:.4f}'.format(calc_DIC(calc_loglikMAP)), '{:.4f}'.format(calc_loglikMAP()),'{:.4f}'.format(calc_loglik_mean()),'{:.4f}'.format(calc_loglik_median()), N, nsteps, model_type, Td1, Td2,
                          τ_to_string(last_NPI),
-                         τ_mean, τ_median, τ_MAP, τ_official_from1Jar,  τ_mean_from1Jar, τ_median_from1Jar, τ_MAP_from1Jar, '{:.4f}'.format(calc_τ_CI_median()),'{:.4f}'.format(calc_τ_CI_median(0.95)), '{:.4f}'.format(calc_τ_CI_mean()),'{:.4f}'.format(calc_τ_CI_mean(0.95)), *params_values])
+                         τ_mean, τ_median,τ_MAP, τ_hpd_75_from_date,τ_hpd_75_to_date, τ_hpd_95_from_date,τ_hpd_95_to_date,
+                         τ_official_from1Jar,  τ_mean_from1Jar, τ_median_from1Jar, τ_MAP_from1Jar, '{:.4f}'.format(calc_τ_CI_median()),'{:.4f}'.format(calc_τ_CI_median(0.95)),
+                          '{:.4f}'.format(calc_τ_CI_mean()),'{:.4f}'.format(calc_τ_CI_mean(0.95)), *params_values, '{:.4f}'.format(τ_hpd_75_from), '{:.4f}'.format(τ_hpd_75_to), '{:.4f}'.format(τ_hpd_95_from), '{:.4f}'.format(τ_hpd_95_to)
+                          , '{:.4f}'.format(τ_hpd_75_to-τ_hpd_75_from), '{:.4f}'.format(τ_hpd_95_to-τ_hpd_95_from)])
 
 def calc_DIC(loglik_E_func):
     loglik_E = loglik_E_func()
@@ -159,6 +172,29 @@ def calc_loglik_mean():
     means = [sample[:,i].mean() for i in range(len(var_names))]
     res = model.log_likelihood(means)
     return res
+
+def calc_hpd(trace, mass_frac) :
+    # Get sorted list
+    d = np.sort(np.copy(trace))
+
+    # Number of total samples taken
+    n = len(trace)
+    
+    # Get number of samples that should be included in HPD
+    n_samples = np.floor(mass_frac * n).astype(int)
+    
+    # Get width (in units of data) of all intervals with n_samples samples
+    int_width = d[n_samples:] - d[:n-n_samples]
+    
+    # Pick out minimal interval
+    min_int = np.argmin(int_width)
+    
+    # Return interval
+    return np.array([d[min_int], d[min_int+n_samples]])
+
+def calc_τ_hpd(mass_frac=0.75):
+    # hpd(sample.T[var_names.index('τ')].astype(int), p)
+    return calc_hpd(sample.T[var_names.index('τ')], mass_frac)
 
 def calc_τ_CI_median(p=0.75):
     try:

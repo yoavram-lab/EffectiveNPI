@@ -20,6 +20,25 @@ colors = {'red':red, 'blue':blue, 'green':green, 'purple':purple}
 def int_to_dt(t):
     return pd.to_datetime(start_date) + timedelta(days=t)
 
+def calc_hpd(trace, mass_frac) :
+    # Get sorted list
+    d = np.sort(np.copy(trace))
+
+    # Number of total samples taken
+    n = len(trace)
+    
+    # Get number of samples that should be included in HPD
+    n_samples = np.floor(mass_frac * n).astype(int)
+    
+    # Get width (in units of data) of all intervals with n_samples samples
+    int_width = d[n_samples:] - d[:n-n_samples]
+    
+    # Pick out minimal interval
+    min_int = np.argmin(int_width)
+    
+    # Return interval
+    return np.array([d[min_int], d[min_int+n_samples]])
+
 if __name__ == '__main__':
 	job_id = sys.argv[1]
 	output_folder = r'../output/{}/'.format(job_id)
@@ -50,7 +69,7 @@ if __name__ == '__main__':
 		last_date_days = (last_date - start_date).days
 
 		τ_sample = sample[:, :, -1]
-		nburn = τ_sample.shape[1]*0.6
+		nburn = int(τ_sample.shape[1]*0.6)
 
 		thin = 100
 		plt.plot(τ_sample[:, ::thin].T)
@@ -86,6 +105,9 @@ if __name__ == '__main__':
 		print("+-{:.2f} days for {:.2f} quantile".format(τ_ci, quantile))
 		# hpi_ = hpd(τ_sample, quantile)#, multimodal=True)
 		# print("HPI {:.2f}-{:.2f} for {:.2f} confidence".format(*hpi_, quantile))
+		τ_hpd_from, τ_hpd_to = calc_hpd(τ_sample, quantile)
+		# print(τ_hpd_from,τ_hpd_to)
+		# print(hpd(τ_sample, quantile)) #arviz hpd is the same
 
 		fig, ax = plt.subplots(figsize=(6, 3))
 		xmin = τ_sample.min()-2.5
@@ -93,7 +115,8 @@ if __name__ == '__main__':
 		density, bins, _ = ax.hist(τ_sample, bins=np.arange(0, xmax, 1), density=True, align='mid')
 		ymax = density.max() * 1.2
 		ax.axvline(τ_med, color='k')
-		ax.fill_between([τ_med - τ_ci, τ_med + τ_ci], 0, ymax, alpha=0.4, color='k')
+		# ax.fill_between([τ_med - τ_ci, τ_med + τ_ci], 0, ymax, alpha=0.4, color='k')
+		ax.fill_between([τ_hpd_from, τ_hpd_to], 0, ymax, alpha=0.4, color='k')
 		# for hpi_ in hpis:
 		# ax.fill_between([hpi_[0], hpi_[1]], 0, ymax, alpha=0.4, color='k')
 		# ax.axvline(first_date_days, color=red)
@@ -116,6 +139,6 @@ if __name__ == '__main__':
 		ax.set_title(country.replace('_', ' '))
 		sns.despine()
 		if not quiet: plt.show()
-		fig_filename = os.path.join(output_folder, 'figures', '{}_τ_posterior.pdf'.format(country))
+		fig_filename = os.path.join(output_folder, 'figures', '{}_τ_posterior_hpd.pdf'.format(country))
 		print("Saving to", fig_filename)
 		fig.savefig(fig_filename, dpi=100, **savefig_bbox(*txt))
