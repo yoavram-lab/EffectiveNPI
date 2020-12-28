@@ -113,6 +113,10 @@ if __name__ == '__main__':
     backend_filename = os.path.join(output_folder, backend_filename)
     autocorr_filename = '{}.autocorr'.format(country_name)
     autocorr_filename = os.path.join(output_folder, autocorr_filename)
+    acceptance_filename = '{}.acceptance'.format(country_name)
+    acceptance_filename = os.path.join(output_folder, acceptance_filename)
+    morestats_npz_filename = '{}.morestats.npz'.format(country_name)
+    morestats_npz_filename = os.path.join(output_folder, morestats_npz_filename)
     print(backend_filename)
 
     if country_name=='Wuhan':
@@ -147,8 +151,8 @@ if __name__ == '__main__':
     if args.steps:
         nsteps = args.steps
 
-    backend = emcee.backends.HDFBackend(backend_filename)
-    backend.reset(nwalkers, ndim)
+    # backend = emcee.backends.HDFBackend(backend_filename) takes too much memory, and can be replaced by np.savez compressed
+    # backend.reset(nwalkers, ndim)
 
     def runit(sampler,guesses, nsteps):
         # We'll track how the average autocorrelation time estimate changes
@@ -171,6 +175,8 @@ if __name__ == '__main__':
             autocorr[index] = np.mean(tau)
             index += 1
             np.savetxt(autocorr_filename, autocorr)
+            np.savetxt(acceptance_filename, np.mean(sample.acceptance_fraction))
+            np.savez(morestats_npz_filename, autocorr=tau, acceptance=sample.acceptance_fraction)
 
             # Check convergence
             converged = np.all(tau * 100 < sampler.iteration)
@@ -182,11 +188,11 @@ if __name__ == '__main__':
     guesses = np.array([model.guess_one() for _ in range(nwalkers)])
     if cores and cores!=1:
         with Pool(cores) as pool:
-            sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[model], pool=pool, backend=backend)
+            sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[model], pool=pool)
             # sampler.run_mcmc(guesses, nsteps, progress=True);
             runit(sampler, guesses, nsteps)
     else:
-        sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[model],backend=backend)
+        sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[model])
         runit(sampler, guesses, nsteps)
         # sampler.run_mcmc(guesses, nsteps, progress=True);
 
