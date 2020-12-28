@@ -175,8 +175,8 @@ if __name__ == '__main__':
             autocorr[index] = np.mean(tau)
             index += 1
             np.savetxt(autocorr_filename, autocorr)
-            np.savetxt(acceptance_filename, np.mean(sample.acceptance_fraction))
-            np.savez(morestats_npz_filename, autocorr=tau, acceptance=sample.acceptance_fraction)
+            np.savetxt(acceptance_filename, np.mean(sampler.acceptance_fraction))
+            np.savez(morestats_npz_filename, autocorr=tau, acceptance=sampler.acceptance_fraction)
 
             # Check convergence
             converged = np.all(tau * 100 < sampler.iteration)
