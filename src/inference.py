@@ -157,14 +157,18 @@ if __name__ == '__main__':
     def runit(sampler,guesses, nsteps):
         # We'll track how the average autocorrelation time estimate changes
         index = 0
-        autocorr = np.empty(nsteps)
+        autocorr = []
+        acceptance = []
+        autocorrall = []
+        acceptanceall = []
+
 
         # This will be useful to testing convergence
         old_tau = np.inf
 
         # Now we'll sample for up to max_n steps
         for sample in sampler.sample(guesses, iterations=nsteps, progress=True):
-            # Only check convergence every 100 steps
+            # Only check convergence every x steps
             if sampler.iteration % 200000:
                 continue
 
@@ -172,11 +176,14 @@ if __name__ == '__main__':
             # Using tol=0 means that we'll always get an estimate even
             # if it isn't trustworthy
             tau = sampler.get_autocorr_time(tol=0)
-            autocorr[index] = np.mean(tau)
-            index += 1
+            autocorrall.append(tau)
+            autocorr.append(np.mean(tau))
             np.savetxt(autocorr_filename, autocorr)
-            np.savetxt(acceptance_filename, np.mean(sampler.acceptance_fraction))
-            np.savez(morestats_npz_filename, autocorr=tau, acceptance=sampler.acceptance_fraction)
+            acceptanceall.append(sampler.acceptance_fraction)
+            acceptance.append(np.mean(sampler.acceptance_fraction))
+
+            np.savetxt(acceptance_filename, acceptance)
+            np.savez(morestats_npz_filename, autocorr=autocorrall, acceptance=acceptanceall)
 
             # Check convergence
             converged = np.all(tau * 100 < sampler.iteration)
