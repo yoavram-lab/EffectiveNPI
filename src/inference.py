@@ -16,6 +16,7 @@ from model.uniform_prior_model import UniformPriorModel
 from model.no_tau_model import NoTauModel
 from model.fixed_tau_model import FixedTauModel
 from model.normal_prior_free_p_model import NormalPriorFreepModel
+from model.normal_prior_negativebin_model import NormalPriorNegativeBinModel
 
 np.random.seed(10)    
 now = datetime.now().strftime('%Y-%m-%d')
@@ -35,10 +36,13 @@ def get_model_class(model_type):
         return FixedTauModel
     elif model_type == 5:
         return NormalPriorFreepModel
+    elif model_type == 6:
+        return NormalPriorNegativeBinModel
     else:
         return None
 
 params_bounds = {
+    'k' : (0.01,100),
     'Z' : (2, 5),
     'D' : (2, 5),
     'μ' : (0.2, 1),
@@ -169,7 +173,7 @@ if __name__ == '__main__':
         # Now we'll sample for up to max_n steps
         for sample in sampler.sample(guesses, iterations=nsteps, progress=True):
             # Only check convergence every x steps
-            if sampler.iteration % 200000:
+            if sampler.iteration % 5000: #200000
                 continue
 
             # Compute the autocorrelation time so far
