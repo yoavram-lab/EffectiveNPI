@@ -173,7 +173,7 @@ if __name__ == '__main__':
         # Now we'll sample for up to max_n steps
         for sample in sampler.sample(guesses, iterations=nsteps, progress=True):
             # Only check convergence every x steps
-            if sampler.iteration % 5000: #200000
+            if sampler.iteration % 200000: #200000
                 continue
 
             # Compute the autocorrelation time so far

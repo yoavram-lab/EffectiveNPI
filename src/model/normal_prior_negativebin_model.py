@@ -62,8 +62,11 @@ class NormalPriorNegativeBinModel(NormalPriorModel):
         n = np.maximum(1, n)
         p = ([p1] * τ + [p2] * (ndays - τ))[1:]
 
-        p= k/(k+n[Δt0-1:] * p[Δt0-1:])
-        loglik = scipy.stats.nbinom.logpmf(X[Δt0:], k, p)
+        mu = n[Δt0-1:] * p[Δt0-1:]
+        size = 1. / k * mu
+        prob = size / (size + mu)
+        #nbinom E = mu, V = (1+k)*mu (k>0)
+        loglik = scipy.stats.nbinom.logpmf(X[Δt0:], size, prob) #NB1
         return loglik.mean()
 
     
