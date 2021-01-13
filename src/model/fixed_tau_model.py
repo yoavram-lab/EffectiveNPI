@@ -15,7 +15,7 @@ class FixedTauModel(NormalPriorModel):
         Z, D, μ, β, α1, λ, α2, E0, Iu0, Δt0 = θ
         Δt0 = int(Δt0)
         if self._in_bounds(Z=Z, D=D, μ=μ, β=β, α1=α1, λ=λ, α2=α2, E0=E0, Iu0=Iu0, Δt0=Δt0):
-            return 0
+            return 0.0
         else:
             return -np.inf
 
