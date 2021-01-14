@@ -69,7 +69,7 @@ class NormalPriorModel:
         last_τ = (self.last_NPI_date - self.start_date).days
         first_τ = (self.get_first_NPI_date - self.start_date).days
 
-        lower = self.params_bounds['Δt0'][1]
+        lower = self.params_bounds['Δt0'][1]+5
         upper = ndays - 2
         μ = (last_τ + first_τ) / 2
         σ = (last_τ - first_τ) / 2
