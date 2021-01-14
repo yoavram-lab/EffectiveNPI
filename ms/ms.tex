@@ -157,6 +157,7 @@ We demonstrate that differences between the official and effective start of NPIs
 
 \pagebreak
 
+%TODO HDI
 
 
 % Table - NPI dates %%%
@@ -544,7 +545,7 @@ R_1 &= \alpha_1 \beta D + (1-\alpha_1) \mu \beta D, \\
 R_2 &= \alpha_2 \lambda \beta D + (1-\alpha_2) \mu \lambda \beta D.
 \end{aligned}
 \end{equation}
-The relative reduction in the effective reproduction number due to NPIs is $\frac{R_1 - R_2}{R1}$.
+The relative reduction in the effective reproduction number due to NPIs is $\frac{R_1 - R_2}{R_1}$.
 
 
 
@@ -572,10 +573,10 @@ D & \sim \mathit{Uniform}(2, 5) \\
 E(0) & \sim \mathit{Uniform}(0, 3000) \\
 I_u(0) & \sim \mathit{Uniform}(0, 3000) \\
 \Delta t & \sim \mathit{Uniform}(1, 5) \\
-\tau &\sim \mathit{TruncatedNormal}\Big(\frac{\tau^*+\tau^0}{2}, \frac{\tau^*-\tau^0}{2}, 1, T-2\Big),
+\tau &\sim \mathit{TruncatedNormal}\Big(\frac{\tau^*+\tau^0}{2}, \frac{\tau^*-\tau^0}{2}, 5, T-2\Big),
 \end{aligned}
 \end{equation}
-where the prior for $\tau$ is a truncated normal distribution shaped so that the date of the first and last NPI, $\tau^0$ and $\tau^*$ (\autoref{table:NPI_dates}), are at minus and plus one standard deviation, and taking values only between 1 and  $T-2$, where $T$ is the number of days in the data $\vec{X}$.
+where the prior for $\tau$ is a truncated normal distribution shaped so that the date of the first and last NPI, $\tau^0$ and $\tau^*$ (\autoref{table:NPI_dates}), are at minus and plus one standard deviation, and taking values only between 5 and  $T-2$, where $T$ is the number of days in the data $\vec{X}$.
 We also tested an uninformative uniform prior, $\mathit{Uniform}(1,T-2)$.
 WAIC (\autoref{eq:WAIC}) of a model with this uniform prior was either higher, or lower by less than 2, compared to WAIC of a model with the truncated normal prior.
 The uninformative prior resulted in non-negligible posterior probability for unreasonable $\tau$ values, such as Mar~1 in the United~Kingdom. This was probably due to MCMC chains being stuck in low posterior regions of the parameter space.
@@ -586,6 +587,9 @@ We checked values of $\Delta t$ larger than five days and found they generally p
 We also tried to estimate the value of $p_t$ before and after $\tau$, instead of keeping it fixed at $1/9$ and $1/6$. The model with fixed values was supported by the evidence (lower WAIC, see below) in 9 of 12 countries. Moreover, the estimates for Wuhan, China were $1/9$ and $1/6$, as in \citet{Li2020}. \\
 Model fitting was calibrated for case data up to Mar~28, and then applied to data up to Apr~11.
 
+%TODO Convergence and merge to previous paragraph
+The integrated autocorrelation time (REF) was averaged across all parameters and chains, and found to be between VALUE FOR NORWAY and VALUE FOR GERMANY (Fig. SX). This means that in our 50 chains, with 7M samples per chain and 2M burnin samples, contain between XXX and XXX effectively uncorrelated samples (PLEASE CALCULATE THESE XXX and XXX numbers).
+We examined the trace plots for TAU in all regions (Fig. SX). All chains seem to converge to the same stationary distribution, in most cases before 2M steps (thus our choice of burnin time). In the case of Spain, single chain converged at around X steps (VERIFY!!). This single chain was considered part of the burnin and removed in the analysis. We also ran additional chains, which we initialized with a different seed and ran for 2M steps. The estimated posterior distributions of TAU are very similar to our main analysis (Fig. SX), further increasing our confidence in the convergence of our inference.
 
 
 %%% Model selection %%%
@@ -605,16 +609,28 @@ Therefore, we exclude from the computation of WAIC chains with mean log-likeliho
 We also plot posterior predictions: we sample 1,000 parameter vectors from the posterior distribution $P(\theta \mid \vec{X})$ fitted to data up to Apr~11, use these parameter vectors to simulate the SEIR model (\autoref{eq:model}) up to Apr~24, and plot the predicted dynamics~(\autoref{fig:ppc}).
 Both the accuracy (i.e. overlap of data and prediction) and the precision (i.e. the tightness of the predictions) are good ways to visually compare models.
 We also compute the expected posterior RMSE (root mean squared error) of these predictions~(\autoref{table:RMSE}).
-
-
-
-%%% Source code %%%
-\paragraph*{Source code.} 
-We use Python 3 with the NumPy, Matplotlib, SciPy, Pandas, Seaborn, and emcee packages.
-All source code will be publicly available under a permissive open-source license at \href{http://github.com/yoavram-lab/EffectiveNPI}{github.com/yoavram-lab/EffectiveNPI}.
 } % small
 
+% Declarations
+{\small
+\section*{Declarations}
+\textbf{Ethics approval and consent to participate.} Not applicable.
 
+\textbf{Consent for publication.} Not applicable.
+
+\textbf{Availability of data and materials.} We use Python 3 with the NumPy, Matplotlib, SciPy, Pandas, Seaborn, and emcee packages.
+Source code will be publicly available under a permissive open-source license at \href{http://github.com/yoavram-lab/EffectiveNPI}{github.com/yoavram-lab/EffectiveNPI}.
+We used freely available data, see source code repository and above \emph{Data} section for details.
+
+\textbf{Competing interests.} The authors declare that they have no competing interests.
+
+\textbf{Funding.} This work was supported in part by the Israel Science Foundation (3811/19 and 552/19, YR). The funding body had no role in designing, performing, or analyzing the study.
+
+\textbf{Authors' contributions.} UO and YR designed the research. IK and YR performed the research and wrote the manuscript. All authors read and approved the final manuscript.
+
+\textbf{Acknowledgements.} 
+We thank Yinon M. Bar-On, Lilach Hadany, and Oren Kolodny for discussions and comments.
+} % small
 
 %% Table - estimated parameters
 % generated with /python Table_estimated_params.py 2020-05-26-Apr11/
@@ -636,14 +652,6 @@ $\tau^*$ is the official last NPI date, see \autoref{table:NPI_dates}.
 
 
 %\pagebreak
-% Acknowledgements
-{\small
-\section*{Acknowledgements}
-We thank Yinon M. Bar-On, Lilach Hadany, and Oren Kolodny for discussions and comments.
-This work was supported in part by the Israel Science Foundation (3811/19 and 552/19, YR).
-}
-
-
 
 \section*{References}
 \nolinenumbers
