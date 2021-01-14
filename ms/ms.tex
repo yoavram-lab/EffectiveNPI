@@ -122,11 +122,12 @@ headheight=12pt
 
 \author[1]{Ilia Kohanovski}
 \author[2,3]{Uri Obolski}
-\author[1,a]{Yoav Ram}
+\author[1,4,a]{Yoav Ram}
 
 \affil[1]{School of Computer Science, Interdisciplinary Center Herzliya, Herzliya 4610101, Israel}
 \affil[2]{School of Public Health, Tel Aviv University, Tel Aviv 6997801, Israel}{
 \affil[3]{Porter School of the Environment and Earth Sciences, Tel Aviv University, Tel Aviv 6997801, Israel}
+\affil[4]{School of Zoology, Faculty of Life Sciences, Tel Aviv University, Tel Aviv 6997801, Israel}
 \affil[a]{Corresponding author: yoav@yoavram.com, ORCID 0000-0002-9653-4458}
 
 % Document
@@ -143,9 +144,9 @@ Keywords: SEIR, COVID-19, public health, pandemic, infectious disease, NPI
 \begin{abstract}
 
 During Feb-Apr 2020, many countries implemented non-pharmaceutical interventions, such as school closures and lockdowns, with variable schedules, to control the \covid pandemic caused by the \sars virus.
-Overall, these interventions seem to have successfully reduced the spread of the pandemic.
+Overall, these interventions seem to have reduced the spread of the pandemic.
 We hypothesise that the official and effective start date of such interventions can significantly differ, for example due to slow adoption by the population, or because the authorities and the public are unprepared.
-We fit an SEIR model to case data from~12 countries to infer the effective start dates of interventions and contrast them with the official dates.
+We fit an SEIR model to case data from~12 regions to infer the effective start dates of interventions and contrast them with the official dates.
 We find mostly late, but also early effects of interventions. For example, Italy implemented a nationwide lockdown on Mar~11, but we infer the effective date on Mar~17 ($\pm$2.99 days 95\% CI). In contrast, Germany announced a lockdown on Mar~22, but we infer an effective start date on Mar~19 ($\pm$ 1.05 days 95\% CI).
 We demonstrate that differences between the official and effective start of NPIs can distort conclusions about their impact, and discuss potential causes and consequences of our results.
 \end{abstract}
@@ -240,8 +241,6 @@ Notably, the data for Sweden and Denmark do not have a single "peak" during the 
 We compare the official $\tau^*$ and effective $\hat{\tau}$ start of NPIs and find that in most regions the effective start of NPIs differs from the official date: in 10 of 12 countries the 75\% credible interval on $\hat{\tau}$ does not include $\tau^*$ (7 of 12 countries when considering a 95\% interval; \autoref{fig:tau-summary}).
 The exceptions are Switzerland and Norway (see below).
 The latter also has a wide 95\% credible interval, perhaps because it has the longest duration between the first and last NPIs~(\autoref{table:NPI_dates}).
-
-In the following, we describe our findings in more detail.
 
 
 
@@ -343,7 +342,7 @@ The uncertainty in the estimate of the effective start of NPIs might be due to t
 
 %%% Exact
 \paragraph*{Exact effective start of NPIs.}
-We find one case in which the official and effective dates match "\emph{like a Swiss watch}" and the credible interval is narrow.
+We find one case in which the official and effective dates match and the credible interval is narrow.
 Switzerland ordered a national lockdown on Mar~20, after banning public evens and closing schools on Mar~13 and~14~\citep{Flaxman2020}.
 Indeed, the posterior median $\hat{\tau}$ is Mar~19 ($\pm$2.51 days 95\% CI, see \autoref{fig:early}). It's also worth mentioning that Switzerland was the first to mandate self isolation of confirmed cases~\citep{Flaxman2020}.
 
@@ -417,7 +416,7 @@ However, the number of cases would actually follow the blue lines (posterior pre
 We have inferred the effective start date of NPIs in several geographical regions using an SEIR model under an MCMC parameter estimation framework.
 We find examples of both late and early effective start of NPIs relative to the official date (\autoref{fig:tau-summary}).
 
-In most investigated countries we find a late effective start of NPIs.
+In most investigated regions we find a late effective start of NPIs.
 For example, in Italy and in Wuhan, China, the effective start of the lockdowns seems to have occurred five or more days after the official date (\autoref{fig:late}).
 This difference might be explained, in some cases, by low compliance: In Italy, for example, the government plan to implement a lockdown in the Northern provinces leaked to the public, resulting in people leaving these provinces before the lockdown started~\citep{Gatto2020}.
 Late effect of NPIs may also be due to the time required by both the government and the citizens to prepare for a lockdown, and for new guidelines to be adopted by the population.
@@ -559,7 +558,7 @@ The model in \autoref{eq:model} is parameterised by the vector $\theta$, where
 \end{equation} 
 
 The likelihood function is defined in \autoref{eq:likelihood}.
-The posterior distribution of the model parameters $P(\theta \mid \vec{X})$ is estimated using the affine-invariant ensemble sampler for Markov chain Monte Carlo (MCMC)~\citep{Goodman2010} implemented in the \texttt{emcee} Python package~\citep{Foreman-Mackey2013}.
+The posterior distribution of the model parameters $P(\theta \mid \vec{X})$ is estimated using the affine-invariant ensemble sampler for Markov chain Monte Carlo (MCMC)~\citep{Goodman2010} implemented in the \texttt{emcee} Python package~\citep{Foreman-Mackey2013}. Reported credible intervals, or CI, are calculated as the highest density intervals, or HDI~\citep{Kruschke2015}.
 
 We defined the following prior distributions on the model parameters $P(\theta)$: 
 \begin{equation} \label{eq:priors}
@@ -579,18 +578,19 @@ I_u(0) & \sim \mathit{Uniform}(0, 3000) \\
 where the prior for $\tau$ is a truncated normal distribution shaped so that the date of the first and last NPI, $\tau^0$ and $\tau^*$ (\autoref{table:NPI_dates}), are at minus and plus one standard deviation, and taking values only between 5 and  $T-2$, where $T$ is the number of days in the data $\vec{X}$.
 We also tested an uninformative uniform prior, $\mathit{Uniform}(1,T-2)$.
 WAIC (\autoref{eq:WAIC}) of a model with this uniform prior was either higher, or lower by less than 2, compared to WAIC of a model with the truncated normal prior.
-The uninformative prior resulted in non-negligible posterior probability for unreasonable $\tau$ values, such as Mar~1 in the United~Kingdom. This was probably due to MCMC chains being stuck in low posterior regions of the parameter space.
+The uninformative prior resulted in non-negligible posterior probability for unreasonable $\tau$ values, such as Mar~1 in the United~Kingdom. 
+%This was probably due to MCMC chains being stuck in low posterior regions of the parameter space.
 We therefore decided to use the more informative truncated normal prior for $\tau$.
 Other priors follow \citet{Li2020}, with the following exceptions.
 $\lambda$ is used to ensure transmission rates are lower after the start of the NPIs ($\lambda < 1$).
 We checked values of $\Delta t$ larger than five days and found they generally produce lower likelihood and unreasonable parameter estimates, and therefore chose $\mathit{Uniform}(1,5)$ as the prior for $\Delta t$.
 We also tried to estimate the value of $p_t$ before and after $\tau$, instead of keeping it fixed at $1/9$ and $1/6$. The model with fixed values was supported by the evidence (lower WAIC, see below) in 9 of 12 countries. Moreover, the estimates for Wuhan, China were $1/9$ and $1/6$, as in \citet{Li2020}. \\
-Model fitting was calibrated for case data up to Mar~28, and then applied to data up to Apr~11.
 
 %TODO Convergence and merge to previous paragraph
 The integrated autocorrelation time (REF) was averaged across all parameters and chains, and found to be between VALUE FOR NORWAY and VALUE FOR GERMANY (Fig. SX). This means that in our 50 chains, with 7M samples per chain and 2M burnin samples, contain between XXX and XXX effectively uncorrelated samples (PLEASE CALCULATE THESE XXX and XXX numbers).
 We examined the trace plots for TAU in all regions (Fig. SX). All chains seem to converge to the same stationary distribution, in most cases before 2M steps (thus our choice of burnin time). In the case of Spain, single chain converged at around X steps (VERIFY!!). This single chain was considered part of the burnin and removed in the analysis. We also ran additional chains, which we initialized with a different seed and ran for 2M steps. The estimated posterior distributions of TAU are very similar to our main analysis (Fig. SX), further increasing our confidence in the convergence of our inference.
 
+Model fitting was calibrated for case data up to Mar~28, and then applied to data up to Apr~11.
 
 %%% Model selection %%%
 \paragraph*{Model comparison.}
@@ -656,8 +656,8 @@ $\tau^*$ is the official last NPI date, see \autoref{table:NPI_dates}.
 \section*{References}
 \nolinenumbers
 \bibliographystyle{agsm}
-%\bibliography{/Users/yoavram/Documents/library}
-\bibliography{ms}
+\bibliography{/Users/yoavram/Documents/library}
+%\bibliography{ms}
 
 
 
