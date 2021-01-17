@@ -24,8 +24,7 @@ from model.uniform_prior_model import UniformPriorModel
 from inference import get_first_NPI_date, get_last_NPI_date, params_bounds, params_bounds, get_model_class
 
 country_name = None
-# Currently lim_steps and delete_chain_less_than are not implemented to work together
-def load_data(file_name, _country_name, burn_fraction=0.6, lim_steps=None, delete_chain_less_than=None): 
+def load_data(file_name, _country_name, nburn=2_000_000, lim_steps=None, delete_chain_less_than=None): 
     # it's the only global point. we initialize all the params here once and don't update it later (only when load_data again for different file_name)
     # TODO PLEASE DONT USE global anywhere in your code
     global first_NPI, last_NPI, incidences, start_date, var_names, nsteps, ndim, N, Td1, Td2, ndays, sample, lnprobability, logliks, model_type, model, country_name
@@ -38,7 +37,6 @@ def load_data(file_name, _country_name, burn_fraction=0.6, lim_steps=None, delet
     chain = data['chain']
     nwalkers = chain.shape[0] #nwalkers before deleting bad chain
     ndays = len(incidences)        
-    nburn = int(nsteps * burn_fraction)
 
     if delete_chain_less_than:
         if len((chain[:,1_000_000, var_names.index('τ')]<delete_chain_less_than).nonzero())>1:
@@ -46,7 +44,7 @@ def load_data(file_name, _country_name, burn_fraction=0.6, lim_steps=None, delet
         bad_chain_ind = (chain[:,1_000_000, var_names.index('τ')]<delete_chain_less_than).nonzero()[0][0]
         chain = np.delete(chain, bad_chain_ind, axis=0)
 
-    sample = chain[:, nburn:, :].reshape(-1, ndim)
+    sample = chain[:, nburn:lim_steps, :].reshape(-1, ndim)
     # try:
     #     sample[:,var_names.index('τ')] = sample[:,var_names.index('τ')].astype(int) #in inference we allways convert it to int
     # except ValueError: #if the model doesn't have such parameter
@@ -56,17 +54,11 @@ def load_data(file_name, _country_name, burn_fraction=0.6, lim_steps=None, delet
     # except ValueError:#if the model doesn't have such parameter
     #     None
 
-    lnprobability = data['lnprobability'][:, nburn:]
-    logliks = data['logliks'].reshape(nwalkers,nsteps)[:,nburn:]
+    lnprobability = data['lnprobability'][:, nburn:lim_steps]
+    logliks = data['logliks'].reshape(nwalkers,nsteps)[:,nburn:lim_steps]
     if delete_chain_less_than:
             lnprobability = np.delete(lnprobability, bad_chain_ind, axis=0)
             logliks = np.delete(logliks, bad_chain_ind, axis=0)
-
-    if lim_steps:
-        #TODO add delete_chain_less logic
-        sample = chain[:, int(lim_steps * burn_fraction):lim_steps, :].reshape(-1, ndim)
-        lnprobability = data['lnprobability'][:, int(lim_steps * burn_fraction):lim_steps]
-        logliks = data['logliks'].reshape(nwalkers,nsteps)[:,int(lim_steps * burn_fraction):lim_steps]
 
     last_NPI = (get_last_NPI_date(country_name) - pd.to_datetime(start_date)).days
     first_NPI = (get_first_NPI_date(country_name) - pd.to_datetime(start_date)).days
