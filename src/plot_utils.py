@@ -61,14 +61,13 @@ def load_data(file_name, _country_name, burn_fraction=0.6, lim_steps=None, delet
     if delete_chain_less_than:
             lnprobability = np.delete(lnprobability, bad_chain_ind, axis=0)
             logliks = np.delete(logliks, bad_chain_ind, axis=0)
-    logliks = logliks.reshape(-1)
 
     if lim_steps:
         #TODO add delete_chain_less logic
         sample = chain[:, int(lim_steps * burn_fraction):lim_steps, :].reshape(-1, ndim)
         lnprobability = data['lnprobability'][:, int(lim_steps * burn_fraction):lim_steps]
-        logliks = data['logliks'].reshape(nwalkers,nsteps)[:,int(lim_steps * burn_fraction):lim_steps].reshape(-1)
-        
+        logliks = data['logliks'].reshape(nwalkers,nsteps)[:,int(lim_steps * burn_fraction):lim_steps]
+
     last_NPI = (get_last_NPI_date(country_name) - pd.to_datetime(start_date)).days
     first_NPI = (get_first_NPI_date(country_name) - pd.to_datetime(start_date)).days
 
@@ -162,9 +161,7 @@ def inliers(logliks, PLOT=False):
     return idx
 
 def calc_WAIC():
-    nwalkers = logliks.size//nsteps
-    l_logliks = logliks.reshape(nwalkers,nsteps)
-    l_logliks = l_logliks[inliers(l_logliks)]
+    l_logliks = logliks[inliers(logliks)]
     S = l_logliks.size
     llpd = -np.log(S) + logsumexp(l_logliks)
     p1 = 2*(-np.log(S) + logsumexp(l_logliks) - l_logliks.mean())
