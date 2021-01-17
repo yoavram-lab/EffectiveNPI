@@ -26,7 +26,11 @@ def main(keys_filename, bibtex_filename, output_filename, verbose):
 
 	out_bib = BibDatabase()
 	for key in citation_keys:
-		e = main_bib.entries_dict[key]
+		try:
+			e = main_bib.entries_dict[key]
+		except KeyError as err:
+			print("** Failed to find '{}', check for typos **".format(key))
+			raise err
 		out_bib.entries.append(e)
 	
 	if verbose:
