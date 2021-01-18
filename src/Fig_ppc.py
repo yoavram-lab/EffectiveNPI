@@ -45,13 +45,13 @@ def date_to_date(x):
 def τ_to_string(τ, start_date):
     return (pd.to_datetime(start_date) + timedelta(days=τ)).strftime('%b %d')
 
-def load_chain(job_id=None, fname=None, burn_fraction=0.6):
+def load_chain(job_id=None, fname=None, delete_chain_less_than=None, nburn=2_000_000):
 	with spinner():
 		if fname is None:
 			fname = os.path.join(output_folder, job_id, 'inference', '{}.npz'.format(country))
 		inference_data = np.load(fname)
 		chain = inference_data['chain']
-		var_names = inference_data['var_names']
+		var_names = list(inference_data['var_names'])
 		nsteps, ndim, N, Td1, Td2, model_type = inference_data['params']
 		X = inference_data['incidences']
 		start_date = inference_data['start_date']
@@ -59,10 +59,19 @@ def load_chain(job_id=None, fname=None, burn_fraction=0.6):
 		# print("Loaded {} with parameters:".format(fname))
 		# print(var_names)
 		nchains, nsteps, ndim = chain.shape
-		nburn = int(nsteps * burn_fraction)
+
+   		if delete_chain_less_than:
+			if len((chain[:,1_000_000, var_names.index('τ')]<delete_chain_less_than).nonzero())>1:
+				raise AssertionError('too many bad chains')
+        	bad_chain_ind = (chain[:,1_000_000, var_names.index('τ')]<delete_chain_less_than).nonzero()[0][0]
+        	chain = np.delete(chain, bad_chain_ind, axis=0)
+
+		
 		chain = chain[:, nburn:, :]
 		chain = chain.reshape((-1, ndim))
 		logliks = logliks.reshape((nchains, nsteps))
+   		if delete_chain_less_than:
+			logliks = np.delete(logliks, bad_chain_ind, axis=0)
 		logliks = logliks[:, nburn:].ravel()
 		return chain, logliks, Td1, Td2, model_type, X, start_date, N
 
@@ -119,7 +128,8 @@ if __name__ == '__main__':
 	ndays = len(X)
 	
 	chain_fname = os.path.join(output_folder, job_id, 'inference', '{}.npz'.format(country))
-	chain, _, Td1, Td2, model_type, _, start_date, N = load_chain(fname=chain_fname)
+	delete_chain_less_than = 15 if country=='Spain' else None
+	chain, _, Td1, Td2, model_type, _, start_date, N = load_chain(fname=chain_fname,delete_chain_less_than=delete_chain_less_than)
 	X_mean = scipy.signal.savgol_filter(X, 3, 1)
 	
 	model_class = get_model_class(model_type)
