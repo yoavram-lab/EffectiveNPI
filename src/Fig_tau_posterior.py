@@ -41,9 +41,10 @@ def calc_hpd(trace, mass_frac) :
 
 if __name__ == '__main__':
 	job_id = sys.argv[1]
-	output_folder = r'../output/{}/'.format(job_id)
+	output_folder = r'../output-tmp/{}/'.format(job_id)
 	country = sys.argv[2]
 	quiet = len(sys.argv) > 3 and sys.argv[3] == '-q'	
+	nburn = 2_000_000
 
 	NPI_dates = pd.read_csv('../data/NPI_dates.csv')
 
@@ -51,6 +52,9 @@ if __name__ == '__main__':
 		countries = [country.replace(' ', '_') for country in NPI_dates['Country']]
 	else:
 		countries = [country]
+
+	if country=='Spain':
+		delete_chain_less_than = 15 #TODO add as input parameter
 
 	for country in countries:
 		npz_path = os.path.join(output_folder, 'inference', '{}.npz').format(country)
@@ -63,13 +67,19 @@ if __name__ == '__main__':
 		sample = data['chain']
 		log_posterior = data['lnprobability']
 
+		if delete_chain_less_than:
+			if len((sample[:,1_000_000, var_names.index('τ')]<delete_chain_less_than).nonzero())>1:
+				raise AssertionError('too many bad chains')
+			bad_chain_ind = (chsampleain[:,1_000_000, var_names.index('τ')]<delete_chain_less_than).nonzero()[0][0]
+			sample = np.delete(sample, bad_chain_ind, axis=0)
+			log_posterior = np.delete(log_posterior, bad_chain_ind, axis=0)
+
 		first_date = pd.to_datetime(NPI_dates.loc[NPI_dates['Country'] == country.replace('_', ' '), 'First'].values[0])
 		last_date = pd.to_datetime(NPI_dates.loc[NPI_dates['Country'] == country.replace('_', ' '), 'Last'].values[0])
 		first_date_days = (first_date - start_date).days
 		last_date_days = (last_date - start_date).days
 
 		τ_sample = sample[:, :, -1]
-		nburn = int(τ_sample.shape[1]*0.6)
 
 		thin = 100
 		plt.plot(τ_sample[:, ::thin].T)
