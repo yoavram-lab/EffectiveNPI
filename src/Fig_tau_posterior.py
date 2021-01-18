@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from arviz import hpd
+# from arviz import hpd
 
 from rakott.mpl import savefig_bbox
 
@@ -55,13 +55,15 @@ if __name__ == '__main__':
 
 	if country=='Spain':
 		delete_chain_less_than = 15 #TODO add as input parameter
+	else:
+		delete_chain_less_than = None
 
 	for country in countries:
 		npz_path = os.path.join(output_folder, 'inference', '{}.npz').format(country)
 		print("Loading inference data from", npz_path)
 		data = np.load(npz_path)
 
-		var_names = data['var_names']
+		var_names = list(data['var_names'])
 		start_date = data['start_date']
 		start_date = pd.to_datetime(start_date)
 		sample = data['chain']
@@ -70,7 +72,7 @@ if __name__ == '__main__':
 		if delete_chain_less_than:
 			if len((sample[:,1_000_000, var_names.index('τ')]<delete_chain_less_than).nonzero())>1:
 				raise AssertionError('too many bad chains')
-			bad_chain_ind = (chsampleain[:,1_000_000, var_names.index('τ')]<delete_chain_less_than).nonzero()[0][0]
+			bad_chain_ind = (sample[:,1_000_000, var_names.index('τ')]<delete_chain_less_than).nonzero()[0][0]
 			sample = np.delete(sample, bad_chain_ind, axis=0)
 			log_posterior = np.delete(log_posterior, bad_chain_ind, axis=0)
 
