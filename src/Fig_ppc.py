@@ -31,19 +31,19 @@ from sklearn.metrics import mean_squared_error
 
 
 def int_to_dt(t):
-    return pd.to_datetime(start_date) + timedelta(days=t)
+	return pd.to_datetime(start_date) + timedelta(days=t)
 
 def date_to_int(x):
-    dt = datetime.strptime(x + ' 2020', '%b %d %Y')
-    td = dt - start_date
-    return td.days
+	dt = datetime.strptime(x + ' 2020', '%b %d %Y')
+	td = dt - start_date
+	return td.days
 
 def date_to_date(x):
-    dt = datetime.strptime(x + ' 2020', '%b %d %Y')
-    return dt
+	dt = datetime.strptime(x + ' 2020', '%b %d %Y')
+	return dt
 
 def τ_to_string(τ, start_date):
-    return (pd.to_datetime(start_date) + timedelta(days=τ)).strftime('%b %d')
+	return (pd.to_datetime(start_date) + timedelta(days=τ)).strftime('%b %d')
 
 def load_chain(job_id=None, fname=None, delete_chain_less_than=None, nburn=2_000_000):
 	with spinner():
@@ -59,12 +59,12 @@ def load_chain(job_id=None, fname=None, delete_chain_less_than=None, nburn=2_000
 		# print("Loaded {} with parameters:".format(fname))
 		# print(var_names)
 		nchains, nsteps, ndim = chain.shape
-
-   		if delete_chain_less_than:
+		
+		if delete_chain_less_than:
 			if len((chain[:,1_000_000, var_names.index('τ')]<delete_chain_less_than).nonzero())>1:
 				raise AssertionError('too many bad chains')
-        	bad_chain_ind = (chain[:,1_000_000, var_names.index('τ')]<delete_chain_less_than).nonzero()[0][0]
-        	chain = np.delete(chain, bad_chain_ind, axis=0)
+			bad_chain_ind = (chain[:,1_000_000, var_names.index('τ')]<delete_chain_less_than).nonzero()[0][0]
+			chain = np.delete(chain, bad_chain_ind, axis=0)
 
 		
 		chain = chain[:, nburn:, :]
@@ -84,24 +84,24 @@ def posterior_prediction(chain, model, nreps):
 
 def load_data(country_name, up_to_date=None):
 	if country_name=='Wuhan':
-	    df = pd.read_csv('../data/Incidence.csv')
-	    df['date'] = pd.to_datetime(df['Date'], dayfirst=True)
-	    df['cases'] = df[country_name]
-	    df = df[::-1] # TODO why?
-	    N = pd.read_csv('../data/pop.csv', index_col='City').loc[country_name].values[0]
+		df = pd.read_csv('../data/Incidence.csv')
+		df['date'] = pd.to_datetime(df['Date'], dayfirst=True)
+		df['cases'] = df[country_name]
+		df = df[::-1] # TODO why?
+		N = pd.read_csv('../data/pop.csv', index_col='City').loc[country_name].values[0]
 	else:
-	    url = 'https://github.com/ImperialCollegeLondon/covid19model/raw/master/data/COVID-19-up-to-date.csv'
-	    fname = '../data/COVID-19-up-to-date_master.csv'
-	    if not os.path.exists(fname):
-	        urllib.request.urlretrieve(url, fname)
-	    df = pd.read_csv(fname, encoding='iso-8859-1')
-	    df['date'] = pd.to_datetime(df['dateRep'], format='%d/%m/%Y')
-	    df = df[df['countriesAndTerritories'] == country_name]
-	    N = df.iloc[0]['popData2018']
+		url = 'https://github.com/ImperialCollegeLondon/covid19model/raw/master/data/COVID-19-up-to-date.csv'
+		fname = '../data/COVID-19-up-to-date_master.csv'
+		if not os.path.exists(fname):
+			urllib.request.urlretrieve(url, fname)
+		df = pd.read_csv(fname, encoding='iso-8859-1')
+		df['date'] = pd.to_datetime(df['dateRep'], format='%d/%m/%Y')
+		df = df[df['countriesAndTerritories'] == country_name]
+		N = df.iloc[0]['popData2018']
 
 	cases_and_dates = df.iloc[::-1][['cases','date']]
 	if up_to_date:
-	    cases_and_dates = cases_and_dates[cases_and_dates['date']<=up_to_date]
+		cases_and_dates = cases_and_dates[cases_and_dates['date']<=up_to_date]
 	start_date = find_start_day(cases_and_dates)
 	X = cases_and_dates.loc[cases_and_dates['date'] >= start_date, 'cases'].values
 	T = cases_and_dates.loc[cases_and_dates['date'] >= start_date, 'date']
@@ -113,7 +113,7 @@ if __name__ == '__main__':
 	date_threshold = datetime(2020, 4, 11)
 	last_date = datetime(2020, 4, 11) + timedelta(15)
 
-	output_folder = r'../output'
+	output_folder = r'../../output-tmp'
 	job_id = sys.argv[1]	
 	country = sys.argv[2]
 	if len(sys.argv) > 2:
@@ -159,7 +159,7 @@ if __name__ == '__main__':
 	ax.plot(t[~idx], X_mean[~idx], '-', color='k')
 	ax.plot(t[idx], X[idx], '*', color='k', alpha=0.5)
 	ax.plot(t[idx], X_mean[idx], '--', color='k')
-	    
+		
 	ax.plot(X_pred.T, color=color, alpha=0.01)
 	
 	ax.axvline((date_threshold-pd.to_datetime(start_date)).days, color='k', ls='--', lw=2)
