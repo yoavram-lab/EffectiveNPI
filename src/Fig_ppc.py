@@ -70,7 +70,7 @@ def load_chain(job_id=None, fname=None, delete_chain_less_than=None, nburn=2_000
         chain = chain[:, nburn:, :]
         chain = chain.reshape((-1, ndim))
         logliks = logliks.reshape((nchains, nsteps))
-           if delete_chain_less_than:
+        if delete_chain_less_than:
             logliks = np.delete(logliks, bad_chain_ind, axis=0)
         logliks = logliks[:, nburn:].ravel()
         return chain, logliks, Td1, Td2, model_type, X, start_date, N
