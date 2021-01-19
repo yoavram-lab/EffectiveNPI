@@ -74,9 +74,9 @@ def write_csv_header(file_name):
 
     with open(file_name, mode='w') as file: # use pd to write csv files?
         writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(['country','WAIC', 'DIC using median', 'DIC using mean', 'DIC using MAP','loglik(MAP)','loglik(mean)','loglik(median)','N','p_steps','p_model_type','p_Td1','p_Td2','official_τ','τ mean','τ median','τ MAP','τ hpd 75% from','τ hpd 75% to','τ hpd 95% from',
+        writer.writerow(['country','WAIC', 'DIC using median', 'DIC using mean', 'DIC using MAP','loglik(MAP)','loglik(mean)','loglik(median)','N','p_steps','p_model_type','p_Td1','p_Td2','official_τ','τ mean d','τ median d','τ MAP d','τ hpd 75% from','τ hpd 75% to','τ hpd 95% from',
         'τ hpd 95% to',
-        'official τ from 1 Jan','τ mean from 1 Jan','τ median from 1 Jan','τ MAP from 1 Jan','τ CrI median (75%)','τ CrI median (95%)','τ CrI mean (75%)','τ CrI mean (95%)', *params_headers,'τ hpd 75% from','τ hpd 75% to n','τ hpd 95% from n',
+        'official τ from 1 Jan','τ mean from 1 Jan','τ median from 1 Jan','τ MAP from 1 Jan','τ CrI median (75%)','τ CrI median (95%)','τ CrI mean (75%)','τ CrI mean (95%)', *params_headers,'τ hpd 75% from n','τ hpd 75% to n','τ hpd 95% from n',
         'τ hpd 95% to n', 'τ hpd CrI 75%', 'τ hpd CrI 95%' ])
 
 def write_csv_data(file_name):
