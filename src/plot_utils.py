@@ -27,7 +27,7 @@ country_name = None
 def load_data(file_name, _country_name, nburn=2_000_000, lim_steps=None, delete_chain_less_than=None): 
     # it's the only global point. we initialize all the params here once and don't update it later (only when load_data again for different file_name)
     # TODO PLEASE DONT USE global anywhere in your code
-    global first_NPI, last_NPI, incidences, start_date, var_names, nsteps, ndim, N, Td1, Td2, ndays, sample, lnprobability, logliks, model_type, model, country_name
+    global first_NPI, last_NPI, incidences, start_date, var_names, realnsteps, nsteps, ndim, N, Td1, Td2, ndays, sample, lnprobability, logliks, model_type, model, country_name
     country_name = _country_name
     data = np.load(file_name)
     incidences = data['incidences']
@@ -36,6 +36,7 @@ def load_data(file_name, _country_name, nburn=2_000_000, lim_steps=None, delete_
     nsteps, ndim, N, Td1, Td2, model_type = data['params']
     chain = data['chain']
     nwalkers = chain.shape[0] #nwalkers before deleting bad chain
+    realnsteps = data['chain'].shape[1]
     ndays = len(incidences)        
 
     if delete_chain_less_than:
@@ -55,7 +56,7 @@ def load_data(file_name, _country_name, nburn=2_000_000, lim_steps=None, delete_
     #     None
 
     lnprobability = data['lnprobability'][:, nburn:lim_steps]
-    logliks = data['logliks'].reshape(nwalkers,nsteps)[:,nburn:lim_steps]
+    logliks = data['logliks'].reshape(nwalkers,realnsteps)[:,nburn:lim_steps]
     if delete_chain_less_than:
             lnprobability = np.delete(lnprobability, bad_chain_ind, axis=0)
             logliks = np.delete(logliks, bad_chain_ind, axis=0)
@@ -74,7 +75,7 @@ def write_csv_header(file_name):
 
     with open(file_name, mode='w') as file: # use pd to write csv files?
         writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(['country','WAIC', 'DIC using median', 'DIC using mean', 'DIC using MAP','loglik(MAP)','loglik(mean)','loglik(median)','N','p_steps','p_model_type','p_Td1','p_Td2','official_τ','τ mean d','τ median d','τ MAP d','τ hpd 75% from','τ hpd 75% to','τ hpd 95% from',
+        writer.writerow(['country','WAIC', 'DIC using median', 'DIC using mean', 'DIC using MAP','loglik(MAP)','loglik(mean)','loglik(median)','N','real_n_steps','p_steps','p_model_type','p_Td1','p_Td2','official_τ','τ mean d','τ median d','τ MAP d','τ hpd 75% from','τ hpd 75% to','τ hpd 95% from',
         'τ hpd 95% to',
         'official τ from 1 Jan','τ mean from 1 Jan','τ median from 1 Jan','τ MAP from 1 Jan','τ CrI median (75%)','τ CrI median (95%)','τ CrI mean (75%)','τ CrI mean (95%)', *params_headers,'τ hpd 75% from n','τ hpd 75% to n','τ hpd 95% from n',
         'τ hpd 95% to n', 'τ hpd CrI 75%', 'τ hpd CrI 95%' ])
@@ -135,7 +136,7 @@ def write_csv_data(file_name):
     with open(file_name, mode='a') as file:
         writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
-        writer.writerow([country_name,'{:.4f}'.format(calc_WAIC()), '{:.4f}'.format(calc_DIC(calc_loglik_median)), '{:.4f}'.format(calc_DIC(calc_loglik_mean)), '{:.4f}'.format(calc_DIC(calc_loglikMAP)), '{:.4f}'.format(calc_loglikMAP()),'{:.4f}'.format(calc_loglik_mean()),'{:.4f}'.format(calc_loglik_median()), N, nsteps, model_type, Td1, Td2,
+        writer.writerow([country_name,'{:.4f}'.format(calc_WAIC()), '{:.4f}'.format(calc_DIC(calc_loglik_median)), '{:.4f}'.format(calc_DIC(calc_loglik_mean)), '{:.4f}'.format(calc_DIC(calc_loglikMAP)), '{:.4f}'.format(calc_loglikMAP()),'{:.4f}'.format(calc_loglik_mean()),'{:.4f}'.format(calc_loglik_median()), N, realnsteps, nsteps, model_type, Td1, Td2,
                          τ_to_string(last_NPI),
                          τ_mean, τ_median,τ_MAP, τ_hpd_75_from_date,τ_hpd_75_to_date, τ_hpd_95_from_date,τ_hpd_95_to_date,
                          τ_official_from1Jar,  τ_mean_from1Jar, τ_median_from1Jar, τ_MAP_from1Jar, '{:.4f}'.format(calc_τ_CI_median()),'{:.4f}'.format(calc_τ_CI_median(0.95)),
