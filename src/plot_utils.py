@@ -106,12 +106,22 @@ def write_csv_data(file_name):
             τ_median =  model.τ
             τ_MAP =  model.τ
             τ_MAP_i = model.τ
+            τ_hpd_75_from,τ_hpd_75_to =  model.τ, model.τ
+            τ_hpd_75_from_date = format(τ_to_string(model.τ))
+            τ_hpd_75_to_date = format(τ_to_string(model.τ))
+            τ_hpd_95_from_date = format(τ_to_string(model.τ))
+            τ_hpd_95_to_date = format(τ_to_string(model.τ))
         except AttributeError: #model without τ
             τ_posterior =np.array([0])
             τ_mean = 0
             τ_median =  0
             τ_MAP =  0
             τ_MAP_i = 0
+            τ_hpd_75_from,τ_hpd_75_to =  0,0
+            τ_hpd_75_from_date = 0
+            τ_hpd_75_to_date = 0
+            τ_hpd_95_from_date = 0
+            τ_hpd_95_to_date = 0
 
     τ_official_from1Jar = (pd.to_datetime(start_date) - pd.Timestamp('2020-01-01')).days + last_NPI
     τ_mean_from1Jar = (pd.to_datetime(start_date) - pd.Timestamp('2020-01-01')).days + τ_posterior.mean()
