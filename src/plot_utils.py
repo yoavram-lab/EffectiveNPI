@@ -106,7 +106,7 @@ def write_csv_data(file_name):
             τ_median =  model.τ
             τ_MAP =  model.τ
             τ_MAP_i = model.τ
-            τ_hpd_75_from,τ_hpd_75_to =  model.τ, model.τ
+            τ_hpd_75_from, τ_hpd_75_to, τ_hpd_95_from,τ_hpd_95_to =  model.τ, model.τ, model.τ, model.τ           
             τ_hpd_75_from_date = format(τ_to_string(model.τ))
             τ_hpd_75_to_date = format(τ_to_string(model.τ))
             τ_hpd_95_from_date = format(τ_to_string(model.τ))
@@ -117,7 +117,7 @@ def write_csv_data(file_name):
             τ_median =  0
             τ_MAP =  0
             τ_MAP_i = 0
-            τ_hpd_75_from,τ_hpd_75_to =  0,0
+            τ_hpd_75_from, τ_hpd_75_to, τ_hpd_95_from, τ_hpd_95_to =  0,0
             τ_hpd_75_from_date = 0
             τ_hpd_75_to_date = 0
             τ_hpd_95_from_date = 0
