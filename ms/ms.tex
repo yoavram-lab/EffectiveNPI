@@ -584,7 +584,7 @@ For the main analysis we use 50 chains (or walkers) per region, with 7M samples 
 % TODO add refs and values
 The \emph{integrated autocorrelation time}~\citep{Foreman-Mackey2013,Goodman2010} was averaged across parameters and chains for each region. 
 It was found to be between XXX for Norway and XXX for Germany (\autoref{fig:autocorr}). % TODO this gives effective number of samples...
-We examined the trace plots for $\tau$ in all regions (FIGURE).
+We examined the trace plots for $\tau$ in all regions (\autoref{fig:trace}).
 All chains seem to converge to the same stationary distribution, in most cases before 2M steps. Thus, we discarded the first 2M samples as burnin samples.
 The only exception is Spain, in which a single chain converged at around X steps.
 We considered this chain as part of the burnin and removed it from the analysis.
@@ -893,6 +893,72 @@ $\tau^*$ is the official last NPI date (\autoref{table:NPI_dates}).
     } 
     \label{fig:autocorr}
 \end{figure}
+
+
+
+%%% Fig Trace plots
+%%% Fig PPC
+% TODO update fixed, Wuhan
+% generated with ppc.sh
+\begin{figure}[p]	
+    \centering
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/traces/Austria_trace3.png}
+    \end{subfigure}
+    ~%%%
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/traces/Belgium_trace3.png}
+    \end{subfigure}
+    ~%%%
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/traces/Denmark_trace3.png}
+    \end{subfigure}
+	~%%%
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/traces/France_trace3.png}
+    \end{subfigure}
+    ~%%%
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/traces/Germany_trace3.png}
+    \end{subfigure}
+    ~%%% 
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/traces/Italy_trace3.png}
+    \end{subfigure}
+    ~%%% 
+	\begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/traces/Norway_trace3.png}
+    \end{subfigure}
+    ~%%%  
+	\begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/traces/Spain_trace3.png}
+    \end{subfigure}
+    ~%%%
+	\begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/traces/Sweden_trace3.png}
+    \end{subfigure}
+    ~%%%  
+	\begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/traces/Switzerland_trace3.png}
+    \end{subfigure}
+    ~%%%  
+	\begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/traces/United_Kingdom_trace3.png}
+    \end{subfigure}
+    ~%%%  
+	\begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/traces/Wuhan_trace3.png}
+    \end{subfigure}
+    \caption{    % TODO update according to requests from Ilia Jan 20 email
+    \textbf{Trace plots for $\tau$.}
+    The value of $\tau$ at each iteration (i.e. sample or step) of 50 chains per region. Each chain is plotted with a different color. In France and Austria some chains converged relatively late but before the burn-in period (2M iterations). In Spain, a single chain converged very late (after roughly 6M iterations). This chain was removed from further analysis. The y-axis range is set to the support of the prior on $\tau$.
+    }
+    \label{fig:trace}	    
+\end{figure}
+
+
+
+% TODO tau-lambda density plots
 
 
 \end{document}  
