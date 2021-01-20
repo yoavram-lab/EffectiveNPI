@@ -579,16 +579,17 @@ $\lambda$ is used to ensure transmission rates are lower after the start of the 
 We checked values of $\Delta t$ larger than five days and found they generally produce lower likelihood and unreasonable parameter estimates, and therefore chose $\mathit{Uniform}(1,5)$ as the prior for $\Delta t$.
 We also tried to estimate the value of $p_t$ before and after $\tau$, instead of keeping it fixed at $1/9$ and $1/6$. The model with fixed values was supported by the evidence (lower WAIC, see below) in 9 of 12 countries. Moreover, the estimates for Wuhan, China were $1/9$ and $1/6$, as in \citet{Li2020}. 
 
-The posterior distribution of the model parameters $P(\theta \mid \vec{X})$ is estimated using the affine-invariant ensemble sampler for Markov chain Monte Carlo (MCMC)~\citep{Goodman2010} implemented in the \texttt{emcee} Python package~\citep{Foreman-Mackey2013}. We used the default configuration using the stretch move with stretch scale parameter $a=2$.
+The posterior distribution of the model parameters $P(\theta \mid \vec{X})$ is estimated using the affine-invariant ensemble sampler for Markov chain Monte Carlo (MCMC)~\citep{Goodman2010}, implemented in the \texttt{emcee} Python package~\citep{Foreman-Mackey2013}.
+We use the default configuration using the stretch move with stretch scale parameter $a=2$.
 For the main analysis we use 50 chains (or walkers) per region, with 7M samples per chain (no thinning was applied).
-% TODO add refs and values
-The \emph{integrated autocorrelation time}~\citep{Foreman-Mackey2013,Goodman2010} was averaged across parameters and chains for each region. 
-It was found to be between XXX for Norway and XXX for Germany (\autoref{fig:autocorr}). % TODO this gives effective number of samples...
+The \emph{integrated autocorrelation time} (IAT)~\citep{Foreman-Mackey2013,Goodman2010} was averaged across parameters and chains for each region. 
+The IAT was between 40K for Norway and 187K for Germany~(\autoref{fig:autocorr}).
 We examined the trace plots for $\tau$ in all regions (\autoref{fig:trace}).
-All chains seem to converge to the same stationary distribution, in most cases before 2M steps. Thus, we discarded the first 2M samples as burnin samples.
-The only exception is Spain, in which a single chain converged at around X steps.
-We considered this chain as part of the burnin and removed it from the analysis.
-We also ran additional chains with 2M samples and a different initialization (i.e. seed). The estimated posterior distributions of $\tau$ were very similar to our main analysis, further increasing our confidence in the convergence of our inference.
+All chains seem to converge to the same stationary distribution, in most cases before 2M steps. Thus, we discarded the first 2M samples as burn-in samples.
+The only exception is Spain, in which a single chain converged at around 6M steps.
+We considered this chain as part of the burn-in and removed it from the analysis.
+Therefore, 50 chains with 5M samples and IAT between 40K and 187K give an effective number of uncorrelated samples between 1,335 and 6,250.
+We ran additional chains with 2M samples and a different initialization (i.e. seed). The estimated posterior distributions of $\tau$ were very similar to our main analysis, further increasing our confidence in the convergence of our inference.
 We also examined the joint posterior distributions of $\tau$ and $\lambda$ to check for correlations (FIGURE). %TODO what do we find?
 
 %%% Model comparison %%%
@@ -733,7 +734,7 @@ $\tau^*$ is the official last NPI date (\autoref{table:NPI_dates}).
 	\includegraphics[width=0.6\textwidth]{../figures/Fig-summary-Mar28.pdf}
     \caption{
     \textbf{Official vs. effective start of non-pharmaceutical interventions estimated up to Mar~28.}
-    	The difference between $\tau$ the effective and $\tau^*$ the official start of NPIs estimated from case data up to Mar~28, 2020, shown for different regions. Here, $\hat{\tau}$ is the marginal posterior median. $\tau^*$ is the last NPI date (a lockdown everywhere by Sweden, see \autoref{table:NPI_dates}). Thin and bold lines show 95\% and 75\% credible intervals (HDI~\citep{Kruschke2015}), respectively. Inference performed similarly to main inference, but with data up to Mar~28 and only 1M samples per chain with 600K burnin.
+    	The difference between $\tau$ the effective and $\tau^*$ the official start of NPIs estimated from case data up to Mar~28, 2020, shown for different regions. Here, $\hat{\tau}$ is the marginal posterior median. $\tau^*$ is the last NPI date (a lockdown everywhere by Sweden, see \autoref{table:NPI_dates}). Thin and bold lines show 95\% and 75\% credible intervals (HDI~\citep{Kruschke2015}), respectively. Inference performed similarly to main inference, but with data up to Mar~28 and only 1M samples per chain with 600K burn-in.
     }
     \label{fig:tau-summary-mar28}
 \end{figure}
@@ -741,7 +742,7 @@ $\tau^*$ is the official last NPI date (\autoref{table:NPI_dates}).
 
 
 %%% Fig PPC
-% TODO update fixed, Wuhan
+% TODO update fixed
 % generated with ppc.sh
 \begin{figure*}[h]	
     \centering
@@ -887,9 +888,8 @@ $\tau^*$ is the official last NPI date (\autoref{table:NPI_dates}).
     \centering
 	\includegraphics[width=\textwidth]{../figures/Fig-autocorr.pdf}
     \caption{
-    \textbf{Integrated autocorrelation time.}
-    The integrated autocorrelation time (IAT)~\citep{Foreman-Mackey2013,Goodman2010}, averaged across model parameters and MCMC chains, as a function of the number of samples in the chains.
-    IAT is less than 200K in all cases, while chain length is 5M after burn-in period of 2M. With 50 chains per region, this gives a at least 1,250 uncorrelated samples for estimating the posterior distribution.
+    \textbf{Integrated autocorrelation time (IAT)}~\citep{Foreman-Mackey2013,Goodman2010}, averaged across model parameters and MCMC chains, as a function of the number of samples in the chains.
+    IAT is less than 187K in all cases, while chain length is 5M after burn-in period of 2M. With 50 chains per region, this gives a at least 1,335 uncorrelated samples for estimating the posterior distribution.
     } 
     \label{fig:autocorr}
 \end{figure}
@@ -898,7 +898,7 @@ $\tau^*$ is the official last NPI date (\autoref{table:NPI_dates}).
 
 %%% Fig Trace plots
 %%% Fig PPC
-% TODO update fixed, Wuhan
+% TODO update fixed
 % generated with ppc.sh
 \begin{figure}[p]	
     \centering
