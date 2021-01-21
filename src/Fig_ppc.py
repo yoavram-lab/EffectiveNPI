@@ -128,7 +128,8 @@ if __name__ == '__main__':
     ndays = len(X)
     
     chain_fname = os.path.join(output_folder, job_id, 'inference', '{}.npz'.format(country))
-    delete_chain_less_than = 15 if country=='Spain' else None
+    if job_id=='7M' and country=='Spain':  #TODO make input parameter
+        delete_chain_less_than = 15 
     chain, _, Td1, Td2, model_type, _, start_date, N = load_chain(fname=chain_fname,delete_chain_less_than=delete_chain_less_than)
     X_mean = scipy.signal.savgol_filter(X, 3, 1)
     

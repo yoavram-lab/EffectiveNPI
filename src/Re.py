@@ -28,28 +28,7 @@ from inference import find_start_day
 from model.normal_prior_model import NormalPriorModel
 from model.fixed_tau_model import FixedTauModel
 from sklearn.metrics import mean_squared_error
-
-
-def load_chain(job_id=None, fname=None, burn_fraction=0.6):
-	with spinner():
-		if fname is None:
-			fname = os.path.join(output_folder, job_id, 'inference', '{}.npz'.format(country))
-		inference_data = np.load(fname)
-		chain = inference_data['chain']
-		var_names = inference_data['var_names']
-		nsteps, ndim, N, Td1, Td2, model_type = inference_data['params']
-		X = inference_data['incidences']
-		start_date = inference_data['start_date']
-		logliks = inference_data['logliks']
-		# print("Loaded {} with parameters:".format(fname))
-		# print(var_names)
-		nchains, nsteps, ndim = chain.shape
-		nburn = int(nsteps * burn_fraction)
-		chain = chain[:, nburn:, :]
-		chain = chain.reshape((-1, ndim))
-		logliks = logliks.reshape((nchains, nsteps))
-		logliks = logliks[:, nburn:].ravel()
-		return chain, logliks, Td1, Td2, model_type, X, start_date, N
+from Fig_ppc import load_chain
 
 def posterior_Re(chain, nreps):
 	# params: ['Z', 'D', 'μ', 'β', 'α1', 'λ', 'α2', ...]
@@ -61,7 +40,6 @@ def posterior_Re(chain, nreps):
 def Re(α, β, D, μ):
     # Li et al 2020, SI pg 4
     return α*β*D + (1-α)*μ*β*D 
-
 
 if __name__ == '__main__':
 	nreps = 1000
@@ -77,6 +55,9 @@ if __name__ == '__main__':
 		print(Re_file, "already exists")
 	else:
 		chain_fname = os.path.join(output_folder, job_id, 'inference', '{}.npz'.format(country))
+		delete_chain_less_than = None
+		if job_id=='7M' and country=='Spain':  #TODO make input parameter
+			delete_chain_less_than = 15 
 		chain, _, _, _, model_type, _, _, _ = load_chain(fname=chain_fname)
 		Re_pre, Re_post = posterior_Re(chain, nreps)
 		rel_reduc_Re = 1 - Re_post / Re_pre

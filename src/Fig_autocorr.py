@@ -14,23 +14,23 @@ class FixedScalarFormatter(matplotlib.ticker.ScalarFormatter):
 
     def _set_order_of_magnitude(self):
         self.orderOfMagnitude = self.power
-        
+
 def plot_auto(country_name): 
     file_name = '7MFixed/inference/{}.autocorr'.format(country_name)
     auto = np.loadtxt(file_name)
     iters = np.array([0]+[i*200000 for i in range(1,len(auto)+1)])/1_000_000
     taus = np.array([0]+list(auto))/1000
-    print(max(taus),country_name)
+    print(max(taus),country_name, len(auto))
 #     plt.plot(iters, iters/100.0,'--k')
     plt.plot(iters, taus, label=country_name)
     plt.xlabel("Samples (1M)")
     plt.ylabel("Average IAT (1K)");
     lgd = plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-    plt.xlim(0,iters[-1])
+    plt.xlim(0,7)
     return lgd
 
 for c in ['Austria','Belgium','Denmark','France','Germany','Italy','Norway',
-          'Spain','Sweden','Switzerland','United_Kingdom']:
+          'Spain','Sweden','Switzerland','United_Kingdom','Wuhan']:
     lgd = plot_auto(c)
 plt.ylim(0)
 
