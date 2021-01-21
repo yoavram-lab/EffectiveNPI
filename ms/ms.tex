@@ -226,12 +226,11 @@ This is done under the simplifying assumption that all interventions start at a 
 We then estimate $\hat{\tau}$ as the median of the marginal posterior distribution of $\tau$.
 Credible intervals (CI) are calculated as the highest density intervals~\citep{Kruschke2014}, and their upper and lower boundaries are reported as $\substack{+\text{upper} \\ -\text{lower}}$ in days relative to $\hat{\tau}$.
 
-We compare the posterior predictive plots of a model with a free $\tau$ with those of a model with~$\tau$ fixed at~$\tau^*$ and a model without~$\tau$ (i.e. transmission and reporting rates are constant).
+We compare the posterior predictive plots of a model with  free±$\tau$ with those of a model with~$\tau$ fixed at~$\tau^*$ and a model without~$\tau$ (i.e. transmission and reporting rates are constant).
 All three models were fitted to case data up to Apr~11, used to predict out-of-sample case data up to Apr~24, and these predictions were then compared to the real case data. 
 The model with free~$\tau$ clearly produces better and less variable predictions~(\autoref{fig:ppc}):
-%TODO update when WAIC and RMSE are ready
-In all 11 of the European countries, the expected posterior RMSE (root mean squared error) of the out-of-sample predictions is lowest for the model with a free~$\tau$ (\autoref{table:RMSE}).
-When we compare the models using WAIC~(\autoref{eq:WAIC}), the model with a free~$\tau$ is strongly preferred in 9 out of 12 countries, the exceptions being Norway (only slight preference), Sweden, and Denmark (\autoref{table:WAIC}).
+In all 11 european countries, the expected posterior RMSE (root mean squared error) of the out-of-sample predictions is lowest for the model with a free~$\tau$ (\autoref{table:RMSE}).
+When we compare the models using WAIC~(\autoref{eq:WAIC}), the model with free~$\tau$ is strongly preferred in 9 out of 12 countries, the exceptions being Norway (only marginal preference), Sweden, and Denmark (\autoref{table:WAIC}).
 Indeed, we estimate low effect of NPIs on transmission in Denmark and Sweden (i.e. $\lambda=0.7$ and $0.74$, respectively; see~\autoref{table:estimated-params}).
 This may interfere with the inference of $\tau$ due to unidentifiability. 
 Notably, the data for Sweden and Denmark do not have a single "peak" during the evaluated dates, possibly leading to wide credible intervals on $\tau$ (\autoref{fig:tau-summary}) and poor WAIC in the model with free~$\tau$, whereas the duration between the first and last interventions was especially long in Norway (\autoref{table:NPI_dates}).
@@ -325,7 +324,7 @@ However, the credible interval for the effective start date in Germany is narrow
 The significantly earlier estimate of $\hat{\tau}$ relative to $\tau^*$ can suggest that early NPIs in Germany more effectively reduced transmission rates compared to other countries. Another possible interpretation is that the German population anticipated the lockdown and reacted before it started.
 
 We also estimate an early effective start of NPIs in Denmark, Norway, and Sweden.
-However, the credible intervals are quite wide (\autoref{fig:tau-summary}), and in Denmark and Sweden the evidence did not support the model with free $\tau$ over the model with $\tau$ fixed at the official date (WAIC values in \autoref{table:WAIC}). %TODO check WAIC
+However, the credible intervals are quite wide (\autoref{fig:tau-summary}), and in Denmark and Sweden the evidence did not support the model with free±$\tau$ over the model with $\tau$ fixed at the official date (WAIC values in \autoref{table:WAIC}).
 Indeed, Denmark and Sweden had the smallest estimated effect of NPIs on transmission rates, which  probably hinders our ability to estimate $\tau$ in these countries (\autoref{table:estimated-params}).
 Moreover, in Sweden the number of daily cases continued to grow up to Apr~11, rather than "peak" (\autoref{fig:ppc}). 
 In Denmark, the opposite occurred: there were seemingly two "peaks", on Mar~11 and on Apr~8 (\autoref{fig:ppc}); the first "peak" may be a result of stochastic events, for example due to a large cluster of cases or an accumulation of tests.
@@ -378,9 +377,9 @@ However, the number of cases would actually follow the blue lines (posterior pre
     \caption{
     \textbf{Impact of NPIs is under-estimated when assuming they start at the official date.}
     Shown are estimates of the relative reductions in $R$ (the effective reproduction number), which measures the impact of NPIs on disease transmission, in 11 European countries.
-     The y-axis shows estimates when assuming the start of NPIs is fixed at the official date (fixed $\tau$); the x-axis shows estimates when inferring the effective start of NPIs from the data (free $\tau$). The dashed line shows a one-to-one correspondence.
+     The y-axis shows estimates when assuming the start of NPIs is fixed at the official date (fixed~$\tau$); the x-axis shows estimates when inferring the effective start of NPIs from the data (free $\tau$). The dashed line shows a one-to-one correspondence.
      Markers and bars denote the posterior median and 50\% credible intervals (HDI).
-    The relative reductions in $R$ are consistently lower for the fixed $\tau$ model (below the dashed line), except in Sweden and Denmark in which uncertainty is high.
+    The relative reductions in $R$ are consistently lower for the fixed~$\tau$ model (below the dashed line), except in Sweden and Denmark in which uncertainty is high.
     } 
     \label{fig:Re}
 \end{figure}
@@ -388,7 +387,6 @@ However, the number of cases would actually follow the blue lines (posterior pre
 
 
 %%% Fig - Prediction
-% TODO update
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.5\textwidth]{../figures/Fig-prediction.pdf}
@@ -586,15 +584,17 @@ We also tried to estimate the value of $p_t$ before and after $\tau$, instead of
 
 The posterior distribution of the model parameters $P(\theta \mid \vec{X})$ is estimated using the affine-invariant ensemble sampler for Markov chain Monte Carlo (MCMC)~\citep{Goodman2010}, implemented in the \texttt{emcee} Python package~\citep{Foreman-Mackey2013}.
 We use the default configuration using the stretch move with stretch scale parameter $a=2$.
-For the main analysis we use 50 chains (or walkers) per region, with 7M samples per chain (no thinning was applied).
+For the main analysis we use 50 chains (or walkers) per region, with 7M samples per chain (no thinning was applied; 6.8M for Wuhan).
 The \emph{integrated autocorrelation time} (IAT)~\citep{Foreman-Mackey2013,Goodman2010} was averaged across parameters and chains for each region. 
-The average IAT was between 32K for Wuhan, China, and 187K for Germany~(\autoref{fig:autocorr}).
+The average IAT was between 31.9K for Wuhan and 187K for Germany~(\autoref{fig:autocorr}).
 We examined the trace plots for $\tau$ in all regions (\autoref{fig:trace}).
 All chains seem to converge to the stationary distribution, in most cases before 2M samples. Thus, we discarded the first 2M samples as burn-in samples.
 The only exception is Spain, in which a single chain converged at around 6M samples.
 We considered this chain as part of the burn-in and removed it from the analysis.
-Therefore, 50 chains with 5M samples and IAT between 32K and 187K give an effective sample size between 1,336 and 7,812.
+Therefore, 50 chains with 5M samples and IAT between 32K and 187K give an effective sample size between 1,336 and 7,523.
 We ran additional chains with 2M samples and a different initialization (i.e. seed). The estimated posterior distributions of $\tau$ were very similar to our main analysis, further increasing our confidence in the convergence of our inference.
+For the models with fixed~$\tau$ and without~$\tau$, in some countries, we use less than 7M samples per chain because the IAT converged sooner.
+In these cases the effective sample size was at between 2,454 (UK) and 10,954 (Spain) in the fixed~$\tau$ model and between 6,230 (Norway) and 94,339 (Italy) in the model without~$\tau$.
 
 
 
@@ -687,29 +687,8 @@ $\tau^*$ is the official last NPI date (\autoref{table:NPI_dates}).
 
 
 
-% Table - WAIC 
-% generated with /python Table-WAIC.py FOLDER NAME
-% TODO update
-\begin{table}[h]
-\centering
-\caption*{\textbf{WAIC}}
-\pgfplotstabletypeset[
-    col sep=comma,
-    string type,
-    every head row/.style={before row=\hline,after row=\hline},
-    every last row/.style={after row=\hline},
-    ]{../figures/Table-WAIC.csv} 
-\caption{
-\textbf{WAIC values for the different models.}
-	WAIC (widely applicable information criterion; \autoref{eq:WAIC})~\citep{gelman2013bayesian} values for models  with: no $\tau$ at all, \emph{No}; $\tau$ fixed at the official last NPI date $\tau^*$, \emph{Fixed}; and free parameter $\tau$, \emph{Free}. WAIC values are scaled as a deviance measure: lower values imply higher predictive accuracy and a difference of 2 is a popular threshold for model comparison~\citep{Kass1995}. Bold values emphasize cases in which the \emph{Free} model has the lowest WAIC.
-} 
-\label{table:WAIC}
-\end{table}
-
-
 % Table - RMSE 
 % generated with /python Table-RMSE.py FOLDER NAME
-% TODO update
 \begin{table}[h]
 \centering
 \caption*{\textbf{RMSE}}
@@ -728,6 +707,26 @@ $\tau^*$ is the official last NPI date (\autoref{table:NPI_dates}).
 	Bold values emphasize cases in which the \emph{Free} model has the lowest RMSE.
 }
 \label{table:RMSE}
+\end{table}
+
+
+
+% Table - WAIC 
+% generated with /python Table-WAIC.py FOLDER NAME
+\begin{table}[h]
+\centering
+\caption*{\textbf{WAIC}}
+\pgfplotstabletypeset[
+    col sep=comma,
+    string type,
+    every head row/.style={before row=\hline,after row=\hline},
+    every last row/.style={after row=\hline},
+    ]{../figures/Table-WAIC.csv} 
+\caption{
+\textbf{WAIC values for the different models.}
+	WAIC (widely applicable information criterion; \autoref{eq:WAIC})~\citep{gelman2013bayesian} values for models  with: no $\tau$ at all, \emph{No}; $\tau$ fixed at the official last NPI date $\tau^*$, \emph{Fixed}; and free parameter $\tau$, \emph{Free}. WAIC values are scaled as a deviance measure: lower values imply higher predictive accuracy and a difference of 2 is a popular threshold for model comparison~\citep{Kass1995}. Bold values emphasize cases in which the \emph{Free} model has the lowest WAIC.
+} 
+\label{table:WAIC}
 \end{table}
 
 
@@ -859,11 +858,11 @@ $\tau^*$ is the official last NPI date (\autoref{table:NPI_dates}).
     \textbf{Posterior prediction plots for 11 European countries.}
     The vertical dashed line represents Apr~11, 2020.
     Circles and stars represent daily case data up to and after Apr~11, respectively
-    Black and white arrows denote the official $\tau^*$ and effective $\hat{\tau}$ start of NPIs, respectively.
+    Black and white arrows denote the official ($\tau^*$) and effective ($\hat{\tau}$) start of NPIs, respectively.
     Black lines represent a smoothing of the data points using a Savitzky-Golay filter with window length 3. 
-    Coloured lines represent posterior predictions from a model with fixed $\tau$ (blue) and free $\tau$ (green). Models were fitted with data up to Apr~11. The predictions are generated by drawing 1,000 parameters sets from the posterior distribution, and then generating a daily case count using the SEIR model (\autoref{eq:model}) up to Apr~24. Note the differences in the y-axis scale.
-    Posterior predictions with the free $\tau$ model predict the out-of-sample data well for all countries except Denmark and Sweden, but poorly with the fixed $\tau$ model.
-    The predictions of the model without $\tau$ (not shown) are even worse.
+    Coloured lines represent posterior predictions from a model with fixed~$\tau$ (blue) and free~$\tau$ (green). Models were fitted with data up to Apr~11. The predictions are generated by drawing 1,000 parameters sets from the posterior distribution, and then generating a daily case count using the SEIR model (\autoref{eq:model}) up to Apr~24. Note the differences in the y-axis scale.
+    Posterior predictions with the free~$\tau$ model predict the out-of-sample data well for all countries except Denmark and Sweden, but poorly with the fixed~$\tau$ model.
+    The predictions of the model without~$\tau$ (not shown) are even worse.
     }
     \label{fig:ppc}	    
 \end{figure*}
