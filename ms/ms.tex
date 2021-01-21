@@ -224,7 +224,7 @@ For example, \citet{Li2020} estimate the infection dynamics in China before and 
 Here, we estimate the joint posterior distribution of the effective start date of NPIs, $\tau$, and the transmission and reporting rates before and after $\tau$ from the entire data, rather than splitting the data at~$\tau$. 
 This is done under the simplifying assumption that all interventions start at a specific date, despite the reality that the durations between the first and last NPIs were between 4 and 12 days (\autoref{table:NPI_dates}, \autoref{fig:NPI_dates}).
 We then estimate $\hat{\tau}$ as the median of the marginal posterior distribution of $\tau$.
-Credible intervals (CI) are calculated as the highest density intervals~\citep{Kruschke2015}, and their upper and lower boundaries are reported as $\substack{+\text{upper} \\ -\text{lower}}$ in days relative to $\hat{\tau}$.
+Credible intervals (CI) are calculated as the highest density intervals~\citep{Kruschke2014}, and their upper and lower boundaries are reported as $\substack{+\text{upper} \\ -\text{lower}}$ in days relative to $\hat{\tau}$.
 
 We compare the posterior predictive plots of a model with a free $\tau$ with those of a model with~$\tau$ fixed at~$\tau^*$ and a model without~$\tau$ (i.e. transmission and reporting rates are constant).
 All three models were fitted to case data up to Apr~11, used to predict out-of-sample case data up to Apr~24, and these predictions were then compared to the real case data. 
@@ -741,7 +741,7 @@ $\tau^*$ is the official last NPI date (\autoref{table:NPI_dates}).
 	\includegraphics[width=0.6\textwidth]{../figures/Fig-summary-Mar28.pdf}
     \caption{
     \textbf{Official vs. effective start of non-pharmaceutical interventions estimated up to Mar~28.}
-    	The difference between $\tau$ the effective and $\tau^*$ the official start of NPIs estimated from case data up to Mar~28, 2020, shown for different regions. Here, $\hat{\tau}$ is the marginal posterior median. $\tau^*$ is the last NPI date (a lockdown everywhere by Sweden, see \autoref{table:NPI_dates}). Thin and bold lines show 95\% and 75\% credible intervals (HDI~\citep{Kruschke2015}), respectively. Inference performed similarly to main inference, but with data up to Mar~28 and only 1M samples per chain with 600K burn-in.
+    	The difference between $\tau$ the effective and $\tau^*$ the official start of NPIs estimated from case data up to Mar~28, 2020, shown for different regions. Here, $\hat{\tau}$ is the marginal posterior median. $\tau^*$ is the last NPI date (a lockdown everywhere by Sweden, see \autoref{table:NPI_dates}). Thin and bold lines show 95\% and 75\% credible intervals (HDI~\citep{Kruschke2014}), respectively. Inference performed similarly to main inference, but with data up to Mar~28 and only 1M samples per chain with 600K burn-in.
     }
     \label{fig:tau-summary-mar28}
 \end{figure}
