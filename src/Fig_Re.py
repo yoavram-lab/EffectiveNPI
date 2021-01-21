@@ -39,9 +39,9 @@ if __name__ == '__main__':
     df = pd.concat(dfs)
     grp = df.groupby(['country', 'model'])
     agg = grp.agg(
-        low=pd.NamedAgg(column="rel_reduc_Re", aggfunc=lambda x: hdi(x, 0.75)[0]),
+        low=pd.NamedAgg(column="rel_reduc_Re", aggfunc=lambda x: hdi(np.array(x), 0.50)[0]),
         median=pd.NamedAgg(column="rel_reduc_Re", aggfunc=np.median),
-        high=pd.NamedAgg(column="rel_reduc_Re", aggfunc=lambda x: hdi(x, 0.75)[1])
+        high=pd.NamedAgg(column="rel_reduc_Re", aggfunc=lambda x: hdi(np.array(x), 0.50)[1])
     ).reset_index()
     df_free = agg[agg['model'] == 'free']
     df_fixed = agg[agg['model'] == 'fixed']
