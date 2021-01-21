@@ -8,7 +8,7 @@ import seaborn as sns
 sns.set_context('paper', font_scale=1.3)
 red, blue, green = sns.color_palette('Set1', 3)
 import pycountry # https://pypi.org/project/pycountry/
-
+from arviz import hdi
 import os
 from glob import glob
 from datetime import datetime, timedelta
@@ -19,8 +19,8 @@ colors = sns.color_palette('Paired')
 
 
 if __name__ == '__main__':
-    job_id_free = '2020-05-26-Apr11'
-    job_id_fixed = '2020-06-25-Apr11-fixedtau'
+    job_id_free = '7M'
+    job_id_fixed = '7MFixed'
 
     dfs = []
     countries = ['Austria', 'Belgium', 'Denmark', 'France', 'Germany', 'Italy', 'Norway', 'Spain', 'Sweden', 'Switzerland', 'United Kingdom']    
@@ -39,9 +39,9 @@ if __name__ == '__main__':
     df = pd.concat(dfs)
     grp = df.groupby(['country', 'model'])
     agg = grp.agg(
-        low=pd.NamedAgg(column="rel_reduc_Re", aggfunc=lambda x: np.percentile(x, 25)),
+        low=pd.NamedAgg(column="rel_reduc_Re", aggfunc=lambda x: hdi(x, 0.75)[0]),
         median=pd.NamedAgg(column="rel_reduc_Re", aggfunc=np.median),
-        high=pd.NamedAgg(column="rel_reduc_Re", aggfunc=lambda x: np.percentile(x, 75))
+        high=pd.NamedAgg(column="rel_reduc_Re", aggfunc=lambda x: hdi(x, 0.75)[1])
     ).reset_index()
     df_free = agg[agg['model'] == 'free']
     df_fixed = agg[agg['model'] == 'fixed']
