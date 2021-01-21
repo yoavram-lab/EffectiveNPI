@@ -26,6 +26,7 @@ def load_chain(job_id, country, nburn=2_000_000):
     fname = os.path.join(output_folder, job_id, 'inference', '{}.npz'.format(country))
     inference_data = np.load(fname)
     nsteps, ndim, N, Td1, Td2, model_type = inference_data['params']
+    nchains, nsteps, ndim = inference_data['data'].shape
     logliks = inference_data['logliks']
     nchains = logliks.size // nsteps
     logliks = logliks.reshape(nchains, nsteps)
@@ -56,7 +57,7 @@ def WAIC(logliks):
     return -2*(llpd + -p1), -2*(llpd + -p2)
 
 if __name__ == '__main__':    
-    output_folder = r'../output'
+    output_folder = r'../../output-tmp'
     
     job_ids = ['7M', '7MNoTau', '7MFixed']
     print('Job IDs:')
