@@ -41,7 +41,7 @@ def calc_hpd(trace, mass_frac) :
 
 if __name__ == '__main__':
 	job_id = sys.argv[1]
-	output_folder = r'../output-tmp/{}/'.format(job_id)
+	output_folder = r'../../output-tmp/{}/'.format(job_id)
 	country = sys.argv[2]
 	quiet = len(sys.argv) > 3 and sys.argv[3] == '-q'	
 	nburn = 2_000_000

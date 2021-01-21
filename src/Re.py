@@ -44,7 +44,7 @@ def Re(α, β, D, μ):
 if __name__ == '__main__':
 	nreps = 1000
 	
-	output_folder = r'../output'
+	output_folder = r'../../output-tmp'
 	job_id = sys.argv[1]	
 	country = sys.argv[2]
 	if len(sys.argv) > 3:
