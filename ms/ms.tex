@@ -322,11 +322,11 @@ The only conclusive early case is Germany, in which we estimate the effective st
 This estimate falls between the first and last official NPI dates, Mar~12 and Mar~22 (\autoref{table:NPI_dates}). Therefore, when we refer to this case as "early", we mean that the effective date (Mar~19) occurs \emph{before} the official lockdown date (Mar~22), not that it occurs before all NPIs.
 Interestingly, Germany had the second longest duration between first and last NPIs after Norway (10 and 12 days respectively; \autoref{table:NPI_dates}).
 However, the credible interval for the effective start date in Germany is narrow (1.91 days), whereas it is very wide in Norway (17.61 days).
-The significantly earlier estimate of $\hat{\tau}$ relative to $\tau^*$ can suggest that early NPIs in Germany more effectively reduced transmission rates compared to other countries. Another possible interpretation is that the German population anticipated the lockdown and began to act accordingly before it started. % TODO rephrase
+The significantly earlier estimate of $\hat{\tau}$ relative to $\tau^*$ can suggest that early NPIs in Germany more effectively reduced transmission rates compared to other countries. Another possible interpretation is that the German population anticipated the lockdown and reacted before it started.
 
 We also estimate an early effective start of NPIs in Denmark, Norway, and Sweden.
 However, the credible intervals are quite wide (\autoref{fig:tau-summary}), and in Denmark and Sweden the evidence did not support the model with free $\tau$ over the model with $\tau$ fixed at the official date (WAIC values in \autoref{table:WAIC}). %TODO check WAIC
-Indeed, Denmark and Sweden had the smallest estimated effect of NPIs on transmission rates, which  probably hinders our ability to estimate $\tau$ in these countries ().%TODO ref to table
+Indeed, Denmark and Sweden had the smallest estimated effect of NPIs on transmission rates, which  probably hinders our ability to estimate $\tau$ in these countries (\autoref{table:estimated-params}).
 Moreover, in Sweden the number of daily cases continued to grow up to Apr~11, rather than "peak" (\autoref{fig:ppc}). 
 In Denmark, the opposite occurred: there were seemingly two "peaks", on Mar~11 and on Apr~8 (\autoref{fig:ppc}); the first "peak" may be a result of stochastic events, for example due to a large cluster of cases or an accumulation of tests.
 We suspect that these missing and additional "peaks" increase the uncertainty in our inference.
@@ -372,7 +372,6 @@ However, the number of cases would actually follow the blue lines (posterior pre
 % generated with
 % > source ./Re.sh
 % > python Fig_Re.py
-% TODO update
 \begin{figure}[h]
     \centering
 	\includegraphics[width=\textwidth]{../figures/Fig_Re.pdf}
