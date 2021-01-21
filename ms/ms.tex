@@ -134,7 +134,6 @@ headheight=12pt
 \begin{document}
 \maketitle
 
-Keywords: SEIR, COVID-19, public health, epidemic, infectious disease, NPI
 
 %\pagebreak 
 
@@ -147,7 +146,12 @@ We fit an SEIR model to case data from~12 regions to infer the effective start d
 We find mostly late, but also early effects of interventions. For example, Italy implemented a nationwide lockdown on Mar~11, but we infer the effective date on Mar~17 ($\substack{+3.05 \\ -2.01}$~days 95\% CI).
 In contrast, Germany announced a lockdown on Mar~22, but we infer an effective start date on Mar~19 ($\substack{+0.92 \\ -0.99}$~days 95\% CI).
 We demonstrate that differences between the official and effective start of NPIs can lead to under-estimating their impact, and discuss potential causes and consequences of our results.
+\\\\
+{\small
+Keywords: SEIR, COVID-19, public health, epidemic, infectious disease, NPI
+}
 \end{abstract}
+
 
 \pagebreak
 
@@ -224,10 +228,11 @@ Credible intervals (CI) are calculated as the highest density intervals~\citep{K
 
 We compare the posterior predictive plots of a model with a free $\tau$ with those of a model with~$\tau$ fixed at~$\tau^*$ and a model without~$\tau$ (i.e. transmission and reporting rates are constant).
 All three models were fitted to case data up to Apr~11, used to predict out-of-sample case data up to Apr~24, and these predictions were then compared to the real case data. 
-% TODO update when ppc fig is ready
 The model with free~$\tau$ clearly produces better and less variable predictions~(\autoref{fig:ppc}):
+%TODO update when WAIC and RMSE are ready
 In all 11 of the European countries, the expected posterior RMSE (root mean squared error) of the out-of-sample predictions is lowest for the model with a free~$\tau$ (\autoref{table:RMSE}).
 When we compare the models using WAIC~(\autoref{eq:WAIC}), the model with a free~$\tau$ is strongly preferred in 9 out of 12 countries, the exceptions being Norway (only slight preference), Sweden, and Denmark (\autoref{table:WAIC}).
+Indeed, when examining the joint posterior distribution of $\tau$ and $\lambda$ (the latter is the reduction in transmission due to NPIs, see \autoref{eq:model}), high values of $\lambda$ are estimated in Denmark and Sweden (0.7 and 0.74, respectively; see~\autoref{table:estimated-params}), probably making the inference of $\tau$ more difficult due to unidentifiability, resulting in a wide posterior for $\tau$. Some correlation between the parameters is also evident in Norway, where $\lambda$ estimates are low (0.31).
 Notably, the data for Sweden and Denmark do not have a single "peak" during the evaluated dates, possibly leading to wide 95\% credible intervals on $\hat{\tau}$ (\autoref{fig:tau-summary}) and poor WAIC in the model with free~$\tau$, whereas the duration between the first and last interventions was especially long in Norway (\autoref{table:NPI_dates}).
 
 We compare the official $\tau^*$ and effective $\tau$ start of NPIs and find that in most regions the effective start of NPIs differs from the official date: in 10 of 12 countries the 75\% credible interval on $\tau$ does not include $\tau^*$ (7 of 12 countries when considering a 95\% interval; \autoref{fig:tau-summary}).
@@ -271,9 +276,9 @@ In Italy, the first case was officially confirmed on Feb~21. School closures wer
 That is, the first and last official NPI dates are Mar~5 and Mar~11.
 However, we estimate the effective date $\hat{\tau}$ six days after the lockdown, at Mar~17 ($\substack{+3.05 \\ -2.01}$~days 95\% CI; \autoref{fig:late}). 
 
-In Wuhan, China, a lockdown was ordered on Jan 23~\citep{Li2020}, but we estimate the effective start of NPIs to be ten days later, at Feb~2 ($\substack{+2.29 \\ -2.97}$~days 95\% CI; \autoref{fig:late}).
+In Wuhan, China, a lockdown was ordered on Jan 23~\citep{Li2020}, but we estimate the effective start of NPIs to be ten days later, at Feb~2 ($\substack{+2.29 \\ -2.97}$~days 95\% CI), although there is low but noticeable posterior probability for Jan~24-25 (\autoref{fig:late}). Higher estimates of $\tau$ (Jan~4) correspond to a wide posterior for $\lambda$ (\autoref{fig:joint}).
 
-In Spain, social distancing was encouraged starting on Mar~8~\citep{Flaxman2020}, but mass gatherings still occurred on Mar~8, including a march of 120,000 people for the \href{https://www.nytimes.com/2020/03/13/world/europe/spain-coronavirus-emergency.html}{International Women's Day}, and a  football match between \href{https://www.espn.com/soccer/match?gameId=550350}{Real Betis and Real Madrid} (final score 2--1) with a crowd of 50,965 in Seville.
+In Spain, social distancing was encouraged starting on Mar~8~\citep{Flaxman2020}, but mass gatherings still occurred on Mar~8, including a march of 120,000 people for the \href{https://www.nytimes.com/2020/03/13/world/europe/spain-coronavirus-emergency.html}{International Women's Day}, and a football match between \href{https://www.espn.com/soccer/match?gameId=550350}{Real Betis and Real Madrid} (final score 2--1) with a crowd of 50,965 in Seville.
 A national lockdown was only announced on Mar~14~\citep{Flaxman2020}.
 Nevertheless, we estimate the effective start of NPI $\hat{\tau}$ eleven days later, at Mar~25($\substack{+1.70 \\ -1.43}$~days 95 \%CI, \autoref{fig:late}).
 
@@ -320,14 +325,15 @@ That $\tau$ is significantly earlier than $\tau^*$ can suggest that early NPIs i
 
 We also estimate an early effective start of NPIs in Denmark, Norway, and Sweden.
 However, the credible intervals are quite wide (\autoref{fig:tau-summary}), and in Denmark and Sweden the evidence did not support the model with free $\tau$ over the model with $\tau$ fixed at the official date (WAIC values in \autoref{table:WAIC}). %TODO check WAIC
-Indeed, Denmark and Sweden had the highest estimates of $\lambda$, that is, the smallest estimated effect of NPIs on transmission rates, which  probably hinders our ability to estimate $\tau$ in these countries.
-Moreover, in Sweden the number of daily cases continues to grow up to Apr~11, rather then "peak" (\autoref{fig:ppc}). 
+Indeed, Denmark and Sweden had the highest estimates of $\lambda$, that is, the smallest estimated effect of NPIs on transmission rates, which  probably hinders our ability to estimate $\tau$ in these countries (see also joint posterior distributions in \autoref{fig:joint}).
+Moreover, in Sweden the number of daily cases continues to grow up to Apr~11, rather than "peak" (\autoref{fig:ppc}). 
 In Denmark, the opposite occurs: there are seemingly two "peaks", on Mar~11 and on Apr~8 (\autoref{fig:ppc}); the first "peak" may be a result of stochastic events, for example due to a large cluster of cases or an accumulation of tests.
 We suspect that these missing and additional "peaks" increase the uncertainty in our inference.
 
 The estimated effective date in Norway is Mar~22, two days earlier than the official date of Mar~24.
-However, the posterior distribution is very wide ($\substack{+5.59 \\ -12.03}$~days 95\% CI): it covers the range between Mar~10, two days before the first NPI, and Mar~27, three days after the last NPI (\autoref{table:NPI_dates}, \autoref{fig:NPI_dates}).
+However, the posterior distribution is very wide ($\substack{+5.59 \\ -12.03}$~days 95\% CI): it covers the range between Mar~10, two days before the first NPI, and Mar~27, three days after the last NPI (\autoref{table:NPI_dates}, \autoref{fig:NPI_dates}). 
 The uncertainty in the estimate of the effective start of NPIs might be due to the long duration between the first and last NPIs; however, Germany had the second longest duration between first and last NPIs, but the corresponding posterior distribution is very narrow (\autoref{fig:early}).
+There may also be an unidentifiability issue, as there is some negative correlation between the estimates of $\tau$ and $\lambda$ (\autoref{fig:joint}). 
 
 
 
@@ -348,7 +354,7 @@ We infer model-based effective reproduction numbers before and after the impleme
 We then estimate the impact of NPIs as the relative reduction in the reproduction number \citep{Flaxman2020}. 
 We compare the impacts estimated using the fixed~$\tau$ model and the free~$\tau$ model.
 That is, we compare the impact estimate assuming that NPIs started at the official date $\tau^*$, versus the estimate when inferring the effective start of NPIs from the data.
-\autoref{fig:Re} demonstrates that estimates from the fixed~$\tau$ model are consistently lower than estimates from the free~$\tau$ model, except in Sweden and Denmark, in which estimation uncertainty is high.   %TODO update when fig Re is ready
+\autoref{fig:Re} demonstrates that estimates from the fixed~$\tau$ model (y-axis) are consistently lower than estimates from the free~$\tau$ model (x-axis), except in Sweden and Denmark, in which estimation uncertainty is high.
 These results suggest that the impact of past NPIs is likely to be under-estimated by health officials and researchers if they assume NPIs effectively start at their official dates.
 The estimated impact can then be interpreted as ineffectiveness of the NPIs, leading to more aggressive NPIs being applied.
 
@@ -371,7 +377,7 @@ However, the number of cases would actually follow the blue lines (posterior pre
 	\includegraphics[width=\textwidth]{../figures/Fig_Re.pdf}
     \caption{
     \textbf{Impact of NPIs is under-estimated when assuming they start at the official date.}
-    Shown are estimates of the relative reductions in $R$ (the effective reproduction number), which measures the impact of NPIs on disease transmission.
+    Shown are estimates of the relative reductions in $R$ (the effective reproduction number), which measures the impact of NPIs on disease transmission, in 11 European countries.
      The y-axis shows estimates when assuming the start of NPIs is fixed at the official date (fixed $\tau$); the x-axis shows estimates when inferring the effective start of NPIs from the data (free $\tau$). The dashed line shows a one-to-one correspondence.
      Markers and bars denote the posterior median and 50\% credible intervals (HDI).
     The relative reductions in $R$ are consistently lower for the fixed $\tau$ model (below the dashed line), except in Sweden and Denmark in which uncertainty is high.
@@ -427,7 +433,7 @@ The number of daily cases was similar in both countries until Mar~8, but diverge
 This may suggest correlations between effective starts of NPIs due to global or international events.
 
 As different countries experiment with various intervention strategies, we expect similar shifts to occur: in some cases the population will be late to comply with new guidelines, whereas in other cases the population will adopt either restrictions or relaxations even before they are formally announced.
-Attempts to asses the impact of NPIs~\citep{Banholzer2020,Flaxman2020} generally assume they start at their official date, and that a significant change in the dynamics can be observed roughly seven days after the start of NPIs (due to the characteristic serial interval of \covid\citep{Ali2020}).
+Attempts to assess the impact of NPIs~\citep{Banholzer2020,Flaxman2020} generally assume they start at their official date, and that a significant change in the dynamics can be observed roughly seven days after the start of NPIs (due to the characteristic serial interval of \covid\citep{Ali2020}).
 However, late and early effective start of NPIs, such as we have inferred, can bias these assessments and lead to wrong conclusions about the impact of NPIs (Figures~\ref{fig:Re} and~\ref{fig:prediction}).
 
 Our results highlight the complex interaction between personal, regional, and global determinants of behavioral response to an epidemic.
@@ -572,7 +578,6 @@ where the prior for $\tau$ is a truncated normal distribution shaped so that the
 We also tested an uninformative uniform prior, $\mathit{Uniform}(1,T-2)$.
 WAIC (\autoref{eq:WAIC}) of a model with this uniform prior was either higher, or lower by less than 2, compared to WAIC of a model with the truncated normal prior.
 The uninformative prior resulted in non-negligible posterior probability for unreasonable $\tau$ values, such as Mar~1 in the United~Kingdom. 
-%This was probably due to MCMC chains being stuck in low posterior regions of the parameter space.
 We therefore decided to use the more informative truncated normal prior for $\tau$.
 Other priors follow \citet{Li2020}, with the following exceptions.
 $\lambda$ is used to ensure transmission rates are lower after the start of the NPIs ($\lambda < 1$).
@@ -583,14 +588,16 @@ The posterior distribution of the model parameters $P(\theta \mid \vec{X})$ is e
 We use the default configuration using the stretch move with stretch scale parameter $a=2$.
 For the main analysis we use 50 chains (or walkers) per region, with 7M samples per chain (no thinning was applied).
 The \emph{integrated autocorrelation time} (IAT)~\citep{Foreman-Mackey2013,Goodman2010} was averaged across parameters and chains for each region. 
-The IAT was between 40K for Norway and 187K for Germany~(\autoref{fig:autocorr}).
+The IAT was between 32K for Wuhan, China, and 187K for Germany~(\autoref{fig:autocorr}).
 We examined the trace plots for $\tau$ in all regions (\autoref{fig:trace}).
 All chains seem to converge to the same stationary distribution, in most cases before 2M steps. Thus, we discarded the first 2M samples as burn-in samples.
 The only exception is Spain, in which a single chain converged at around 6M steps.
 We considered this chain as part of the burn-in and removed it from the analysis.
-Therefore, 50 chains with 5M samples and IAT between 40K and 187K give an effective number of uncorrelated samples between 1,335 and 6,250.
+Therefore, 50 chains with 5M samples and IAT between 40K and 187K give an effective samples size between 1,335 and 7,812.
 We ran additional chains with 2M samples and a different initialization (i.e. seed). The estimated posterior distributions of $\tau$ were very similar to our main analysis, further increasing our confidence in the convergence of our inference.
-We also examined the joint posterior distributions of $\tau$ and $\lambda$ to check for correlations (FIGURE). %TODO what do we find?
+We also examined the joint posterior distributions of $\tau$ and $\lambda$ (\autoref{fig:joint}).
+
+
 
 %%% Model comparison %%%
 \paragraph*{Model comparison.}
@@ -627,7 +634,7 @@ We used freely available data, see source code repository and above \emph{Data} 
 \textbf{Authors' contributions.} UO and YR designed the research. IK and YR performed the research and wrote the manuscript. All authors read and approved the final manuscript.
 
 \textbf{Acknowledgements.} 
-We thank Yinon M. Bar-On, Lilach Hadany, and Oren Kolodny for discussions and comments. % Tim CD Lucas
+We thank Yinon M. Bar-On, Lilach Hadany, Oren Kolodny, and Zohar Yakhini. % Tim CD Lucas
 } % small
 
 %% Table - estimated parameters
@@ -742,7 +749,6 @@ $\tau^*$ is the official last NPI date (\autoref{table:NPI_dates}).
 
 
 %%% Fig PPC
-% TODO update fixed
 % generated with ppc.sh
 \begin{figure*}[h]	
     \centering
@@ -865,6 +871,64 @@ $\tau^*$ is the official last NPI date (\autoref{table:NPI_dates}).
 
 
 
+%%% Fig Joint density plots
+\begin{figure}[p]	
+    \centering
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/joint/Austria_joint.pdf}
+    \end{subfigure}
+    ~%%%
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/joint/Belgium_joint.pdf}
+    \end{subfigure}
+    ~%%%
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/joint/Denmark_joint.pdf}
+    \end{subfigure}
+	~%%%
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/joint/France_joint.pdf}
+    \end{subfigure}
+    ~%%%
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/joint/Germany_joint.pdf}
+    \end{subfigure}
+    ~%%% 
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/joint/Italy_joint.pdf}
+    \end{subfigure}
+    ~%%% 
+	\begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/joint/Norway_joint.pdf}
+    \end{subfigure}
+    ~%%%  
+	\begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/joint/Spain_joint.pdf}
+    \end{subfigure}
+    ~%%%
+	\begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/joint/Sweden_joint.pdf}
+    \end{subfigure}
+    ~%%%  
+	\begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/joint/Switzerland_joint.pdf}
+    \end{subfigure}
+    ~%%%  
+	\begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/joint/United_Kingdom_joint.pdf}
+    \end{subfigure}
+    ~%%%  
+	\begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/joint/Wuhan_joint.pdf}
+    \end{subfigure}
+    \caption{
+    \textbf{Joint posterior density plots for $\tau$ and $\lambda$.} The high values of $\lambda$ estimated in Denmark and Sweden reduce the effect of the NPIs thereby making the inference of $\tau$ more difficult, resulting in wide posterior distributions. A correlation between the parameters is also evident in Norway. In Belgium and in Wuhan a later $\tau$ gives a wide estimate for $\lambda$. In comparison, Austria, France, Germany, Italy, Spain, Switzerland, and UK have a narrow joint distribution.
+    }
+    \label{fig:joint}
+\end{figure}
+
+
+
 %%% Fig Fr-vs-Es
 % generated with Fig-fr-vs-es.ipynb
 \begin{figure}[h]
@@ -952,9 +1016,6 @@ $\tau^*$ is the official last NPI date (\autoref{table:NPI_dates}).
     \label{fig:trace}	    
 \end{figure}
 
-
-
-% TODO tau-lambda density plots
 
 
 \end{document}  
