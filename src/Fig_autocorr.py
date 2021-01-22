@@ -20,8 +20,7 @@ def plot_auto(country_name):
     auto = np.loadtxt(file_name)
     iters = np.array([0]+[i*200000 for i in range(1,len(auto)+1)])/1_000_000
     taus = np.array([0]+list(auto))/1000
-    print(max(taus),country_name, len(auto))
-#     plt.plot(iters, iters/100.0,'--k')
+    print(int(50*(200_000*len(auto)-2_000_000)/1000/max(taus)),'\t',int(max(taus)),'\t', 200_000*len(auto), country_name)
     plt.plot(iters, taus, label=country_name)
     plt.xlabel("Samples (1M)")
     plt.ylabel("Average IAT (1K)");
