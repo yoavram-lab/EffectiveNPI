@@ -274,7 +274,7 @@ In half of the examined regions, we estimate that the effective start of NPIs $\
  
 In Italy, the first case was officially confirmed on Feb~21. School closures were implemented on Mar~5~\citep{Flaxman2020}, a lockdown was declared in Northern Italy on Mar~8, with social distancing implemented in the rest of the country, and the lockdown was extended to the entire nation on Mar 11~\citep{Gatto2020}.
 That is, the first and last official NPI dates are Mar~5 and Mar~11.
-However, we estimate the effective date $\hat{\tau}$ six days after the lockdown, at Mar~17 ($\substack{+3.05 \\ -2.01}$~days 95\% CI; \autoref{fig:late}). 
+However, we estimate the effective date ($\hat{\tau}$) six~days after the lockdown, at Mar~17 ($\substack{+3.05 \\ -2.01}$~days 95\% CI; \autoref{fig:late}). 
 
 In Wuhan, China, a lockdown was ordered on Jan 23~\citep{Li2020}, but we estimate the effective start of NPIs to be ten days later, at Feb~2 ($\substack{+2.29 \\ -2.97}$~days 95\% CI). Yet, there is low but noticeable posterior probability for Jan~25 (\autoref{fig:late}), for which the effect of NPIs on transmission is considerably lower (\autoref{fig:joint}).
 
@@ -351,19 +351,14 @@ Indeed, the posterior median $\hat{\tau}$ is Mar~19 ($\substack{+3.2 \\ -1.78}$~
 The \emph{effective reproduction number} $R$ is the average number of secondary
 cases caused by an infected individual after an epidemic is already underway \citep{Bar-On2020a}.
 We infer model-based effective reproduction numbers before and after the implementation of NPIs from model parameters (\autoref{eq:Re}).
-We then estimate the impact of NPIs as the relative reduction in the reproduction number \citep{Flaxman2020}. 
+We then estimate the impact of NPIs as the relative reduction in the reproduction number \citep{Flaxman2020}, $\Delta R = (R_1-R_2)/R_1$. 
 We compare the impacts estimated using the fixed~$\tau$ model and the free~$\tau$ model.
 That is, we compare the impact estimate assuming that NPIs started at the official date $\tau^*$, versus the estimate when inferring the effective start of NPIs from the data.
 \autoref{fig:Re} demonstrates that estimates from the fixed~$\tau$ model (y-axis) are consistently lower than estimates from the free~$\tau$ model (x-axis), except in Sweden and Denmark, in which estimation uncertainty is high.
+That is, assuming NPIs start at their official date leads to error in the estimation of their impact.
+Moreover, these errors increase with the duration of the delay between the official and effective dates (\autoref{fig:Re2}).
 These results suggest that the impact of past NPIs is likely to be under-estimated by health officials and researchers if they assume NPIs effectively start at their official dates.
 The estimated impact can then be interpreted as ineffectiveness of the NPIs, leading to more aggressive NPIs being applied.
-
-Health officials might also assess the impact of NPIs by comparing model expectations to actual number of daily cases at a specific number of days after the intervention began. 
-However, a significant difference between the official and effective start of interventions can invalidate such assessments.
-This is illustrated in \autoref{fig:prediction} using data and parameters from Italy: a lockdown was officially ordered on Mar~10 ($\tau^*$), but its late effect on the infection dynamics starts on Mar~17 ($\hat{\tau}$).
-If health officials assume that the dynamics change exactly at $\tau^*$, they would expect the number of cases to be within the red lines (posterior predictions assuming $\tau=\tau^*$).
-This would lead to a significant under-estimation, which might be interpreted as ineffectiveness of NPIs, and therefore more strict guidelines.
-However, the number of cases would actually follow the blue lines (posterior predictions using $\tau=\hat{\tau}$), which are a good fit to the real data (stars).
 
 
 
@@ -376,7 +371,7 @@ However, the number of cases would actually follow the blue lines (posterior pre
 	\includegraphics[width=\textwidth]{../figures/Fig_Re.pdf}
     \caption{
     \textbf{Impact of NPIs is under-estimated when assuming they start at the official date.}
-    Shown are estimates of the relative reductions in $R$ (the effective reproduction number), which measures the impact of NPIs on disease transmission, in 11 European countries.
+    Shown are estimates of the relative reduction in the effective reproduction number ($R$, see \autoref{eq:Re}), which measures the impact of NPIs on disease transmission, in 11 European countries.
      The y-axis shows estimates when assuming the start of NPIs is fixed at the official date (fixed~$\tau$); the x-axis shows estimates when inferring the effective start of NPIs from the data (free $\tau$). The dashed line shows a one-to-one correspondence.
      Markers and bars denote the posterior median and 50\% credible intervals (HDI).
     The relative reductions in $R$ are consistently lower for the fixed~$\tau$ model (below the dashed line), except in Sweden and Denmark in which uncertainty is high.
@@ -384,23 +379,6 @@ However, the number of cases would actually follow the blue lines (posterior pre
     \label{fig:Re}
 \end{figure}
 
-
-
-%%% Fig - Prediction
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.5\textwidth]{../figures/Fig-prediction.pdf}
-    \caption{
-    \textbf{Late effective start of NPIs leads to under-estimation of daily confirmed cases.}
-    Real number of daily cases in Italy in black (markers: data; line: smoothed using a Savitzky-Golay filter with window length 3).
-    Model posterior predictions are shown as coloured lines (1,000 draws from the posterior distribution).
-    Shaded box illustrates a serial interval of seven days~\citep{Ali2020} after the start of NPIs.
-    \textbf{(A)} Using the official date $\tau^*$ for the effective start of the NPI, Mar~11, the model under-estimates the number of cases seven days after the start of the NPI.
-    \textbf{(B)} Using the estimated date $\hat{\tau}$ for the effective start of the NPI, Mar~17, the model precisely estimates the number of cases seven days after the start of the NPI.
-    Here, model parameters are best estimates for Italy (\autoref{table:estimated-params}).
-    }
-    \label{fig:prediction}
-\end{figure}
 
 
 \pagebreak
@@ -432,7 +410,7 @@ However, interpretation of such models will be harder, as multiple change-points
 
 As different countries experiment with various intervention strategies, we expect similar shifts to occur: in some cases the population will be late to comply with new guidelines, whereas in other cases the population will adopt either restrictions or relaxations even before they are formally announced.
 Attempts to assess the impact of NPIs~\citep{Banholzer2020,Flaxman2020} generally assume they start at their official date, and that a significant change in the dynamics can be observed roughly seven days after the start of NPIs (due to the characteristic serial interval of \covid\citep{Ali2020}).
-However, late and early effective start of NPIs, such as we have inferred, can bias these assessments and lead to wrong conclusions about the impact of NPIs (Figures~\ref{fig:Re} and~\ref{fig:prediction}).
+However, late and early effective start of NPIs, such as we have inferred, can bias these assessments and lead to wrong conclusions about the impact of NPIs (\autoref{fig:Re}).
 
 Our results highlight the complex interaction between personal, regional, and global determinants of behavioral response to an epidemic.
 Therefore, we emphasize the need to further study heterogeneity in compliance and behavior over both time and space. This can be accomplished both by surveying differences in compliance within and between populations~\citep{Atchison2020}, and by incorporating specific behavioral models into epidemiological models~\citep{Arthur2020,Fenichela2011,Walters2013}.
@@ -923,6 +901,19 @@ $\tau^*$ is the official last NPI date (\autoref{table:NPI_dates}).
     \textbf{Joint posterior density plots for $\tau$ and $\lambda$.} The high values of $\lambda$ estimated in Denmark and Sweden reduce the effect of the NPIs thereby making the inference of $\tau$ more difficult, resulting in wide posterior distributions. A correlation between the parameters is also evident in Norway. In Belgium and in Wuhan a later $\tau$ gives a wide estimate for $\lambda$. In comparison, Austria, France, Germany, Italy, Spain, Switzerland, and UK have a narrow joint distribution.
     }
     \label{fig:joint}
+\end{figure}
+
+
+
+\begin{figure}[h]
+    \centering
+	\includegraphics[width=\textwidth]{../figures/Fig_Re2.pdf}
+    \caption{
+    \textbf{Under-estimation of impact of NPIs increases with the delay in their effective start.} The x-axis shows the days between the estimated effective start of NPIs, $\hat\tau$, and the official date, $\tau^*$. The y-axis shows the error in estimation of the impact of NPIs when assuming they start at their official date (i.e. the difference between the median estimate from a model with fixed~$\tau$ minus the estimate from a model with free~$\tau$, the y- and x-axis of \autoref{fig:Re}, respectively.
+    Impact of NPIs defined as $\frac{R_1 - R_2}{R_1}$, where $R_1$ and $R_2$ are the effective reproduction numbers before and after the NPI, respectively (\autoref{eq:Re}).
+	The dashed black line shows a linear regression, slope=-0.0313 with 95\% CI [-0.051, -0.012], $R^2=0.554$.
+    } 
+    \label{fig:Re2}
 \end{figure}
 
 
