@@ -139,13 +139,19 @@ headheight=12pt
 
 % Abstract
 \begin{abstract}
+\noindent
+\textbf{Background.}
 During Feb-Apr 2020, many countries implemented non-pharmaceutical interventions, such as school closures and lockdowns, with variable schedules, to control the \covid pandemic caused by the \sars virus.
 Overall, these interventions seem to have reduced the spread of the pandemic.
-We hypothesize that the official and effective start date of such interventions can be noticeably different, for example due to slow adoption by the population, or because the authorities and the public are unprepared.
-We fit an SEIR model to case data from~12 regions to infer the effective start dates of interventions and contrast them with the official dates.
-We find mostly late, but also early effects of interventions. For example, Italy implemented a nationwide lockdown on Mar~11, but we infer the effective date on Mar~17 ($\substack{+3.05 \\ -2.01}$~days 95\% CI).
-In contrast, Germany announced a lockdown on Mar~22, but we infer an effective start date on Mar~19 ($\substack{+0.92 \\ -0.99}$~days 95\% CI).
-We demonstrate that differences between the official and effective start of NPIs can lead to under-estimating their impact, and discuss potential causes and consequences of our results.
+We hypothesized that the official and effective start date of such interventions can be noticeably different, for example due to slow adoption by the population, or because the authorities and the public are unprepared, and that these difference can lead to errors in the estimation of the impact of NPIs. \\
+\textbf{Methods.}
+SEIR models were fitted to case data from~12 regions to infer the effective start dates of interventions and contrast them with the official dates. \\
+\textbf{Results.}
+We infer mostly late, but also early effects of interventions. For example, Italy implemented a nationwide lockdown on Mar~11, but we infer the effective start date on Mar~17 ($\substack{+3.05 \\ -2.01}$~days 95\%~CI).
+In contrast, Germany announced a lockdown on Mar~22, but we infer an effective start date on Mar~19 ($\substack{+0.92 \\ -0.99}$~days 95\%~CI).
+Moreover, we find that the impact of NPIs can be under-estimated if assuming they start at their official date.\\
+\textbf{Conclusions.}
+Differences between the official and effective start of NPIs are likely, and that neglecting such differences can lead to under-estimation of the impact of NPIs.
 \\\\
 {\small
 Keywords: SEIR, COVID-19, public health, epidemic, infectious disease, NPI
@@ -159,14 +165,15 @@ Keywords: SEIR, COVID-19, public health, epidemic, infectious disease, NPI
 % Table - NPI dates %%%
 \begin{table}[b!]
 \centering
+\caption{
+\textbf{Official start of non-pharmaceutical interventions.}}
 \pgfplotstabletypeset[
     col sep=comma,
     string type,
     every head row/.style={before row=\hline,after row=\hline},
     every last row/.style={after row=\hline},
     ]{../data/NPI_dates.csv}
-\caption{
-\textbf{Official start of non-pharmaceutical interventions.}
+\caption*{
 The date of the first intervention is for a ban of public events, or encouragement of social distancing, or for school closures.
 In all countries except Sweden, the date of the last intervention ($\tau^*$) is for a lockdown. In Sweden, where a lockdown was not ordered during the studied dates, the last date is for school closures. Dates for European countries from \citet{Flaxman2020}, date for Wuhan, China from \citet{Pei2020}. See \autoref{fig:NPI_dates} for a visual presentation.
 }
@@ -190,7 +197,7 @@ Similarly, compliance to NPIs may be impacted by personal experiences. \citet{Sm
 Compliance may also depend on risk perception as perceived by the the number of domestic cases or even by reported cases in other regions and countries.
 Interestingly, the perceived risk of \covid infection has likely caused a reduction in the number of influenza-like illness cases in the US starting from mid-Feb~2020~\citep{Zipfel2020}.
 
-Here, we hypothesise that there is a significant difference between the official start of NPIs and their effective adoption by the public and therefore their effect on infection dynamics.
+Here, we hypothesize that there is a significant difference between the official start of NPIs and their effective adoption by the public and therefore their effect on infection dynamics.
 We use a \textit{Susceptible-Exposed-Infected-Recovered} (SEIR) model and a \textit{Markov Chain Monte Carlo} (MCMC) parameter estimation framework to infer the effective start date of NPIs from publicly available \covid case data in 12 geographical regions.
 We compare these estimates to the official dates, and find that they include both late and early effects of NPIs on infection dynamics.
 We conclude by demonstrating how differences between the official and effective start of NPIs can confound assessments of their impacts.
@@ -208,7 +215,7 @@ We conclude by demonstrating how differences between the official and effective 
 	\includegraphics[width=0.6\textwidth]{../figures/Fig-summary-Apr11.pdf}	
     \caption{
     \textbf{Official vs. effective start of non-pharmaceutical interventions.}
-    	The difference between $\tau$ the effective and $\tau^*$ the official start of NPIs is shown for different regions. The effective date is delayed in UK, Austria, Italy, France, Belgium, Spain, and Wuhan, China, compared to the official date (red markers). In contrast, the estimated effective dates in Sweden, Denmark, and Germany are earlier than the official dates (blue markers), although uncertainty is low only for Germany (i.e., zero is not in 95\% CI). The credible intervals for Sweden, Denmark, and Norway are especially wide, see text and \autoref{fig:early} for possible explanation.
+    	The difference between $\tau$ the effective and $\tau^*$ the official start of NPIs is shown for different regions. The effective date is delayed in UK, Austria, Italy, France, Belgium, Spain, and Wuhan, China, compared to the official date (red markers). In contrast, the estimated effective dates in Sweden, Denmark, and Germany are earlier than the official dates (blue markers), although uncertainty is low only for Germany (i.e., zero is not in 95\%~CI). The credible intervals for Sweden, Denmark, and Norway are especially wide, see text and \autoref{fig:early} for possible explanation.
 	Here, the markers show $\hat{\tau}$, the marginal posterior median (\autoref{table:estimated-params}). $\tau^*$ is the last NPI date (a lockdown, except in Sweden; \autoref{table:NPI_dates}). Thin and bold lines show 95\% and 75\% credible intervals, respectively. \autoref{fig:tau-summary-mar28} shows a similar summary when estimating $\hat{\tau}$ using case data up to Mar~28 rather than Apr~11.
     }
     \label{fig:tau-summary}
@@ -227,7 +234,7 @@ We then estimate $\hat{\tau}$ as the median of the marginal posterior distributi
 Credible intervals (CI) are calculated as the highest density intervals~\citep{Kruschke2014}, and their upper and lower boundaries are reported as $\substack{+\text{upper} \\ -\text{lower}}$ in days relative to $\hat{\tau}$.
 
 We compare the posterior predictive plots of a model with  free~$\tau$ with those of a model with~$\tau$ fixed at~$\tau^*$ and a model without~$\tau$ (i.e. transmission and reporting rates are constant).
-All three models were fitted to case data up to Apr~11, used to predict out-of-sample case data up to Apr~24, and these predictions were then compared to the real case data. 
+All three models were fitted to case data up to Apr~11, 2020, used to predict out-of-sample case data up to Apr~24, 2020, and these predictions were then compared to the real case data. 
 The model with free~$\tau$ clearly produces better and less variable predictions~(\autoref{fig:ppc}):
 In all 11 european countries, the expected posterior RMSE (root mean squared error) of the out-of-sample predictions is lowest for the model with a free~$\tau$ (\autoref{table:RMSE}).
 When we compare the models using WAIC~(\autoref{eq:WAIC}), the model with free~$\tau$ is strongly preferred in 9 out of 12 countries, the exceptions being Norway (only marginal preference), Sweden, and Denmark (\autoref{table:WAIC}).
@@ -235,7 +242,7 @@ Indeed, we estimate low effect of NPIs on transmission in Denmark and Sweden (i.
 This may interfere with the inference of $\tau$ due to unidentifiability. 
 Notably, the data for Sweden and Denmark do not have a single "peak" during the evaluated dates, possibly leading to wide credible intervals on $\tau$ (\autoref{fig:tau-summary}) and poor WAIC in the model with free~$\tau$, whereas the duration between the first and last interventions was especially long in Norway (\autoref{table:NPI_dates}).
 
-We compare the official $\tau^*$ and effective $\tau$ start of NPIs and find that in most regions the effective start of NPIs differs from the official date: in 10 of 12 countries the 75\% credible interval on $\tau$ does not include $\tau^*$ (7 of 12 countries when considering a 95\% interval; \autoref{fig:tau-summary}).
+We compare the official ($\tau^*$) and effective ($\tau$) start of NPIs and find that in most regions the effective start date differs from the official date: in 10 of 12 countries the 75\%~credible interval on $\tau$ does not include $\tau^*$ (7 of 12 countries when considering a 95\%~credible interval; \autoref{fig:tau-summary}).
 The exceptions are Norway and Switzerland (see below).
 The former also has a wide credible interval, perhaps because it has the longest duration between the first and last NPIs~(\autoref{table:NPI_dates}).
 
@@ -261,7 +268,7 @@ The former also has a wide credible interval, perhaps because it has the longest
     \end{subfigure}
     \caption{
 	\textbf{Late effect of non-pharmaceutical interventions.}
-    Posterior distribution of $\tau$, the effective start date of NPI, is shown as a histogram of MCMC samples. Red line shows the official last NPI date $\tau^*$. Black line shows the estimated effective start date $\hat{\tau}$. Shaded area shows a 95\% credible interval. 
+    Posterior distribution of $\tau$, the effective start date of NPI, is shown as a histogram of MCMC samples. Red line shows the official last NPI date $\tau^*$. Black line shows the estimated effective start date $\hat{\tau}$. Shaded area shows a 95\%~credible interval. 
     }
     \label{fig:late}
 \end{figure}
@@ -274,15 +281,15 @@ In half of the examined regions, we estimate that the effective start of NPIs $\
  
 In Italy, the first case was officially confirmed on Feb~21. School closures were implemented on Mar~5~\citep{Flaxman2020}, a lockdown was declared in Northern Italy on Mar~8, with social distancing implemented in the rest of the country, and the lockdown was extended to the entire nation on Mar 11~\citep{Gatto2020}.
 That is, the first and last official NPI dates are Mar~5 and Mar~11.
-However, we estimate the effective date ($\hat{\tau}$) six~days after the lockdown, at Mar~17 ($\substack{+3.05 \\ -2.01}$~days 95\% CI; \autoref{fig:late}). 
+However, we estimate the effective date ($\hat{\tau}$) six~days after the lockdown, at Mar~17 ($\substack{+3.05 \\ -2.01}$~days 95\%~CI; \autoref{fig:late}). 
 
-In Wuhan, China, a lockdown was ordered on Jan 23~\citep{Li2020}, but we estimate the effective start of NPIs to be ten days later, at Feb~2 ($\substack{+2.29 \\ -2.97}$~days 95\% CI). Yet, there is low but noticeable posterior probability for Jan~25 (\autoref{fig:late}), for which the effect of NPIs on transmission is considerably lower (\autoref{fig:joint}).
+In Wuhan, China, a lockdown was ordered on Jan 23~\citep{Li2020}, but we estimate the effective start of NPIs to be ten days later, at Feb~2 ($\substack{+2.29 \\ -2.97}$~days 95\%~CI). Yet, there is low but noticeable posterior probability for Jan~25 (\autoref{fig:late}), for which the effect of NPIs on transmission is considerably lower (\autoref{fig:joint}).
 
-In Spain, social distancing was encouraged starting on Mar~8~\citep{Flaxman2020}, but mass gatherings still occurred on Mar~8, including a march of 120,000 people for the \href{https://www.nytimes.com/2020/03/13/world/europe/spain-coronavirus-emergency.html}{International Women's Day}, and a football match between \href{https://www.espn.com/soccer/match?gameId=550350}{Real Betis and Real Madrid} (final score 2--1) with a crowd of 50,965 in Seville.
+In Spain, social distancing was encouraged starting on Mar~8~\citep{Flaxman2020}, but mass gatherings still occurred on Mar~8, including a march of 120,000 people for the International Women's Day~\citep{RaphaelMinder}, and a football match between Real Betis and Real Madrid (final score 2--1) with a crowd of 50,965 in Seville~\citep{ESPNRealBetis}.
 A national lockdown was only announced on Mar~14~\citep{Flaxman2020}.
-Nevertheless, we estimate the effective start of NPI eleven days later, at Mar~25($\substack{+1.70 \\ -1.43}$~days 95\% CI, \autoref{fig:late}).
+Nevertheless, we estimate the effective start of NPIs eleven days later, at Mar~25($\substack{+1.70 \\ -1.43}$~days 95\%~CI, \autoref{fig:late}).
 
-Similarly, in France we estimate the effective start of NPIs at Mar~24 ($\substack{+2.65 \\ -1.44}$~days 95\% CI, \autoref{fig:late}).
+Similarly, in France we estimate the effective start of NPIs at Mar~24 ($\substack{+2.65 \\ -1.44}$~days 95\%~CI, \autoref{fig:late}).
 This is a week later than the official lockdown, which started at Mar~17, and more than 10 days after the earliest NPI, banning of public events, which started on Mar~13~\citep{Flaxman2020}.
 
 
@@ -316,24 +323,24 @@ This is a week later than the official lockdown, which started at Mar~17, and mo
 
 %%% Early
 \paragraph*{Early effective start of NPIs.}
-In some regions we estimate an effective start of NPIs $\tau$ that is \emph{earlier} then the official date $\tau^*$ (\autoref{fig:tau-summary}).
-The only conclusive early case is Germany, in which we estimate the effective start of NPIs at Mar~19 ($\substack{+0.92 \\ -0.99}$~days 95 \%CI; \autoref{fig:early}).
+In some regions we estimate an effective start of NPIs that is \emph{earlier} then the official date (\autoref{fig:tau-summary}).
+The only conclusive early case is Germany, in which we estimate the effective start of NPIs at Mar~19 ($\substack{+0.92 \\ -0.99}$~days 95~\%CI, \autoref{fig:early}).
 This estimate falls between the first and last official NPI dates, Mar~12 and Mar~22 (\autoref{table:NPI_dates}). Therefore, when we refer to this case as "early", we mean that the effective date (Mar~19) occurs \emph{before} the official lockdown date (Mar~22), not that it occurs before all NPIs.
 Interestingly, Germany had the second longest duration between first and last NPIs after Norway (10 and 12 days respectively; \autoref{table:NPI_dates}).
 However, the credible interval for the effective start date in Germany is narrow (1.91 days), whereas it is very wide in Norway (17.61 days).
 The significantly earlier estimate of $\hat{\tau}$ relative to $\tau^*$ can suggest that early NPIs in Germany more effectively reduced transmission rates compared to other countries. Another possible interpretation is that the German population anticipated the lockdown and reacted before it started.
 
 We also estimate an early effective start of NPIs in Denmark, Norway, and Sweden.
-However, the credible intervals are quite wide (\autoref{fig:tau-summary}), and in Denmark and Sweden the evidence did not support the model with free~$\tau$ over the model with $\tau$ fixed at the official date (WAIC values in \autoref{table:WAIC}).
+However, the credible intervals are quite wide (\autoref{fig:tau-summary}), and in Denmark and Sweden the evidence did not support the model with free~$\tau$ over the model with $\tau$ fixed at the official date (\autoref{table:WAIC}).
 Indeed, Denmark and Sweden had the smallest estimated effect of NPIs on transmission rates, which  probably hinders our ability to estimate $\tau$ in these countries (\autoref{table:estimated-params}).
-Moreover, in Sweden the number of daily cases continued to grow up to Apr~11, rather than "peak" (\autoref{fig:ppc}). 
+Moreover, in Sweden the number of daily cases continued to grow through Apr~11, rather than "peak" (\autoref{fig:ppc}). 
 In Denmark, the opposite occurred: there were seemingly two "peaks", on Mar~11 and on Apr~8 (\autoref{fig:ppc}); the first "peak" may be a result of stochastic events, for example due to a large cluster of cases or an accumulation of tests.
 We suspect that these missing and additional "peaks" increase the uncertainty in our inference.
 
 The estimated effective date in Norway is Mar~22, two days earlier than the official date of Mar~24.
-However, the posterior distribution is very wide ($\substack{+5.59 \\ -12.03}$~days 95\% CI): it covers the range between Mar~10, two days before the first NPI, and Mar~27, three days after the last NPI (\autoref{table:NPI_dates}, \autoref{fig:NPI_dates}). 
+However, the posterior distribution is very wide ($\substack{+5.59 \\ -12.03}$~days 95\%~CI): it covers the range between Mar~10, two days before the first NPI, and Mar~27, three days after the last NPI (\autoref{table:NPI_dates}, \autoref{fig:NPI_dates}). 
 The high uncertainty might be due to the long duration between the first and last NPIs; however, Germany had the second longest duration between first and last NPIs, and the corresponding posterior distribution is very narrow (\autoref{fig:early}).
-There may also be an unidentifiability issues between $\tau$ and the effect of NPIs on transmission (\autoref{fig:joint}). 
+There may also be an unidentifiability issue between $\tau$ and the effect of NPIs on transmission (\autoref{fig:joint}). 
 
 
 
@@ -341,23 +348,24 @@ There may also be an unidentifiability issues between $\tau$ and the effect of N
 \paragraph*{Exact effective start of NPIs.}
 We find one case in which the official and effective dates match and the credible interval is narrow.
 Switzerland ordered a national lockdown on Mar~20, after banning public evens and closing schools on Mar~13 and~14~\citep{Flaxman2020}.
-Indeed, the posterior median $\hat{\tau}$ is Mar~19 ($\substack{+3.2 \\ -1.78}$~days 95\% CI, see \autoref{fig:early}). It's also worth mentioning that Switzerland was the first to mandate self isolation of confirmed cases~\citep{Flaxman2020}.
+Indeed, the posterior median $\hat{\tau}$ is Mar~19 ($\substack{+3.2 \\ -1.78}$~days 95\%~CI, see \autoref{fig:early}). 
+Notably, Switzerland was the first to mandate self isolation of confirmed cases~\citep{Flaxman2020}.
 
 
 
 %%% Assessment
 \paragraph*{Assessment of impact of NPIs.}
-
 The \emph{effective reproduction number} $R$ is the average number of secondary
 cases caused by an infected individual after an epidemic is already underway \citep{Bar-On2020a}.
 We infer model-based effective reproduction numbers before and after the implementation of NPIs from model parameters (\autoref{eq:Re}).
-We then estimate the impact of NPIs as the relative reduction in the reproduction number \citep{Flaxman2020}, $\Delta R = (R_1-R_2)/R_1$. 
+We then estimate the impact of NPIs as the relative reduction in the reproduction number \citep{Flaxman2020}, $\Delta R = (R_1-R_2)/R_1$, where $R_1$ and $R_2$ are the reproduction numbers before and after the start of NPIs. 
 We compare the impacts estimated using the fixed~$\tau$ model and the free~$\tau$ model.
-That is, we compare the impact estimate assuming that NPIs started at the official date $\tau^*$, versus the estimate when inferring the effective start of NPIs from the data.
-\autoref{fig:Re} demonstrates that estimates from the fixed~$\tau$ model (y-axis) are consistently lower than estimates from the free~$\tau$ model (x-axis), except in Sweden and Denmark, in which estimation uncertainty is high.
+That is, we compare the impact estimate $\Delta R$ assuming that NPIs started at the official date $\tau^*$, versus the estimate when inferring the effective start of NPIs from the data.
+
+\autoref{fig:Re} demonstrates that estimates from the fixed~$\tau$ model (y-axis) are consistently lower than estimates from the free~$\tau$ model (x-axis), except in Sweden (SE) and Denmark (DK), in which estimation uncertainty is high.
 That is, assuming NPIs start at their official date leads to error in the estimation of their impact.
 Moreover, these errors increase with the duration of the delay between the official and effective dates (\autoref{fig:Re2}).
-These results suggest that the impact of past NPIs is likely to be under-estimated by health officials and researchers if they assume NPIs effectively start at their official dates.
+These results suggest that the impact of past NPIs is likely to be under-estimated by health officials and researchers if they assume NPIs start at their official dates.
 The estimated impact can then be interpreted as ineffectiveness of the NPIs, leading to more aggressive NPIs being applied.
 
 
@@ -370,47 +378,50 @@ The estimated impact can then be interpreted as ineffectiveness of the NPIs, lea
     \centering
 	\includegraphics[width=\textwidth]{../figures/Fig_Re.pdf}
     \caption{
-    \textbf{Impact of NPIs is under-estimated when assuming they start at the official date.}
-    Shown are estimates of the relative reduction in the effective reproduction number ($R$, see \autoref{eq:Re}), which measures the impact of NPIs on disease transmission, in 11 European countries.
-     The y-axis shows estimates when assuming the start of NPIs is fixed at the official date (fixed~$\tau$); the x-axis shows estimates when inferring the effective start of NPIs from the data (free $\tau$). The dashed line shows a one-to-one correspondence.
+    \textbf{Impact of NPIs is under-estimated when assuming they start at their official date.}
+    Shown are estimates of the relative reduction in the effective reproduction number ($R$, see \autoref{eq:Re}), which measures the impact of NPIs on the epidemic.
+     The y-axis shows estimates when assuming the start of NPIs is fixed at the official date (fixed~$\tau$). The x-axis shows estimates when inferring the effective start of NPIs from the data (free~$\tau$). The dashed line shows a one-to-one correspondence.
      Markers and bars denote the posterior median and 50\% credible intervals (HDI).
     The relative reductions in $R$ are consistently lower for the fixed~$\tau$ model (below the dashed line), except in Sweden and Denmark in which uncertainty is high.
+    \autoref{fig:Re2} shows how the delay in effective start affect the estimation error. 
+    AT: Austria, BE: Belgium, CH: Switzerland, CN: Wuhan, China, DE: Germany, DK: Denmark, ES: Spain, FR: France, GB: United Kingdom, IT: Italy, NO: Norway, SE: Sweden.
     } 
     \label{fig:Re}
 \end{figure}
 
 
 
-\pagebreak
+%\pagebreak
 % Discussion
 \section*{Discussion}
 
-We have inferred the effective start date of NPIs in several geographical regions using an SEIR model under an MCMC parameter estimation framework.
+We have inferred the effective start date of NPIs in 12~regions using SEIR models under an MCMC parameter estimation framework.
 We find examples of both late and early effective start of NPIs relative to the official date (\autoref{fig:tau-summary}).
 
 In most investigated regions we find late effective start of NPIs.
 For example, in Italy and in Wuhan, China, the effective start of the lockdowns seems to have occurred five or more days after the official date (\autoref{fig:late}).
-This difference might be explained, in some cases, by low compliance or non-adherence to guidelines: In Italy, for example, the government plan to implement a lockdown in the Northern provinces leaked to the public, resulting in people leaving these provinces before the lockdown started~\citep{Gatto2020}.
+These differences might be explained, in some cases, by low compliance or non-adherence to guidelines: In Italy, for example, the government plan to implement a lockdown in the Northern provinces leaked to the public, which led to people leaving these provinces before the lockdown started~\citep{Gatto2020}.
 Late effect of NPIs may also be due to the time required by both the government and the citizens to prepare for a lockdown, and for new guidelines to be adopted by the population.
  
 In contrast, in some regions we inferred reduced transmission rates even before official lockdowns were implemented, although this is only conclusive in Germany (\autoref{fig:early}).
 An early effective date might be due to early adoption of social distancing and similar behavioural adaptations in parts of the population, possibly due to earlier NPIs or NPIs being applied in other regions.
 Adoption of these behaviours may occur via media and social networks, rather than official guidelines, and may be influenced by increased risk perception due to domestic or international \covid reports~\citep{Arthur2020}.
-Indeed, the evidence supports a change in infection dynamics (i.e. a model with fixed or free $\tau$) even for Sweden~(\autoref{table:WAIC}, \autoref{table:RMSE}, \autoref{fig:ppc}), where a lockdown was not implemented\footnote{Sweden banned public events on Mar~12, encouraged social distancing on Mar~16, and closed schools on Mar~18~\citep{Flaxman2020}.}.
+Indeed, the evidence supports a change in infection dynamics (i.e. a model with fixed or free $\tau$) even for Sweden~(\autoref{table:RMSE}, \autoref{table:WAIC}, \autoref{fig:ppc}), where a lockdown was not implemented within the investigated time\footnote{Sweden banned public events on Mar~12, encouraged social distancing on Mar~16, and closed schools on Mar~18~\citep{Flaxman2020}.}.
 
 Interestingly, the effective start of NPIs in France and Spain is estimated to have started on Mar~24 and~25, respectively,
 although the official NPI dates differ significantly: the first NPI in France is only one day before the last NPI in Spain.
 The number of daily cases was similar in both countries until Mar~8, but diverged by Mar~13, reaching much higher numbers in Spain (\autoref{fig:fig-fr-vs-es}).
-This may suggest correlations between effective starts of NPIs due to global or international events.
+This may suggest correlations between effective starts of NPIs in different countries due to international or global events.
 
-As expected, we have found that the evidence supports a model in which the transmission rate changes at a specific time point over a model with a constant transmission rate (Tables~\ref{table:WAIC} and~\ref{table:RMSE}).
+As expected, we have found that the evidence supports a model in which the transmission rate changes at a specific time point over a model with a constant transmission rate (Tables~\ref{table:RMSE} and~\ref{table:WAIC}).
 It may be interesting to check if the evidence supports a model with \emph{two} or more change-points, rather than one. 
 Multiple change-points could reflect escalating NPIs (e.g. school closures followed by lockdowns), or an intervention followed by a relaxation.
-However, interpretation of such models will be harder, as multiple change-points are also likely to result in parameter unidentifiability, for example due to simultaneous implementations of NPIs~\citep{Flaxman2020}.
+However, interpretation of such models will be harder, as multiple change-points are also likely to result in parameter unidentifiability, for example due to simultaneous implementation of NPIs~\citep{Flaxman2020}.
 
 As different countries experiment with various intervention strategies, we expect similar shifts to occur: in some cases the population will be late to comply with new guidelines, whereas in other cases the population will adopt either restrictions or relaxations even before they are formally announced.
-Attempts to assess the impact of NPIs~\citep{Banholzer2020,Flaxman2020} generally assume they start at their official date, and that a significant change in the dynamics can be observed roughly seven days after the start of NPIs (due to the characteristic serial interval of \covid\citep{Ali2020}).
-However, late and early effective start of NPIs, such as we have inferred, can bias these assessments and lead to wrong conclusions about the impact of NPIs (\autoref{fig:Re}).
+Attempts to assess the impact of NPIs~\citep{Banholzer2020,Flaxman2020} generally assume they start at their official date.
+However, late effective start of NPIs, such as we have inferred, can lead to under-estimation of the impact of NPIs (Figures~\ref{fig:Re} and~\ref{fig:Re2}).
+Such under-estimation may lead decision-makers to enforce stricter guidelines, rather than enforce earlier implementation of the guidelines~\citep{Pei2020a}.
 
 Our results highlight the complex interaction between personal, regional, and global determinants of behavioral response to an epidemic.
 Therefore, we emphasize the need to further study heterogeneity in compliance and behavior over both time and space. This can be accomplished both by surveying differences in compliance within and between populations~\citep{Atchison2020}, and by incorporating specific behavioral models into epidemiological models~\citep{Arthur2020,Fenichela2011,Walters2013}.
@@ -561,7 +572,7 @@ We checked values of $\Delta t$ larger than five days and found they generally p
 We also tried to estimate the value of $p_t$ before and after $\tau$, instead of keeping it fixed at $1/9$ and $1/6$. The model with fixed values was supported by the evidence (lower WAIC, see below) in 9 of 12 countries. Moreover, the estimates for Wuhan, China were $1/9$ and $1/6$, as in \citet{Li2020}. 
 
 The posterior distribution of the model parameters $P(\theta \mid \vec{X})$ is estimated using the affine-invariant ensemble sampler for Markov chain Monte Carlo (MCMC)~\citep{Goodman2010}, implemented in the \texttt{emcee} Python package~\citep{Foreman-Mackey2013}.
-We use the default configuration using the stretch move with stretch scale parameter $a=2$.
+We use the default configuration with the stretch move and a stretch scale parameter $a=2$.
 For the main analysis we use 50 chains (or walkers) per region, with 7M samples per chain (no thinning was applied; 6.8M for Wuhan).
 The \emph{integrated autocorrelation time} (IAT)~\citep{Foreman-Mackey2013,Goodman2010} was averaged across parameters and chains for each region. 
 The average IAT was between 31.9K for Wuhan and 187K for Germany~(\autoref{fig:autocorr}).
@@ -619,11 +630,12 @@ We thank Yinon M. Bar-On, Lilach Hadany, Oren Kolodny, and Zohar Yakhini. % Tim 
 \begin{landscape}
 \begin{table}[]
 \centering
+\caption{
+\textbf{Parameter estimates for different regions.}}
 \footnotesize{
 \input{../figures/Table-estimated-params.tex}
 }
-\caption{
-\textbf{Parameter estimates for different regions.}
+\caption*{
 See \autoref{eq:model} for model parameters.
 All estimates are posterior medians.
 75\% and 95\% credible intervals (HDI) are given for $\tau$ in days relative to $\hat{\tau}$.
@@ -669,15 +681,16 @@ $\tau^*$ is the official last NPI date (\autoref{table:NPI_dates}).
 % generated with /python Table-RMSE.py FOLDER NAME
 \begin{table}[h]
 \centering
-\caption*{\textbf{RMSE}}
+\caption{
+\textbf{Posterior RMSE of out-of-sample predictions with the different models.}}
+%\caption*{\textbf{RMSE}}
 \pgfplotstabletypeset[
     col sep=comma,
     string type,
     every head row/.style={before row=\hline,after row=\hline},
     every last row/.style={after row=\hline},
     ]{../figures/Table-RMSE.csv}
-\caption{
-\textbf{Posterior RMSE of out-of-sample predictions with the different models.}
+\caption*{
 	Expected posterior predictive RMSE (root mean squared error) for models  with: no $\tau$ at all, \emph{No}; $\tau$ fixed at the official last NPI date $\tau^*$, \emph{Fixed}; and free parameter $\tau$, \emph{Free}.
 	In all cases, the model with free parameter $\tau$ has the lowest RMSE.
 	Models were fitted to case data up to Apr~11, 2020, and then used to generate 1,000 predictions up to Apr~24 by sampling model parameters from the posterior distribution.
@@ -693,15 +706,15 @@ $\tau^*$ is the official last NPI date (\autoref{table:NPI_dates}).
 % generated with /python Table-WAIC.py FOLDER NAME
 \begin{table}[h]
 \centering
-\caption*{\textbf{WAIC}}
+\caption{
+\textbf{WAIC values for the different models.}}
 \pgfplotstabletypeset[
     col sep=comma,
     string type,
     every head row/.style={before row=\hline,after row=\hline},
     every last row/.style={after row=\hline},
     ]{../figures/Table-WAIC.csv} 
-\caption{
-\textbf{WAIC values for the different models.}
+\caption*{
 	WAIC (widely applicable information criterion; \autoref{eq:WAIC})~\citep{gelman2013bayesian} values for models  with: no $\tau$ at all, \emph{No}; $\tau$ fixed at the official last NPI date $\tau^*$, \emph{Fixed}; and free parameter $\tau$, \emph{Free}. WAIC values are scaled as a deviance measure: lower values imply higher predictive accuracy and a difference of 2 is a popular threshold for model comparison~\citep{Kass1995}. Bold values emphasize cases in which the \emph{Free} model has the lowest WAIC.
 } 
 \label{table:WAIC}
@@ -911,7 +924,8 @@ $\tau^*$ is the official last NPI date (\autoref{table:NPI_dates}).
     \caption{
     \textbf{Under-estimation of impact of NPIs increases with the delay in their effective start.} The x-axis shows the days between the estimated effective start of NPIs, $\hat\tau$, and the official date, $\tau^*$. The y-axis shows the error in estimation of the impact of NPIs when assuming they start at their official date, i.e. the difference between the median estimate from a model with fixed~$\tau$ minus the estimate from a model with free~$\tau$, the y-axis and x-axis of \autoref{fig:Re}, respectively.
     Impact of NPIs defined as $\frac{R_1 - R_2}{R_1}$, where $R_1$ and $R_2$ are the effective reproduction numbers before and after the NPI, respectively (\autoref{eq:Re}).
-	The dashed black line shows a linear regression, slope=-0.0313 with 95\% CI [-0.051, -0.012], $R^2=0.554$.
+	The dashed black line shows a linear regression, slope=-0.0313 with (-0.051, -0.012)~95\%~CI, $R^2=0.554$.
+	AT: Austria, BE: Belgium, CH: Switzerland, CN: Wuhan, China, DE: Germany, DK: Denmark, ES: Spain, FR: France, GB: United Kingdom, IT: Italy, NO: Norway, SE: Sweden.
     } 
     \label{fig:Re2}
 \end{figure}
