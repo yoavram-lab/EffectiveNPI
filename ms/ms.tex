@@ -182,8 +182,8 @@ In all countries except Sweden, the date of the last intervention ($\tau^*$) is 
 
 
 
-% Introduction
-\section*{Introduction}
+% Background
+\section*{Background}
 
 The \covid pandemic has resulted in implementation of extreme non-pharmaceutical interventions (NPIs) in many affected countries. These interventions, from social distancing to lockdowns, are applied in a rapid and widespread fashion.
 NPIs are designed and assessed using epidemiological models, which follow the dynamics of infection to forecast the effect of different mitigation and suppression strategies on the levels of infection, hospitalization, and fatality.
@@ -201,6 +201,181 @@ Here, we hypothesize that there is a significant difference between the official
 We use a \textit{Susceptible-Exposed-Infected-Recovered} (SEIR) model and a \textit{Markov Chain Monte Carlo} (MCMC) parameter estimation framework to infer the effective start date of NPIs from publicly available \covid case data in 12 geographical regions.
 We compare these estimates to the official dates, and find that they include both late and early effects of NPIs on infection dynamics.
 We conclude by demonstrating how differences between the official and effective start of NPIs can confound assessments of their impacts.
+
+
+
+% Methods
+\section*{Methods}
+
+
+
+%%% Data %%%%
+\paragraph*{Data.} 
+We use daily confirmed case data $\vec{X}=(X_1, \ldots, X_T)$ from 12~regions during Jan--Apr 2020. These incidence data summarise the number of individuals $X_t$ tested positive for \sars (using RT-qPCR tests) on each day $t$. 
+Data for Wuhan, China, from Jan~10 to Feb~8, retrieved from \citet{Pei2020}. Data for 11 European countries, from Feb~20 to Apr~24, retrieved from \citet{Flaxman2020}.
+Where there were multiple sequences of days with zero confirmed cases (e.g. France), we cropped the data to begin with the last sequence so that our analysis focuses on the first sustained outbreak rather than isolated imported cases. 
+For official NPI dates see \autoref{table:NPI_dates}.
+
+
+
+%%% SEIR model %%%%
+\paragraph*{SEIR model.} \label{sec:model}
+We model \sars infection dynamics by following the number of susceptible $S$, exposed $E$, reported infected $I_r$, unreported infected $I_u$, and recovered $R$ individuals in a population of size $N$.
+This model distinguishes between reported and unreported infected individuals: the reported infected are those that have enough symptoms to eventually be tested and thus appear in daily case reports, to which we fit the model.
+This model is inspired by \citet{Li2020} and \citet{Pei2020}, who used a similar model with multiple regions and constant transmission and reporting rates to study \covid dynamics in China and in the continental US.
+
+Susceptible ($S$) individuals become exposed due to contact with reported or unreported infected individuals ($I_r$ or $I_u$) at a rate $\beta_t$ or $\mu \beta_t$, respectively.
+The parameter $0 < \mu < 1$ represents the decreased transmission rate from unreported infected individuals, who are often subclinical or even asymptomatic~\citep{Ferretti2020,Thompson2020}.
+The transmission rate $\beta_t \ge 0$ may change over  time $t$ due to behavioural changes of both susceptible and infected individuals.
+Exposed individuals, after an average latent period of $Z$ days, become reported infected with probability $\alpha_t$ or unreported infected with probability $(1-\alpha_t)$.
+The reporting rate $0 < \alpha_t < 1$ may also change over time due to changes in human behaviour.
+Infected individuals remain infectious for an average period of $D$ days, after which they either recover, or become ill enough to be quarantined.
+In either case, they no longer infect other individuals, and therefore effectively become recovered ($R$).
+The model is described by the following set of equations,
+\begin{equation} \label{eq:model}
+\begin{aligned}
+\frac{dS}{dt} & = -\beta_t S \Big(\frac{I_r}{N} + \mu \frac{I_u}{N}\Big) \\
+\frac{dE}{dt} & = \beta_t S \Big(\frac{I_r}{N} + \mu \frac{I_u}{N}\Big)  - \frac{E}{Z} \\
+\frac{dI_r}{dt} & = \alpha_t \frac{E}{Z} - \frac{I_r}{D} \\
+\frac{dI_u}{dt} & = \big(1-\alpha_t\big) \frac{E}{Z} - \frac{I_u}{D} \\
+\frac{dR}{dt} & = \frac{I_r}{D} + \frac{I_u}{D} \;,
+\end{aligned}
+\end{equation}
+where $N$ is the population size.
+The initial numbers of exposed $E(0)$ and unreported infected $I_u(0)$ are free model parameters (i.e. inferred from the data), whereas the initial number of reported infected and recovered is assumed to be zero, $I_r(0)=R(0)=0$, and the number of susceptible is $S(0)=N-E(0)-I_u(0)$.
+
+
+
+%%% Likelihood %%%
+\paragraph*{Likelihood function.}
+
+For a given vector $\theta$ of model parameters the \emph{expected} cumulative number of reported infected individuals ($I_r$) until day $t$, following~\autoref{eq:model}, is
+\begin{equation} \label{eq:Yt}
+Y_t(\theta) = \int_{0}^{t}{\alpha_s \frac{E(s)}{Z} \; ds}, \quad Y_0 = 0.
+\end{equation}
+We assume that reported infected individuals are confirmed and therefore observed in the daily case report of day $t$ with probability $p_t$ (note that an individual can only be observed once, and that $p_t$ may change over time, but $t$ is a specific date rather than the time elapsed since the individual was infected).
+We denote by $X_t$ the \emph{observed} number of confirmed cases in day $t$, and by $\tilde{X}_t$ the cumulative number of confirmed cases until end of day $t$,
+\begin{equation} \label{eq:Xsumt}
+\tilde{X}_t=\sum_{i=1}^{t}X_i.
+\end{equation}
+Therefore, at day $t$ the number of reported infected yet-to-be confirmed individuals is
+$(Y_t(\theta) - \tilde{X}_{t-1})$.
+We assume that $X_t$ conditioned on $\tilde{X}_{t-1}$ is Poisson distributed, such that
+\begin{equation} \label{eq:Xt} \begin{aligned}
+\Big(X_1 \mid \theta \Big) & \sim \mathit{Poi}\big( Y_1(\theta) \cdot p_1 \big), \\
+\Big(X_t \mid \tilde{X}_{t-1}, \theta \Big) & \sim 
+\mathit{Poi}\Big( \big(Y_t(\theta) - \tilde{X}_{t-1}\big) \cdot p_t \Big), \quad t=2,\ldots,T.
+\end{aligned}\end{equation}
+
+Hence, the \emph{likelihood function} $\mathcal{L}(\theta \mid \vec{X})$ for a parameter vector $\theta$ given the confirmed case data $\vec{X} = (X_1, \ldots, X_T)$ is defined by the probability to observe  $\vec{X}$ given $\theta$,
+\begin{equation} \label{eq:likelihood}
+\mathcal{L}(\theta \mid \vec{X}) = 
+P(\vec{X} \mid \theta) = 
+P(X_1 \mid \theta) \cdot P(X_2 \mid \tilde{X_1}, \theta) \cdots P(X_T \mid \tilde{X}_{T-1}, \theta).
+\end{equation}
+
+
+
+%%% NPI %%%
+\paragraph*{NPI model.}
+To model non-pharmaceutical interventions (NPIs), we set the start of the NPIs to day $\tau$ and define
+\begin{equation} \label{eq:NPI_model}
+\beta_t = \begin{cases} 
+  \beta, & t < \tau \\ 
+  \beta \lambda, & t \ge \tau
+\end{cases},
+\quad
+\alpha_t = \begin{cases} 
+  \alpha_1, & t < \tau \\ 
+  \alpha_2, & t \ge \tau
+\end{cases},
+\quad
+p_t = \begin{cases} 
+  1/9, & t < \tau \\ 
+  1/6, & t \ge \tau
+\end{cases},
+\end{equation}
+where $0 < \lambda < 1$.
+The values for $p_t$ follow \citet{Li2020}, who estimated the average time between infection and reporting in Wuhan, China, at 9 days before the start of NPIs and 6 days after start of NPIs.
+
+Following \citet{Li2020}, the effective reproduction numbers before and after the start of NPIs are
+\begin{equation} \label{eq:Re}
+\begin{aligned}
+R_1 &= \alpha_1 \beta D + (1-\alpha_1) \mu \beta D, \\
+R_2 &= \alpha_2 \lambda \beta D + (1-\alpha_2) \mu \lambda \beta D.
+\end{aligned}
+\end{equation}
+The relative reduction in the effective reproduction number due to NPIs is $\frac{R_1 - R_2}{R_1}$.
+
+
+
+%%% Model fitting %%%
+\paragraph*{Parameter estimation.}
+To estimate the model parameters from the daily case data $\vec{X}$, we apply a Bayesian inference approach.
+Model fitting was calibrated for case data up to Mar~28, and then applied to data up to Apr~11 (for Wuhan, China, model fitting was applied for data up to Feb~8.)
+We start our model $\Delta t$ days~\citep{Gatto2020} before the outbreak (defined as consecutive days with increasing confirmed cases) in each country.
+The model in Eqs.~\ref{eq:model} and~\ref{eq:NPI_model} is parameterised by the vector $\theta$, where
+\begin{equation} \label{eq:theta}
+\theta=\Big(Z, D, \mu, \beta, \lambda, \alpha_1, \alpha_2, E(0), I_u(0), \Delta t, \tau \Big) \;.
+\end{equation} 
+
+The likelihood function is defined in \autoref{eq:likelihood}.
+We defined the following prior distributions on the model parameters $P(\theta)$: 
+\begin{equation} \label{eq:priors}
+\begin{aligned} 
+Z & \sim \mathit{Uniform}(2, 5) \\
+D & \sim \mathit{Uniform}(2, 5) \\
+\mu & \sim \mathit{Uniform}(0.2, 1) \\
+\beta & \sim \mathit{Uniform}(0.8, 1.5) \\
+\lambda & \sim \mathit{Uniform}(0, 1) \\
+\alpha_1, \alpha_2 & \sim \mathit{Uniform}(0.02, 1)\\
+E(0) & \sim \mathit{Uniform}(0, 3000) \\
+I_u(0) & \sim \mathit{Uniform}(0, 3000) \\
+\Delta t & \sim \mathit{Uniform}(1, 5) \\
+\tau &\sim \mathit{TruncatedNormal}\Big(\frac{\tau^*+\tau^0}{2}, \frac{\tau^*-\tau^0}{2}, 5, T-2\Big),
+\end{aligned}
+\end{equation}
+where the prior for $\tau$ is a truncated normal distribution shaped so that the date of the first and last NPI, $\tau^0$ and $\tau^*$ (\autoref{table:NPI_dates}), are at minus and plus one standard deviation, and taking values only between 5 and  $T-2$, where $T$ is the number of days in the data $\vec{X}$.
+We also tested an uninformative uniform prior, $\mathit{Uniform}(1,T-2)$.
+WAIC (\autoref{eq:WAIC}) of a model with this uniform prior was either higher, or lower by less than 2, compared to WAIC of a model with the truncated normal prior.
+The uninformative prior resulted in non-negligible posterior probability for unreasonable $\tau$ values, such as Mar~1 in the United~Kingdom. 
+We therefore decided to use the more informative truncated normal prior for $\tau$.
+Other priors follow \citet{Li2020}, with the following exceptions.
+$\lambda$ is used to ensure transmission rates are lower after the start of the NPIs ($\lambda < 1$).
+We checked values of $\Delta t$ larger than five days and found they generally produce lower likelihood and unreasonable parameter estimates, and therefore chose $\mathit{Uniform}(1,5)$ as the prior for $\Delta t$.
+We also tried to estimate the value of $p_t$ before and after $\tau$, instead of keeping it fixed at $1/9$ and $1/6$. The model with fixed values was supported by the evidence (lower WAIC, see below) in 9 of 12 countries. Moreover, the estimates for Wuhan, China were $1/9$ and $1/6$, as in \citet{Li2020}. 
+
+The posterior distribution of the model parameters $P(\theta \mid \vec{X})$ is estimated using the affine-invariant ensemble sampler for Markov chain Monte Carlo (MCMC)~\citep{Goodman2010}, implemented in the \texttt{emcee} Python package~\citep{Foreman-Mackey2013}.
+We use the default configuration with the stretch move and a stretch scale parameter $a=2$.
+For the main analysis we use 50 chains (or walkers) per region, with 7M samples per chain (no thinning was applied; 6.8M for Wuhan).
+The \emph{integrated autocorrelation time} (IAT)~\citep{Foreman-Mackey2013,Goodman2010} was averaged across parameters and chains for each region. 
+The average IAT was between 31.9K for Wuhan and 187K for Germany~(\autoref{fig:autocorr}).
+We examined the trace plots for $\tau$ in all regions (\autoref{fig:trace}).
+All chains seem to converge to the stationary distribution, in most cases before 2M samples. Thus, we discarded the first 2M samples as burn-in samples.
+The only exception is Spain, in which a single chain converged at around 6M samples.
+We considered this chain as part of the burn-in and removed it from the analysis.
+Therefore, 50 chains with 5M samples and IAT between 32K and 187K give an effective sample size between 1,336 and 7,523.
+We ran additional chains with 2M samples and a different initialization (i.e. seed). The estimated posterior distributions of $\tau$ were very similar to our main analysis, further increasing our confidence in the convergence of our inference.
+For the models with fixed~$\tau$ and without~$\tau$, in some countries, we use less than 7M samples per chain because the IAT converged sooner.
+In these cases the effective sample size was at between 2,454 (UK) and 10,954 (Spain) in the fixed~$\tau$ model and between 6,230 (Norway) and 94,339 (Italy) in the model without~$\tau$.
+
+
+
+%%% Model comparison %%%
+\paragraph*{Model comparison.}
+We perform model selection using two methods.
+First, we compute WAIC (widely applicable information criterion)~\citep{gelman2013bayesian},
+\begin{equation} \label{eq:WAIC}
+\begin{aligned}
+\mathit{WAIC}(\theta, \vec{X}) &= -2\log\mathbb{E}[\mathcal{L}(\theta \mid \vec{X})] + 2\mathbb{V}[\log\mathcal{L}(\theta \mid \vec{X})]
+\end{aligned}
+\end{equation}
+where $\mathbb{E}[\cdot]$ and $\mathbb{V}[\cdot]$ are the expectation and variance operators taken over the posterior distribution $P(\theta \mid \vec{X})$.
+We compare models by reporting their relative WAIC; lower is better~(\autoref{table:WAIC}).
+
+We also plot posterior predictions: we sample 1,000 parameter vectors from the posterior distribution $P(\theta \mid \vec{X})$ fitted to data up to Apr~11, use these parameter vectors to simulate the SEIR model (\autoref{eq:model}) up to Apr~24, and plot the predicted dynamics~(\autoref{fig:ppc}).
+Both the accuracy (i.e. overlap of data and prediction) and the precision (i.e. the tightness of the predictions) are good ways to visually compare models.
+We also compute the expected posterior RMSE (root mean squared error) of these predictions~(\autoref{table:RMSE}).
 
 
 
@@ -391,9 +566,8 @@ The estimated impact can then be interpreted as ineffectiveness of the NPIs, lea
 
 
 
-%\pagebreak
-% Discussion
-\section*{Discussion}
+% Discussion and Conclusions
+\section*{Discussion and Conclusions}
 
 We have inferred the effective start date of NPIs in 12~regions using SEIR models under an MCMC parameter estimation framework.
 We find examples of both late and early effective start of NPIs relative to the official date (\autoref{fig:tau-summary}).
@@ -428,203 +602,6 @@ Therefore, we emphasize the need to further study heterogeneity in compliance an
 
 
 
-%\pagebreak
-% Models and Methods
-{\small
-\section*{Models and Methods}
-
-
-
-%%% Data %%%%
-\paragraph*{Data.} 
-We use daily confirmed case data $\vec{X}=(X_1, \ldots, X_T)$ from 12~regions during Jan--Apr 2020. These incidence data summarise the number of individuals $X_t$ tested positive for \sars (using RT-qPCR tests) on each day $t$. 
-Data for Wuhan, China, from Jan~10 to Feb~8, retrieved from \citet{Pei2020}. Data for 11 European countries, from Feb~20 to Apr~24, retrieved from \citet{Flaxman2020}.
-Where there were multiple sequences of days with zero confirmed cases (e.g. France), we cropped the data to begin with the last sequence so that our analysis focuses on the first sustained outbreak rather than isolated imported cases. 
-For official NPI dates see \autoref{table:NPI_dates}.
-
-
-
-%%% SEIR model %%%%
-\paragraph*{SEIR model.} \label{sec:model}
-We model \sars infection dynamics by following the number of susceptible $S$, exposed $E$, reported infected $I_r$, unreported infected $I_u$, and recovered $R$ individuals in a population of size $N$.
-This model distinguishes between reported and unreported infected individuals: the reported infected are those that have enough symptoms to eventually be tested and thus appear in daily case reports, to which we fit the model.
-This model is inspired by \citet{Li2020} and \citet{Pei2020}, who used a similar model with multiple regions and constant transmission and reporting rates to study \covid dynamics in China and in the continental US.
-
-Susceptible ($S$) individuals become exposed due to contact with reported or unreported infected individuals ($I_r$ or $I_u$) at a rate $\beta_t$ or $\mu \beta_t$, respectively.
-The parameter $0 < \mu < 1$ represents the decreased transmission rate from unreported infected individuals, who are often subclinical or even asymptomatic~\citep{Ferretti2020,Thompson2020}.
-The transmission rate $\beta_t \ge 0$ may change over  time $t$ due to behavioural changes of both susceptible and infected individuals.
-Exposed individuals, after an average latent period of $Z$ days, become reported infected with probability $\alpha_t$ or unreported infected with probability $(1-\alpha_t)$.
-The reporting rate $0 < \alpha_t < 1$ may also change over time due to changes in human behaviour.
-Infected individuals remain infectious for an average period of $D$ days, after which they either recover, or become ill enough to be quarantined.
-In either case, they no longer infect other individuals, and therefore effectively become recovered ($R$).
-The model is described by the following set of equations,
-\begin{equation} \label{eq:model}
-\begin{aligned}
-\frac{dS}{dt} & = -\beta_t S \Big(\frac{I_r}{N} + \mu \frac{I_u}{N}\Big) \\
-\frac{dE}{dt} & = \beta_t S \Big(\frac{I_r}{N} + \mu \frac{I_u}{N}\Big)  - \frac{E}{Z} \\
-\frac{dI_r}{dt} & = \alpha_t \frac{E}{Z} - \frac{I_r}{D} \\
-\frac{dI_u}{dt} & = \big(1-\alpha_t\big) \frac{E}{Z} - \frac{I_u}{D} \\
-\frac{dR}{dt} & = \frac{I_r}{D} + \frac{I_u}{D} \;,
-\end{aligned}
-\end{equation}
-where $N$ is the population size.
-The initial numbers of exposed $E(0)$ and unreported infected $I_u(0)$ are free model parameters (i.e. inferred from the data), whereas the initial number of reported infected and recovered is assumed to be zero, $I_r(0)=R(0)=0$, and the number of susceptible is $S(0)=N-E(0)-I_u(0)$.
-
-
-
-%%% Likelihood %%%
-\paragraph*{Likelihood function.}
-
-For a given vector $\theta$ of model parameters the \emph{expected} cumulative number of reported infected individuals ($I_r$) until day $t$, following~\autoref{eq:model}, is
-\begin{equation} \label{eq:Yt}
-Y_t(\theta) = \int_{0}^{t}{\alpha_s \frac{E(s)}{Z} \; ds}, \quad Y_0 = 0.
-\end{equation}
-We assume that reported infected individuals are confirmed and therefore observed in the daily case report of day $t$ with probability $p_t$ (note that an individual can only be observed once, and that $p_t$ may change over time, but $t$ is a specific date rather than the time elapsed since the individual was infected).
-We denote by $X_t$ the \emph{observed} number of confirmed cases in day $t$, and by $\tilde{X}_t$ the cumulative number of confirmed cases until end of day $t$,
-\begin{equation} \label{eq:Xsumt}
-\tilde{X}_t=\sum_{i=1}^{t}X_i.
-\end{equation}
-Therefore, at day $t$ the number of reported infected yet-to-be confirmed individuals is
-$(Y_t(\theta) - \tilde{X}_{t-1})$.
-We assume that $X_t$ conditioned on $\tilde{X}_{t-1}$ is Poisson distributed, such that
-\begin{equation} \label{eq:Xt} \begin{aligned}
-\Big(X_1 \mid \theta \Big) & \sim \mathit{Poi}\big( Y_1(\theta) \cdot p_1 \big), \\
-\Big(X_t \mid \tilde{X}_{t-1}, \theta \Big) & \sim 
-\mathit{Poi}\Big( \big(Y_t(\theta) - \tilde{X}_{t-1}\big) \cdot p_t \Big), \quad t=2,\ldots,T.
-\end{aligned}\end{equation}
-
-Hence, the \emph{likelihood function} $\mathcal{L}(\theta \mid \vec{X})$ for a parameter vector $\theta$ given the confirmed case data $\vec{X} = (X_1, \ldots, X_T)$ is defined by the probability to observe  $\vec{X}$ given $\theta$,
-\begin{equation} \label{eq:likelihood}
-\mathcal{L}(\theta \mid \vec{X}) = 
-P(\vec{X} \mid \theta) = 
-P(X_1 \mid \theta) \cdot P(X_2 \mid \tilde{X_1}, \theta) \cdots P(X_T \mid \tilde{X}_{T-1}, \theta).
-\end{equation}
-
-
-
-%%% NPI %%%
-\paragraph*{NPI model.}
-To model non-pharmaceutical interventions (NPIs), we set the start of the NPIs to day $\tau$ and define
-\begin{equation} \label{eq:NPI_model}
-\beta_t = \begin{cases} 
-  \beta, & t < \tau \\ 
-  \beta \lambda, & t \ge \tau
-\end{cases},
-\quad
-\alpha_t = \begin{cases} 
-  \alpha_1, & t < \tau \\ 
-  \alpha_2, & t \ge \tau
-\end{cases},
-\quad
-p_t = \begin{cases} 
-  1/9, & t < \tau \\ 
-  1/6, & t \ge \tau
-\end{cases},
-\end{equation}
-where $0 < \lambda < 1$.
-The values for $p_t$ follow \citet{Li2020}, who estimated the average time between infection and reporting in Wuhan, China, at 9 days before the start of NPIs and 6 days after start of NPIs.
-
-Following \citet{Li2020}, the effective reproduction numbers before and after the start of NPIs are
-\begin{equation} \label{eq:Re}
-\begin{aligned}
-R_1 &= \alpha_1 \beta D + (1-\alpha_1) \mu \beta D, \\
-R_2 &= \alpha_2 \lambda \beta D + (1-\alpha_2) \mu \lambda \beta D.
-\end{aligned}
-\end{equation}
-The relative reduction in the effective reproduction number due to NPIs is $\frac{R_1 - R_2}{R_1}$.
-
-
-
-%%% Model fitting %%%
-\paragraph*{Parameter estimation.}
-To estimate the model parameters from the daily case data $\vec{X}$, we apply a Bayesian inference approach.
-Model fitting was calibrated for case data up to Mar~28, and then applied to data up to Apr~11 (for Wuhan, China, model fitting was applied for data up to Feb~8.)
-We start our model $\Delta t$ days~\citep{Gatto2020} before the outbreak (defined as consecutive days with increasing confirmed cases) in each country.
-The model in Eqs.~\ref{eq:model} and~\ref{eq:NPI_model} is parameterised by the vector $\theta$, where
-\begin{equation} \label{eq:theta}
-\theta=\Big(Z, D, \mu, \beta, \lambda, \alpha_1, \alpha_2, E(0), I_u(0), \Delta t, \tau \Big) \;.
-\end{equation} 
-
-The likelihood function is defined in \autoref{eq:likelihood}.
-We defined the following prior distributions on the model parameters $P(\theta)$: 
-\begin{equation} \label{eq:priors}
-\begin{aligned} 
-Z & \sim \mathit{Uniform}(2, 5) \\
-D & \sim \mathit{Uniform}(2, 5) \\
-\mu & \sim \mathit{Uniform}(0.2, 1) \\
-\beta & \sim \mathit{Uniform}(0.8, 1.5) \\
-\lambda & \sim \mathit{Uniform}(0, 1) \\
-\alpha_1, \alpha_2 & \sim \mathit{Uniform}(0.02, 1)\\
-E(0) & \sim \mathit{Uniform}(0, 3000) \\
-I_u(0) & \sim \mathit{Uniform}(0, 3000) \\
-\Delta t & \sim \mathit{Uniform}(1, 5) \\
-\tau &\sim \mathit{TruncatedNormal}\Big(\frac{\tau^*+\tau^0}{2}, \frac{\tau^*-\tau^0}{2}, 5, T-2\Big),
-\end{aligned}
-\end{equation}
-where the prior for $\tau$ is a truncated normal distribution shaped so that the date of the first and last NPI, $\tau^0$ and $\tau^*$ (\autoref{table:NPI_dates}), are at minus and plus one standard deviation, and taking values only between 5 and  $T-2$, where $T$ is the number of days in the data $\vec{X}$.
-We also tested an uninformative uniform prior, $\mathit{Uniform}(1,T-2)$.
-WAIC (\autoref{eq:WAIC}) of a model with this uniform prior was either higher, or lower by less than 2, compared to WAIC of a model with the truncated normal prior.
-The uninformative prior resulted in non-negligible posterior probability for unreasonable $\tau$ values, such as Mar~1 in the United~Kingdom. 
-We therefore decided to use the more informative truncated normal prior for $\tau$.
-Other priors follow \citet{Li2020}, with the following exceptions.
-$\lambda$ is used to ensure transmission rates are lower after the start of the NPIs ($\lambda < 1$).
-We checked values of $\Delta t$ larger than five days and found they generally produce lower likelihood and unreasonable parameter estimates, and therefore chose $\mathit{Uniform}(1,5)$ as the prior for $\Delta t$.
-We also tried to estimate the value of $p_t$ before and after $\tau$, instead of keeping it fixed at $1/9$ and $1/6$. The model with fixed values was supported by the evidence (lower WAIC, see below) in 9 of 12 countries. Moreover, the estimates for Wuhan, China were $1/9$ and $1/6$, as in \citet{Li2020}. 
-
-The posterior distribution of the model parameters $P(\theta \mid \vec{X})$ is estimated using the affine-invariant ensemble sampler for Markov chain Monte Carlo (MCMC)~\citep{Goodman2010}, implemented in the \texttt{emcee} Python package~\citep{Foreman-Mackey2013}.
-We use the default configuration with the stretch move and a stretch scale parameter $a=2$.
-For the main analysis we use 50 chains (or walkers) per region, with 7M samples per chain (no thinning was applied; 6.8M for Wuhan).
-The \emph{integrated autocorrelation time} (IAT)~\citep{Foreman-Mackey2013,Goodman2010} was averaged across parameters and chains for each region. 
-The average IAT was between 31.9K for Wuhan and 187K for Germany~(\autoref{fig:autocorr}).
-We examined the trace plots for $\tau$ in all regions (\autoref{fig:trace}).
-All chains seem to converge to the stationary distribution, in most cases before 2M samples. Thus, we discarded the first 2M samples as burn-in samples.
-The only exception is Spain, in which a single chain converged at around 6M samples.
-We considered this chain as part of the burn-in and removed it from the analysis.
-Therefore, 50 chains with 5M samples and IAT between 32K and 187K give an effective sample size between 1,336 and 7,523.
-We ran additional chains with 2M samples and a different initialization (i.e. seed). The estimated posterior distributions of $\tau$ were very similar to our main analysis, further increasing our confidence in the convergence of our inference.
-For the models with fixed~$\tau$ and without~$\tau$, in some countries, we use less than 7M samples per chain because the IAT converged sooner.
-In these cases the effective sample size was at between 2,454 (UK) and 10,954 (Spain) in the fixed~$\tau$ model and between 6,230 (Norway) and 94,339 (Italy) in the model without~$\tau$.
-
-
-
-%%% Model comparison %%%
-\paragraph*{Model comparison.}
-We perform model selection using two methods.
-First, we compute WAIC (widely applicable information criterion)~\citep{gelman2013bayesian},
-\begin{equation} \label{eq:WAIC}
-\begin{aligned}
-\mathit{WAIC}(\theta, \vec{X}) &= -2\log\mathbb{E}[\mathcal{L}(\theta \mid \vec{X})] + 2\mathbb{V}[\log\mathcal{L}(\theta \mid \vec{X})]
-\end{aligned}
-\end{equation}
-where $\mathbb{E}[\cdot]$ and $\mathbb{V}[\cdot]$ are the expectation and variance operators taken over the posterior distribution $P(\theta \mid \vec{X})$.
-We compare models by reporting their relative WAIC; lower is better~(\autoref{table:WAIC}).
-
-We also plot posterior predictions: we sample 1,000 parameter vectors from the posterior distribution $P(\theta \mid \vec{X})$ fitted to data up to Apr~11, use these parameter vectors to simulate the SEIR model (\autoref{eq:model}) up to Apr~24, and plot the predicted dynamics~(\autoref{fig:ppc}).
-Both the accuracy (i.e. overlap of data and prediction) and the precision (i.e. the tightness of the predictions) are good ways to visually compare models.
-We also compute the expected posterior RMSE (root mean squared error) of these predictions~(\autoref{table:RMSE}).
-} % small
-
-% Declarations
-{\small
-\section*{Declarations}
-\textbf{Ethics approval and consent to participate.} Not applicable.
-
-\textbf{Consent for publication.} Not applicable.
-
-\textbf{Availability of data and materials.} We use Python 3 with NumPy, Matplotlib, SciPy, Pandas, Seaborn, and emcee.
-Source code will be publicly available under a permissive open-source license at \href{http://github.com/yoavram-lab/EffectiveNPI}{github.com/yoavram-lab/EffectiveNPI}.
-We used freely available data, see source code repository and above \emph{Data} section for details.
-
-\textbf{Competing interests.} The authors declare that they have no competing interests.
-
-\textbf{Funding.} This work was supported in part by the Israel Science Foundation (3811/19 and 552/19, YR). The funding body had no role in designing, performing, or analyzing the study.
-
-\textbf{Authors' contributions.} UO and YR designed the research. IK and YR performed the research and wrote the manuscript. All authors read and approved the final manuscript.
-
-\textbf{Acknowledgements.} 
-We thank Yinon M. Bar-On, Lilach Hadany, Oren Kolodny, and Zohar Yakhini. % Tim CD Lucas
-} % small
-
 %% Table - estimated parameters
 % generated with /python Table_estimated_params.py FOLDER NAME
 \begin{landscape}
@@ -647,7 +624,37 @@ $\tau^*$ is the official last NPI date (\autoref{table:NPI_dates}).
 
 
 
-%\pagebreak
+% Abbreviations
+{\small
+\section*{Abbreviations}
+NPI: non-pharmaceutical interventions, CI: credible interval, MCMC: Markov chain Monte Carlo, SEIR: susceptible-exposed-infected-recovered, WAIC: widely applicable information criterion, RMSE: root mean squared error, IAT: integrated autocorrelation time, \covid: coronavirus disease 2019, \sars: severe acute respiratory syndrome coronavirus 2.
+}
+
+
+
+% Declarations
+{\small
+\section*{Declarations}
+\textbf{Ethics approval and consent to participate.} Not applicable.
+
+\textbf{Consent for publication.} Not applicable.
+
+\textbf{Availability of data and materials.} We use Python 3 with NumPy, Matplotlib, SciPy, Pandas, Seaborn, and emcee.
+Source code will be publicly available under a permissive open-source license at \href{http://github.com/yoavram-lab/EffectiveNPI}{github.com/yoavram-lab/EffectiveNPI}.
+Data for Wuhan, China, retrieved from \citet{Pei2020}.
+Data for 11 European countries retrieved from \citet{Flaxman2020}.
+
+\textbf{Competing interests.} The authors declare that they have no competing interests.
+
+\textbf{Funding.} This work was supported in part by the Israel Science Foundation (3811/19 and 552/19, YR). The funding body had no role in designing, performing, or analyzing the study.
+
+\textbf{Authors' contributions.} UO and YR designed the research. IK and YR performed the research and wrote the manuscript. All authors read and approved the final manuscript.
+
+\textbf{Acknowledgements.} 
+We thank Yinon M. Bar-On, Lilach Hadany, Oren Kolodny, and Zohar Yakhini. % Tim CD Lucas
+} % small
+
+
 
 \section*{References}
 \nolinenumbers
@@ -719,22 +726,80 @@ $\tau^*$ is the official last NPI date (\autoref{table:NPI_dates}).
 } 
 \label{table:WAIC}
 \end{table}
-
-
-%%% Fig - tau summary Mar 28 %%%
-% generated with
-% > python Fig_tau_summary.py 2020-06-23-Mar28
-% > mv ../figures/Fig-tau-summary.pdf ../figures/Fig-summary-Mar28.pdf
-\begin{figure}[b!]
-    \centering
-	\includegraphics[width=0.6\textwidth]{../figures/Fig-summary-Mar28.pdf}
-    \caption{
-    \textbf{Official vs. effective start of non-pharmaceutical interventions estimated up to Mar~28.}
-    	The difference between $\tau$ the effective and $\tau^*$ the official start of NPIs estimated from case data up to Mar~28, 2020, shown for different regions. Here, $\hat{\tau}$ is the marginal posterior median. $\tau^*$ is the last NPI date (a lockdown everywhere by Sweden, see \autoref{table:NPI_dates}). Thin and bold lines show 95\% and 75\% credible intervals (HDI~\citep{Kruschke2014}), respectively. Inference performed similarly to main inference, but with data up to Mar~28 and only 1M samples per chain with 600K burn-in.
-    }
-    \label{fig:tau-summary-mar28}
-\end{figure}
  
+
+
+%%% Fig Autocorrelation
+% generated with Fig_autocorr.py
+\begin{figure}[h]
+    \centering
+	\includegraphics[width=\textwidth]{../figures/Fig-autocorr.pdf}
+    \caption{
+    \textbf{Integrated autocorrelation time (IAT)}~\citep{Foreman-Mackey2013,Goodman2010}, averaged across model parameters and MCMC chains, as a function of the number of samples in the chains.
+    IAT is less than 187K in all cases, while chain length is 5M after burn-in period of 2M. With 50 chains per region, this gives a at least 1,335 uncorrelated samples for estimating the posterior distribution.
+    } 
+    \label{fig:autocorr}
+\end{figure}
+
+
+
+%%% Fig Trace plots
+\begin{figure}[p]	
+    \centering
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/traces/Austria_trace.pdf}
+    \end{subfigure}
+    ~%%%
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/traces/Belgium_trace.pdf}
+    \end{subfigure}
+    ~%%%
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/traces/Denmark_trace.pdf}
+    \end{subfigure}
+	~%%%
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/traces/France_trace.pdf}
+    \end{subfigure}
+    ~%%%
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/traces/Germany_trace.pdf}
+    \end{subfigure}
+    ~%%% 
+    \begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/traces/Italy_trace.pdf}
+    \end{subfigure}
+    ~%%% 
+	\begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/traces/Norway_trace.pdf}
+    \end{subfigure}
+    ~%%%  
+	\begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/traces/Spain_trace.pdf}
+    \end{subfigure}
+    ~%%%
+	\begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/traces/Sweden_trace.pdf}
+    \end{subfigure}
+    ~%%%  
+	\begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/traces/Switzerland_trace.pdf}
+    \end{subfigure}
+    ~%%%  
+	\begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/traces/United_Kingdom_trace.pdf}
+    \end{subfigure}
+    ~%%%  
+	\begin{subfigure}{0.32\textwidth}
+        \includegraphics[width=\textwidth]{../figures/traces/Wuhan_trace.pdf}
+    \end{subfigure}
+    \caption{
+    \textbf{Trace plots for $\tau$.}
+    The value of $\tau$ at for sequential samples of 50 chains per region. To facilitate visualization, chains were thinned 1:10,000 for the trace plots, but not for posterior estimation. Line transparency was set at $\alpha=0.1$ and chains cycle through different colors. In France and Austria some chains converged relatively late but before the burn-in period (2M iterations). In Spain, a single chain converged very late (after roughly 6M iterations) and was removed from further analysis. The y-axis range is the support of the prior on $\tau$.  
+    }
+    \label{fig:trace}	    
+\end{figure}
+
 
 
 %%% Fig PPC
@@ -860,6 +925,22 @@ $\tau^*$ is the official last NPI date (\autoref{table:NPI_dates}).
 
 
 
+%%% Fig - tau summary Mar 28 %%%
+% generated with
+% > python Fig_tau_summary.py 2020-06-23-Mar28
+% > mv ../figures/Fig-tau-summary.pdf ../figures/Fig-summary-Mar28.pdf
+\begin{figure}[b!]
+    \centering
+	\includegraphics[width=0.6\textwidth]{../figures/Fig-summary-Mar28.pdf}
+    \caption{
+    \textbf{Official vs. effective start of non-pharmaceutical interventions estimated up to Mar~28.}
+    	The difference between $\tau$ the effective and $\tau^*$ the official start of NPIs estimated from case data up to Mar~28, 2020, shown for different regions. Here, $\hat{\tau}$ is the marginal posterior median. $\tau^*$ is the last NPI date (a lockdown everywhere by Sweden, see \autoref{table:NPI_dates}). Thin and bold lines show 95\% and 75\% credible intervals (HDI~\citep{Kruschke2014}), respectively. Inference performed similarly to main inference, but with data up to Mar~28 and only 1M samples per chain with 600K burn-in.
+    }
+    \label{fig:tau-summary-mar28}
+\end{figure}
+
+
+
 %%% Fig Joint density plots
 \begin{figure}[p]	
     \centering
@@ -944,79 +1025,6 @@ $\tau^*$ is the official last NPI date (\autoref{table:NPI_dates}).
     Data from~\citet{Flaxman2020}.
     } 
     \label{fig:fig-fr-vs-es}
-\end{figure}
-
-
-
-%%% Fig Autocorrelation
-% generated with Fig_autocorr.py
-\begin{figure}[h]
-    \centering
-	\includegraphics[width=\textwidth]{../figures/Fig-autocorr.pdf}
-    \caption{
-    \textbf{Integrated autocorrelation time (IAT)}~\citep{Foreman-Mackey2013,Goodman2010}, averaged across model parameters and MCMC chains, as a function of the number of samples in the chains.
-    IAT is less than 187K in all cases, while chain length is 5M after burn-in period of 2M. With 50 chains per region, this gives a at least 1,335 uncorrelated samples for estimating the posterior distribution.
-    } 
-    \label{fig:autocorr}
-\end{figure}
-
-
-
-%%% Fig Trace plots
-\begin{figure}[p]	
-    \centering
-    \begin{subfigure}{0.32\textwidth}
-        \includegraphics[width=\textwidth]{../figures/traces/Austria_trace.pdf}
-    \end{subfigure}
-    ~%%%
-    \begin{subfigure}{0.32\textwidth}
-        \includegraphics[width=\textwidth]{../figures/traces/Belgium_trace.pdf}
-    \end{subfigure}
-    ~%%%
-    \begin{subfigure}{0.32\textwidth}
-        \includegraphics[width=\textwidth]{../figures/traces/Denmark_trace.pdf}
-    \end{subfigure}
-	~%%%
-    \begin{subfigure}{0.32\textwidth}
-        \includegraphics[width=\textwidth]{../figures/traces/France_trace.pdf}
-    \end{subfigure}
-    ~%%%
-    \begin{subfigure}{0.32\textwidth}
-        \includegraphics[width=\textwidth]{../figures/traces/Germany_trace.pdf}
-    \end{subfigure}
-    ~%%% 
-    \begin{subfigure}{0.32\textwidth}
-        \includegraphics[width=\textwidth]{../figures/traces/Italy_trace.pdf}
-    \end{subfigure}
-    ~%%% 
-	\begin{subfigure}{0.32\textwidth}
-        \includegraphics[width=\textwidth]{../figures/traces/Norway_trace.pdf}
-    \end{subfigure}
-    ~%%%  
-	\begin{subfigure}{0.32\textwidth}
-        \includegraphics[width=\textwidth]{../figures/traces/Spain_trace.pdf}
-    \end{subfigure}
-    ~%%%
-	\begin{subfigure}{0.32\textwidth}
-        \includegraphics[width=\textwidth]{../figures/traces/Sweden_trace.pdf}
-    \end{subfigure}
-    ~%%%  
-	\begin{subfigure}{0.32\textwidth}
-        \includegraphics[width=\textwidth]{../figures/traces/Switzerland_trace.pdf}
-    \end{subfigure}
-    ~%%%  
-	\begin{subfigure}{0.32\textwidth}
-        \includegraphics[width=\textwidth]{../figures/traces/United_Kingdom_trace.pdf}
-    \end{subfigure}
-    ~%%%  
-	\begin{subfigure}{0.32\textwidth}
-        \includegraphics[width=\textwidth]{../figures/traces/Wuhan_trace.pdf}
-    \end{subfigure}
-    \caption{
-    \textbf{Trace plots for $\tau$.}
-    The value of $\tau$ at for sequential samples of 50 chains per region. To facilitate visualization, chains were thinned 1:10,000 for the trace plots, but not for posterior estimation. Line transparency was set at $\alpha=0.1$ and chains cycle through different colors. In France and Austria some chains converged relatively late but before the burn-in period (2M iterations). In Spain, a single chain converged very late (after roughly 6M iterations) and was removed from further analysis. The y-axis range is the support of the prior on $\tau$.  
-    }
-    \label{fig:trace}	    
 \end{figure}
 
 
