@@ -41,7 +41,7 @@ if __name__ == '__main__':
 	job_id = sys.argv[1]
 	verbose = len(sys.argv) > 2 and sys.argv[2] == '-v'
 
-	output_folder = r'../output/{}'.format(job_id)
+	output_folder = r'../output-tmp/{}'.format(job_id)
 	
 	official = get_official_dates()
 	table_path = os.path.join(output_folder, 'tables', 'all-countries-{}.csv'.format(job_id))
@@ -163,7 +163,7 @@ if __name__ == '__main__':
 
 	plt.axvline(0, ls='--', color='k')
 	ax.set(
-	    xlabel=r'Days between effective and official date, $\hat{\tau} - \tau^*$',
+	    xlabel=r'Days between effective and official date, $\tau - \tau^*$',
 	)
 	ax.annotate('Late', (7, 11.5), fontsize=16)
 	ax.annotate('Early', (-12, 11.5), fontsize=16)

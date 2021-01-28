@@ -24,10 +24,10 @@ from model.uniform_prior_model import UniformPriorModel
 from inference import get_first_NPI_date, get_last_NPI_date, params_bounds, params_bounds, get_model_class
 
 country_name = None
-def load_data(file_name, _country_name, burn_fraction=0.6, lim_steps=None):
+def load_data(file_name, _country_name, nburn=2_000_000, lim_steps=None, delete_chain_less_than=None): 
     # it's the only global point. we initialize all the params here once and don't update it later (only when load_data again for different file_name)
     # TODO PLEASE DONT USE global anywhere in your code
-    global first_NPI, last_NPI, incidences, start_date, var_names, nsteps, ndim, N, Td1, Td2, ndays, sample, lnprobability, logliks, model_type, model, country_name
+    global first_NPI, last_NPI, incidences, start_date, var_names, realnsteps, nsteps, ndim, N, Td1, Td2, ndays, sample, lnprobability, logliks, model_type, model, country_name
     country_name = _country_name
     data = np.load(file_name)
     incidences = data['incidences']
@@ -35,10 +35,17 @@ def load_data(file_name, _country_name, burn_fraction=0.6, lim_steps=None):
     var_names = list(data['var_names'])
     nsteps, ndim, N, Td1, Td2, model_type = data['params']
     chain = data['chain']
-    nwalkers = chain.shape[0]
-    ndays = len(incidences)
-    nburn = int(nsteps * burn_fraction)
-    sample = chain[:, nburn:, :].reshape(-1, ndim)
+    nwalkers = chain.shape[0] #nwalkers before deleting bad chain
+    realnsteps = data['chain'].shape[1]
+    ndays = len(incidences)        
+
+    if delete_chain_less_than:
+        if len((chain[:,1_000_000, var_names.index('τ')]<delete_chain_less_than).nonzero())>1:
+            raise AssertionError('too many bad chains')
+        bad_chain_ind = (chain[:,1_000_000, var_names.index('τ')]<delete_chain_less_than).nonzero()[0][0]
+        chain = np.delete(chain, bad_chain_ind, axis=0)
+
+    sample = chain[:, nburn:lim_steps, :].reshape(-1, ndim)
     # try:
     #     sample[:,var_names.index('τ')] = sample[:,var_names.index('τ')].astype(int) #in inference we allways convert it to int
     # except ValueError: #if the model doesn't have such parameter
@@ -48,12 +55,12 @@ def load_data(file_name, _country_name, burn_fraction=0.6, lim_steps=None):
     # except ValueError:#if the model doesn't have such parameter
     #     None
 
-    lnprobability = data['lnprobability'][:, nburn:]
-    logliks = data['logliks'].reshape(nwalkers,nsteps)[:,nburn:].reshape(-1)
-    if lim_steps:
-        sample = chain[:, int(lim_steps * burn_fraction):lim_steps, :].reshape(-1, ndim)
-        lnprobability = data['lnprobability'][:, int(lim_steps * burn_fraction):lim_steps]
-        logliks = data['logliks'].reshape(nwalkers,nsteps)[:,int(lim_steps * burn_fraction):lim_steps].reshape(-1)
+    lnprobability = data['lnprobability'][:, nburn:lim_steps]
+    logliks = data['logliks'].reshape(nwalkers,realnsteps)[:,nburn:lim_steps]
+    if delete_chain_less_than:
+            lnprobability = np.delete(lnprobability, bad_chain_ind, axis=0)
+            logliks = np.delete(logliks, bad_chain_ind, axis=0)
+
     last_NPI = (get_last_NPI_date(country_name) - pd.to_datetime(start_date)).days
     first_NPI = (get_first_NPI_date(country_name) - pd.to_datetime(start_date)).days
 
@@ -68,9 +75,9 @@ def write_csv_header(file_name):
 
     with open(file_name, mode='w') as file: # use pd to write csv files?
         writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(['country','WAIC', 'DIC using median', 'DIC using mean', 'DIC using MAP','loglik(MAP)','loglik(mean)','loglik(median)','N','p_steps','p_model_type','p_Td1','p_Td2','official_τ','τ mean','τ median','τ MAP','τ hpd 75% from','τ hpd 75% to','τ hpd 95% from',
+        writer.writerow(['country','WAIC', 'DIC using median', 'DIC using mean', 'DIC using MAP','loglik(MAP)','loglik(mean)','loglik(median)','N','real_n_steps','p_steps','p_model_type','p_Td1','p_Td2','official_τ','τ mean d','τ median d','τ MAP d','τ hpd 75% from','τ hpd 75% to','τ hpd 95% from',
         'τ hpd 95% to',
-        'official τ from 1 Jan','τ mean from 1 Jan','τ median from 1 Jan','τ MAP from 1 Jan','τ CrI median (75%)','τ CrI median (95%)','τ CrI mean (75%)','τ CrI mean (95%)', *params_headers,'τ hpd 75% from','τ hpd 75% to n','τ hpd 95% from n',
+        'official τ from 1 Jan','τ mean from 1 Jan','τ median from 1 Jan','τ MAP from 1 Jan','τ CrI median (75%)','τ CrI median (95%)','τ CrI mean (75%)','τ CrI mean (95%)', *params_headers,'τ hpd 75% from n','τ hpd 75% to n','τ hpd 95% from n',
         'τ hpd 95% to n', 'τ hpd CrI 75%', 'τ hpd CrI 95%' ])
 
 def write_csv_data(file_name):
@@ -100,12 +107,22 @@ def write_csv_data(file_name):
             τ_median =  model.τ
             τ_MAP =  model.τ
             τ_MAP_i = model.τ
+            τ_hpd_75_from, τ_hpd_75_to, τ_hpd_95_from,τ_hpd_95_to =  model.τ, model.τ, model.τ, model.τ           
+            τ_hpd_75_from_date = format(τ_to_string(model.τ))
+            τ_hpd_75_to_date = format(τ_to_string(model.τ))
+            τ_hpd_95_from_date = format(τ_to_string(model.τ))
+            τ_hpd_95_to_date = format(τ_to_string(model.τ))
         except AttributeError: #model without τ
             τ_posterior =np.array([0])
             τ_mean = 0
             τ_median =  0
             τ_MAP =  0
             τ_MAP_i = 0
+            τ_hpd_75_from, τ_hpd_75_to, τ_hpd_95_from, τ_hpd_95_to =  0,0
+            τ_hpd_75_from_date = 0
+            τ_hpd_75_to_date = 0
+            τ_hpd_95_from_date = 0
+            τ_hpd_95_to_date = 0
 
     τ_official_from1Jar = (pd.to_datetime(start_date) - pd.Timestamp('2020-01-01')).days + last_NPI
     τ_mean_from1Jar = (pd.to_datetime(start_date) - pd.Timestamp('2020-01-01')).days + τ_posterior.mean()
@@ -119,7 +136,7 @@ def write_csv_data(file_name):
     with open(file_name, mode='a') as file:
         writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
-        writer.writerow([country_name,'{:.4f}'.format(calc_WAIC()), '{:.4f}'.format(calc_DIC(calc_loglik_median)), '{:.4f}'.format(calc_DIC(calc_loglik_mean)), '{:.4f}'.format(calc_DIC(calc_loglikMAP)), '{:.4f}'.format(calc_loglikMAP()),'{:.4f}'.format(calc_loglik_mean()),'{:.4f}'.format(calc_loglik_median()), N, nsteps, model_type, Td1, Td2,
+        writer.writerow([country_name,'{:.4f}'.format(calc_WAIC()), '{:.4f}'.format(calc_DIC(calc_loglik_median)), '{:.4f}'.format(calc_DIC(calc_loglik_mean)), '{:.4f}'.format(calc_DIC(calc_loglikMAP)), '{:.4f}'.format(calc_loglikMAP()),'{:.4f}'.format(calc_loglik_mean()),'{:.4f}'.format(calc_loglik_median()), N, realnsteps, nsteps, model_type, Td1, Td2,
                          τ_to_string(last_NPI),
                          τ_mean, τ_median,τ_MAP, τ_hpd_75_from_date,τ_hpd_75_to_date, τ_hpd_95_from_date,τ_hpd_95_to_date,
                          τ_official_from1Jar,  τ_mean_from1Jar, τ_median_from1Jar, τ_MAP_from1Jar, '{:.4f}'.format(calc_τ_CI_median()),'{:.4f}'.format(calc_τ_CI_median(0.95)),
@@ -147,9 +164,7 @@ def inliers(logliks, PLOT=False):
     return idx
 
 def calc_WAIC():
-    nwalkers = logliks.size//nsteps
-    l_logliks = logliks.reshape(nwalkers,nsteps)
-    l_logliks = l_logliks[inliers(l_logliks)]
+    l_logliks = logliks[inliers(logliks)]
     S = l_logliks.size
     llpd = -np.log(S) + logsumexp(l_logliks)
     p1 = 2*(-np.log(S) + logsumexp(l_logliks) - l_logliks.mean())

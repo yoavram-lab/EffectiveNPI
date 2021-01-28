@@ -1,8 +1,8 @@
 import os
 import pandas as pd
 
-no_fixed_free = ['2020-06-27-Apr11-notau', '2020-06-25-Apr11-fixedtau', '2020-05-26-Apr11']
-main_folder = r'../output'
+no_fixed_free = ['7MNoTau', '7MFixed', '7M']
+main_folder = r'../../output-tmp'
 nodf, fixeddf, freedf = [pd.read_csv(os.path.join(main_folder, inner_folder, 'figures', 'ppc_rmse.csv'),sep='\t',header=None) 
        for inner_folder in no_fixed_free]
 

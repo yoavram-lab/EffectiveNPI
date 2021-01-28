@@ -22,14 +22,14 @@ sns.set_context('paper', font_scale=1.3)
 red, blue, green = sns.color_palette('Set1', 3)
 
 
-def load_chain(job_id, country, burn_fraction=0.6):
+def load_chain(job_id, country, nburn=2_000_000):
     fname = os.path.join(output_folder, job_id, 'inference', '{}.npz'.format(country))
     inference_data = np.load(fname)
     nsteps, ndim, N, Td1, Td2, model_type = inference_data['params']
+    nchains, nsteps, ndim = inference_data['chain'].shape
     logliks = inference_data['logliks']
     nchains = logliks.size // nsteps
     logliks = logliks.reshape(nchains, nsteps)
-    nburn = int(nsteps*burn_fraction)
     logliks = logliks[:, nburn:]
     return logliks
 
@@ -57,9 +57,9 @@ def WAIC(logliks):
     return -2*(llpd + -p1), -2*(llpd + -p2)
 
 if __name__ == '__main__':    
-    output_folder = r'../output'
+    output_folder = r'../../output-tmp'
     
-    job_ids = ['2020-05-26-Apr11', '2020-06-27-Apr11-notau', '2020-06-25-Apr11-fixedtau']
+    job_ids = ['7M', '7MNoTau', '7MFixed']
     print('Job IDs:')
     print(job_ids)    
     countries = 'Austria Belgium Denmark France Germany Italy Norway Spain Sweden Switzerland United_Kingdom Wuhan'.split(' ')
@@ -79,9 +79,9 @@ if __name__ == '__main__':
             ))
 
     df = pd.DataFrame(results)
-    df.loc[df['job_id'] == '2020-05-26-Apr11', 'job_id'] = 'Free'
-    df.loc[df['job_id'] == '2020-06-27-Apr11-notau', 'job_id'] = 'No'
-    df.loc[df['job_id'] == '2020-06-25-Apr11-fixedtau', 'job_id'] = 'Fixed'
+    df.loc[df['job_id'] == '7M', 'job_id'] = 'Free'
+    df.loc[df['job_id'] == '7MNoTau', 'job_id'] = 'No'
+    df.loc[df['job_id'] == '7MFixed', 'job_id'] = 'Fixed'
     df = df.rename(columns={'country':'Country', 'job_id':'Model'})
     df['Country'] = [x.replace('_', ' ') for x in df['Country']]
     df.loc[df['Country']=='Wuhan', 'Country'] = 'Wuhan China'

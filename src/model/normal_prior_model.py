@@ -20,7 +20,6 @@ class NormalPriorModel:
         self.var_names = ['Z', 'D', 'μ', 'β', 'α1', 'λ', 'α2', 'E0', 'Iu0','Δt0','τ']
         self.τ_prior = self._get_τ_prior()
 
-
     def log_likelihood(self, θ):
         Z, D, μ, β, α1, λ, α2, E0, Iu0, Δt0, τ = θ
         X = self.X
