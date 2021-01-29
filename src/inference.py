@@ -145,7 +145,7 @@ if __name__ == '__main__':
         cases_and_dates = cases_and_dates[cases_and_dates['date']<=args.up_to_date]
     start_date = find_start_day(cases_and_dates)
     X = np.array(cases_and_dates[cases_and_dates['date'] >= start_date]['cases'])
-    model = ModelClass(country_name, X, start_date, N, get_first_NPI_date(country_name), get_last_NPI_date(country_name), params_bounds, Td1, Td2)
+    model = ModelClass(country_name, X, start_date, N, get_last_NPI_date(country_name), get_first_NPI_date(country_name), params_bounds, Td1, Td2)
 
     ndim = len(model.var_names)
     nwalkers = 50
