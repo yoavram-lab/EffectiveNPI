@@ -343,7 +343,7 @@ We therefore decided to use the more informative truncated normal prior for $\ta
 Other priors follow \citet{Li2020}, with the following exceptions.
 $\lambda$ is used to ensure transmission rates are lower after the start of the NPIs ($\lambda < 1$).
 We checked values of $\Delta t$ larger than five days and found they generally produce lower likelihood and unreasonable parameter estimates, and therefore chose $\mathit{Uniform}(1,5)$ as the prior for $\Delta t$.
-We also tried to estimate the value of $p_t$ before and after $\tau$, instead of keeping it fixed at $1/9$ and $1/6$. The model with fixed values was supported by the evidence (lower WAIC, see below) in 9 of 12 countries. Moreover, the estimates for Wuhan, China were $1/9$ and $1/6$, as in \citet{Li2020}. 
+We also tried to estimate the value of $p_t$ before and after $\tau$, instead of keeping it fixed at $1/9$ and $1/6$. The model with fixed values was supported by the evidence (lower WAIC, see~\autoref{eq:WAIC}) in 9 of 12 countries. Moreover, the estimates for Wuhan, China were $1/9$ and $1/6$, as in \citet{Li2020}. 
 
 The posterior distribution of the model parameters $P(\theta \mid \vec{X})$ is estimated using the affine-invariant ensemble sampler for Markov chain Monte Carlo (MCMC)~\citep{Goodman2010}, implemented in the \texttt{emcee} Python package~\citep{Foreman-Mackey2013}.
 We use the default configuration with the stretch move and a stretch scale parameter $a=2$.
@@ -411,8 +411,8 @@ Credible intervals (CI) are calculated as the highest density intervals~\citep{K
 We compare the posterior predictive plots of a model with  free~$\tau$ with those of a model with~$\tau$ fixed at~$\tau^*$ and a model without~$\tau$ (i.e. transmission and reporting rates are constant).
 All three models were fitted to case data up to Apr~11, 2020, used to predict out-of-sample case data up to Apr~24, 2020, and these predictions were then compared to the real case data. 
 The model with free~$\tau$ clearly produces better and less variable predictions~(\autoref{fig:ppc}):
-In all 11 european countries, the expected posterior RMSE (root mean squared error) of the out-of-sample predictions is lowest for the model with a free~$\tau$ (\autoref{table:RMSE}).
-When we compare the models using WAIC~(\autoref{eq:WAIC}), the model with free~$\tau$ is strongly preferred in 9 out of 12 countries, the exceptions being Norway (only marginal preference), Sweden, and Denmark (\autoref{table:WAIC}).
+In 7 of 11 European countries, the expected posterior RMSE (root mean squared error) of the out-of-sample predictions is lowest for the model with a free~$\tau$ (\autoref{table:RMSE}). The RMSE is lower for the fixed~$\tau$ model in Denmark, Norway, and Sweden, where the difference is small (<9\%) and Switzerland, where the estimated and official dates match (\autoref{fig:tau-summary}). 
+A similar trend appears when we compare the models using WAIC~(\autoref{eq:WAIC}: the model with free~$\tau$ is strongly preferred in 9 out of 12 regions, the exceptions being Denmark, Norway, and Switzerland (\autoref{table:WAIC}).
 Indeed, we estimate low effect of NPIs on transmission in Denmark and Sweden (i.e. $\lambda=0.7$ and $0.74$, respectively; see~\autoref{table:estimated-params}).
 This may interfere with the inference of $\tau$ due to unidentifiability. 
 Notably, the data for Sweden and Denmark do not have a single "peak" during the evaluated dates, possibly leading to wide credible intervals on $\tau$ (\autoref{fig:tau-summary}) and poor WAIC in the model with free~$\tau$, whereas the duration between the first and last interventions was especially long in Norway (\autoref{table:NPI_dates}).
@@ -506,7 +506,7 @@ However, the credible interval for the effective start date in Germany is narrow
 The significantly earlier estimate of $\hat{\tau}$ relative to $\tau^*$ can suggest that early NPIs in Germany more effectively reduced transmission rates compared to other countries. Another possible interpretation is that the German population anticipated the lockdown and reacted before it started.
 
 We also estimate an early effective start of NPIs in Denmark, Norway, and Sweden.
-However, the credible intervals are quite wide (\autoref{fig:tau-summary}), and in Denmark and Sweden the evidence did not support the model with free~$\tau$ over the model with $\tau$ fixed at the official date (\autoref{table:WAIC}).
+However, the credible intervals are quite wide (\autoref{fig:tau-summary}), and the evidence did not support the model with free~$\tau$ over the model with $\tau$ fixed at the official date (Tables~\ref{table:RMSE} and~\ref{table:WAIC}).
 Indeed, Denmark and Sweden had the smallest estimated effect of NPIs on transmission rates, which  probably hinders our ability to estimate $\tau$ in these countries (\autoref{table:estimated-params}).
 Moreover, in Sweden the number of daily cases continued to grow through Apr~11, rather than "peak" (\autoref{fig:ppc}). 
 In Denmark, the opposite occurred: there were seemingly two "peaks", on Mar~11 and on Apr~8 (\autoref{fig:ppc}); the first "peak" may be a result of stochastic events, for example due to a large cluster of cases or an accumulation of tests.
@@ -664,7 +664,7 @@ We thank Yinon M. Bar-On, Lilach Hadany, Oren Kolodny, and Zohar Yakhini. % Tim 
 
 
 
-\pagebreak
+%\pagebreak
 \section*{Supplementary Material}
 \beginsupplement % https://support.authorea.com/en-us/article/how-to-create-an-appendix-section-or-supplementary-information-1g25i5a/
 
@@ -699,10 +699,10 @@ We thank Yinon M. Bar-On, Lilach Hadany, Oren Kolodny, and Zohar Yakhini. % Tim 
     ]{../figures/Table-RMSE.csv}
 \caption*{
 	Expected posterior predictive RMSE (root mean squared error) for models  with: no $\tau$ at all, \emph{No}; $\tau$ fixed at the official last NPI date $\tau^*$, \emph{Fixed}; and free parameter $\tau$, \emph{Free}.
-	In all cases, the model with free parameter $\tau$ has the lowest RMSE.
+	In 7 of 11 cases, the model with free parameter $\tau$ has the lowest RMSE.
 	Models were fitted to case data up to Apr~11, 2020, and then used to generate 1,000 predictions up to Apr~24 by sampling model parameters from the posterior distribution.
 	These predictions were then compared to the real data using RMSE, and the mean RMSE value is shown in the table for each country and model. 
-	Bold values emphasize cases in which the \emph{Free} model has the lowest RMSE.
+	Bold values highlight the model with the lowest RMSE.
 }
 \label{table:RMSE}
 \end{table}
@@ -722,7 +722,7 @@ We thank Yinon M. Bar-On, Lilach Hadany, Oren Kolodny, and Zohar Yakhini. % Tim 
     every last row/.style={after row=\hline},
     ]{../figures/Table-WAIC.csv} 
 \caption*{
-	WAIC (widely applicable information criterion; \autoref{eq:WAIC})~\citep{gelman2013bayesian} values for models  with: no $\tau$ at all, \emph{No}; $\tau$ fixed at the official last NPI date $\tau^*$, \emph{Fixed}; and free parameter $\tau$, \emph{Free}. WAIC values are scaled as a deviance measure: lower values imply higher predictive accuracy and a difference of 2 is a popular threshold for model comparison~\citep{Kass1995}. Bold values emphasize cases in which the \emph{Free} model has the lowest WAIC.
+	WAIC (widely applicable information criterion; \autoref{eq:WAIC})~\citep{gelman2013bayesian} values for models  with: no $\tau$ at all, \emph{No}; $\tau$ fixed at the official last NPI date $\tau^*$, \emph{Fixed}; and free parameter $\tau$, \emph{Free}. WAIC values are scaled as a deviance measure: lower values imply higher predictive accuracy and a difference of 2 is a popular threshold for model comparison~\citep{Kass1995}. Bold values highlight the model with the lowest WAIC.
 } 
 \label{table:WAIC}
 \end{table}
