@@ -27,12 +27,12 @@ We demonstrate that differences between the official and effective start of NPIs
 # Inference results
 
 Inference results (prior samples, reports) are saved to iCloud in the following folders:
-- 2020-06-23-Mar28: inference up to Mar 28, 2020; used to calibrate model
-- 2020-05-26-Apr11: inference up to Apr 11, 2020; main model
-- 2020-06-25-Apr11-fixedtau; inference up to Apr 11 with τ=τ* fixed at official data
-- 2020-06-27-Apr11-notau: inference up to Apr 11 without τ, ie no change point
-- 2020-05-27-Apr4: inference up to Apr 4
-- 2020-05-25-Apr24: inference up to Apr 24
+- 2020-06-23-Mar28: inference up to Mar 28, 2020; 1M iterations; used to calibrate model
+- 7M: inference up to Apr 11, 2020; 7M iterations; main model
+- 7MFixed; inference up to Apr 11 with τ=τ* fixed at official data
+- 7MFixedNoTau: inference up to Apr 11 without τ, ie no change point
+- 2020-05-27-Apr4: inference up to Apr 4; 1M iterations
+- 2020-05-25-Apr24: inference up to Apr 24; 1M iterations
 
 # License
 
