@@ -36,51 +36,53 @@ Inference results (prior samples, reports) are saved to iCloud in the following 
 
 # Instructions
 
-To run mcmc, execute `inference.py`. Run `python inference.py -h` for usage.
-It uses the cases data from '../data' folder and persists the resulted mcmc chains at '../output-tmp/dir_name/inference/country_name.npz'
+To run the inference, execute `src/inference.py`. Run `python inference.py -h` for usage.
+It uses the cases data from `data` folder and persists the inferred chains to `output-tmp/dir_name/inference/country_name.npz`.
 
-To reproduce all the figures following scripts can be executed in the order:
+To reproduce all the figures, the following scripts are executed in order:
 1. `make_report.ipynb` 
-- analyzes mcmc chains and persist summary csv and plots to ‘…dir_name/tables/’, and ‘…dir_name/figures/‘
-2. python `Fig_tau_summary.py` dir_name
-- uses csv report from the previous step and constructs Fig-tau-summary.pdf (Figure 1)
-3. python `Fig_tau_posterior.py` dir_name country/all -q
-- prepares country_τ_posterior.pdf figures (Figure 2)
-- ppc.sh can be used to run it for each country
-4. python `Fig_ppc.py` 7M country green/red
-- prepares country_ppc_long.pdf for Figure S4
-5. python `Table_estimated_params.py` dir_name
+- analyzes inferred chains and persists summary table and plots to `dir_name/tables`, and `dir_name/figures`
+2. `python Fig_tau_summary.py dir_name`
+- uses summary report from the previous step and constructs `Fig-tau-summary.pdf` (Figure 1)
+3. `python Fig_tau_posterior.py dir_name country_name/all -q`
+- prepares `country_τ_posterior.pdf` figures (Figure 2)
+- `ppc.sh` can be used to run it for all countries
+4. `python Fig_ppc.py 7M country green/red`
+- prepares `country_ppc_long.pdf` for Figure S4
+5. `python Table_estimated_params.py dir_name`
 - prepares Table 2
-6. python `Fig_trace_tau.py` dir_name country
-- prepares country_trace.pdf for Figure S3
-7. python `Fig-autocorr.py` dir_name
-- prepares Fig-autocorr.pdf for Figure S2
+6. `python Fig_trace_tau.py dir_name country_name`
+- prepares `country_trace.pdf` for Figure S3
+7. `python Fig-autocorr.py dir_name`
+- prepares `Fig-autocorr.pdf` for Figure S2
 8. `compare_posteriors.ipynb`
 - checks that different inference runs result in similar posterior
-9. python `Fig_joint_tau_lambda.py` dir_name country
-- produces country_joint.pdf for Figure S6.
-Notice, it has hardcoded number of burning steps (2M) and it removes one bad chain for Spain
-10. python `Re.py` dir_name country
-- prepare Re.csv file that is necessary for executing Re.ipynb (Figure S7 Fig_RE2.pdf) and Fig_Re.py (Figure 4)
-- Re.sh can be used to run for every country
+9. `python Fig_joint_tau_lambda.py dir_name country_name`
+- produces `country_joint.pdf` for Figure S6.
+- Notice, this has hardcoded number of burning steps (2M) and it removes one bad chain for Spain
+10. `python Re.py dir_name country_name`
+- prepare a `Re.csv` file that is necessary for executing `Re.ipynb` (Figure S7 Fig_RE2.pdf) and `Fig_Re.py` (Figure 4)
+- `Re.sh` can be used to run for every country
 11. `Re.ipynb` 
-- prepares Fig_RE2.pdf for Figure S7
-12. python `Fig_Re.py`
-- prepares Fig_RE.pdf for Figure 4
+- prepares `Fig_RE2.pdf` for Figure S7
+12. `python Fig_Re.py`
+- prepares `Fig_RE.pdf` for Figure 4
 13. `Table-WAIC.py`
 - prepares Table-WAIC.csv by comparing different models (Table S2)
-14. `Table-RMSE.p`
-- prepares Table-RMSE.csv (Table S1)
+14. `Table-RMSE.py`
+- prepares `Table-RMSE.csv` (Table S1)
 15. `Fig1.ipynb`
-- prepares Figure 1 :)
+- prepares Figure 1.
 16. `Fig_NPI_dates.py`
 - prepares Figure S1
 
 Other files:
-- `model` folder contains all the models, when NormalPriorModel is the main model and other models inherit from it.
-- `plot_utils.py` is the main file that is used for loading mcmc chains and preparing plots. See `make_report.ipynb` for it usage in jupyter
+- `model` folder contains all the models: `NormalPriorModel` is the main model and other models inherit from it.
+- `plot_utils.py` is the main file that is used for loading inferred chains and preparing plots. See `make_report.ipynb` for it usage in Jupyter
 - `model_selection_reports` folder contains some additional model comparisons that were done
 
 # License
 
-Source code and results released under CC-BY-SA 4.0 license.
+Source code and results released under CC-BY 4.0 license.
+
+<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons Licence" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
