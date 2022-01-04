@@ -3,7 +3,7 @@
 
 Repository for paper:
 
-> Kohanovski I, Obolski U, Ram Y. (2022) [Inferring the effective start dates of non-pharmaceutical interventions during COVID-19 outbreaks](https://doi.org/10.1016/j.ijid.2021.12.364). International Journal of Infectious Diseases. doi:10.1016/j.ijid.2021.12.364; also on [medRxiv](http://doi.org/10.1101/2020.05.24.20092817).
+> Kohanovski Ilia, Obolski Uri, Ram Yoav (2022) [Inferring the effective start dates of non-pharmaceutical interventions during COVID-19 outbreaks](https://doi.org/10.1016/j.ijid.2021.12.364). International Journal of Infectious Diseases. doi:10.1016/j.ijid.2021.12.364; also on [medRxiv](http://doi.org/10.1101/2020.05.24.20092817).
 
 # Data
 
