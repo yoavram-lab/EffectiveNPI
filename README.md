@@ -1,5 +1,5 @@
 # Inferring the effective start dates of non-pharmaceutical interventions during COVID-19 outbreaks
-## Ilia Kohanovski, Uri Obolski, [Yoav Ram](http://www.yoavram.com)
+## Ilia Kohanovski, [Uri Obolski](http://uriobols.wixsite.com), [Yoav Ram](http://www.yoavram.com)
 
 Repository for paper:
 
