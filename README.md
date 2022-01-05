@@ -37,18 +37,19 @@ Inference results (prior samples, reports) are saved to iCloud in the following 
 # Instructions
 
 To run the inference, execute `src/inference.py`. Run `python inference.py -h` for usage.
-It uses the cases data from `data` folder and persists the inferred chains to `output-tmp/dir_name/inference/country_name.npz`.
+It uses the cases data from `data` folder and persists the inferred chains to `output-tmp/dir_name/inference/country_name.npz`. `dir_name` is defined by the date of the execution and provided '--ver-desc' parameter (short description of the version). `dir_name` is passed as input parameter for different scripts.
 
 To reproduce all the figures, the following scripts are executed in order:
-1. `make_report.ipynb` 
+1. `make_report.ipynb` - change `dir_name` and execute all cells
 - analyzes inferred chains and persists summary table and plots to `dir_name/tables`, and `dir_name/figures`
 2. `python Fig_tau_summary.py dir_name`
-- uses summary report from the previous step and constructs `Fig-tau-summary.pdf` (Figure 1)
+- uses summary report from the previous step and constructs `Fig-tau-summary.pdf` (Figures 1 and S5)
 3. `python Fig_tau_posterior.py dir_name country_name/all -q`
 - prepares `country_τ_posterior.pdf` figures (Figure 2)
-- `ppc.sh` can be used to run it for all countries
-4. `python Fig_ppc.py 7M country green/red`
+- `tau.sh` can be used to run it for all countries
+4. `python Fig_ppc.py dir_name country green/red/blue` - green/red/blue is the color of the plotted lines
 - prepares `country_ppc_long.pdf` for Figure S4
+- `ppc.sh` can be used to run it for all countries
 5. `python Table_estimated_params.py dir_name`
 - prepares Table 2
 6. `python Fig_trace_tau.py dir_name country_name`
@@ -63,7 +64,7 @@ To reproduce all the figures, the following scripts are executed in order:
 10. `python Re.py dir_name country_name`
 - prepare a `Re.csv` file that is necessary for executing `Re.ipynb` (Figure S7 Fig_RE2.pdf) and `Fig_Re.py` (Figure 4)
 - `Re.sh` can be used to run for every country
-11. `Re.ipynb` 
+11. `Re.ipynb` - change if needed the dir names (job_id_free, job_id_fixed) and run all cells
 - prepares `Fig_RE2.pdf` for Figure S7
 12. `python Fig_Re.py`
 - prepares `Fig_RE.pdf` for Figure 4
@@ -71,9 +72,7 @@ To reproduce all the figures, the following scripts are executed in order:
 - prepares Table-WAIC.csv by comparing different models (Table S2)
 14. `Table-RMSE.py`
 - prepares `Table-RMSE.csv` (Table S1)
-15. `Fig1.ipynb`
-- prepares Figure 1.
-16. `Fig_NPI_dates.py`
+15. `Fig_NPI_dates.py`
 - prepares Figure S1
 
 Other files:
