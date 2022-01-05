@@ -82,13 +82,13 @@ To reproduce all the figures, the following scripts are executed in order:
 
 Other files:
 - `model` folder contains all the models:
- - `NormalPriorModel` is the main model and other models inherit from it.
- - `NormalPriorModel` with truncanted normal distribution prior for τ. 
- - `UniformPriorModel` with uniform distribution prior for τ.
- - `FixedTauModel` with fixed τ defined by the official NPI date.
- - `NoTauModel` assumes there were no transmission and reporting rate changes for all the period.
- - `NormalPriorFreepModel` has additional parameters `Td1` and `Td2` with uniform prior that correspond to confirmation time in days before and after τ, respectively.
- - `NormalPriorNegativeBinModel` uses Negative Binomial distribution instead of Poisson for drawing the number of daily confirmed cases.
+  - `NormalPriorModel` is the main model and other models inherit from it.
+  - `NormalPriorModel` with truncanted normal distribution prior for τ. 
+  - `UniformPriorModel` with uniform distribution prior for τ.
+  - `FixedTauModel` with fixed τ defined by the official NPI date.
+  - `NoTauModel` assumes there were no transmission and reporting rate changes for all the period.
+  - `NormalPriorFreepModel` has additional parameters `Td1` and `Td2` with uniform prior that correspond to confirmation time in days before and after τ, respectively.
+  - `NormalPriorNegativeBinModel` uses Negative Binomial distribution instead of Poisson for drawing the number of daily confirmed cases.
 - `plot_utils.py` is the main file that is used for loading inferred chains and preparing plots. See `make_report.ipynb` for it usage in Jupyter
 - `model_selection_reports` folder contains some additional model comparisons that were done
 
