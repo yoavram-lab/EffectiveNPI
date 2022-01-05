@@ -36,7 +36,7 @@ Inference results (prior samples, reports) are saved to iCloud in the following 
 
 # Instructions
 
-To run the inference, execute `src/inference.py`. Run `python inference.py -h` for usage.\\
+To run the inference, execute `src/inference.py`. Run `python inference.py -h` for usage.//
 It uses the cases data from `data` folder and persists the inferred chains to `output-tmp/dir_name/inference/country_name.npz`. `dir_name` is defined by the date of the execution and provided '--ver-desc' parameter (short description of the version). `dir_name` is passed as input parameter for different scripts.
 
 To reproduce all the figures, the following scripts are executed in order:
@@ -76,7 +76,7 @@ To reproduce all the figures, the following scripts are executed in order:
 - prepares Figure S1
 
 Other files:
-- `model` folder contains all the models: `NormalPriorModel` is the main model and other models inherit from it.\\
+- `model` folder contains all the models: `NormalPriorModel` is the main model and other models inherit from it.//
 The models are: `NormalPriorModel` - with truncanted normal distribution prior for $\tau$. `UniformPriorModel` - with uniform distribution prior for $\tau$. `FixedTauModel` - with fixed $\tau$ defined by the official NPI date. `NoTauModel` - assumes there were no transmission and reporting rate changes for all the period. `NormalPriorFreepModel` - has additional parameters Td1, Td2 with uniform prior that corresponds to confirmation time in days before $\tau$ (Td1) and after $\tau$ (Td2). `NormalPriorNegativeBinModel` - use Negative Binomial distribution instead of Poisson for the model calculation of confirmed cases.
 - `plot_utils.py` is the main file that is used for loading inferred chains and preparing plots. See `make_report.ipynb` for it usage in Jupyter
 - `model_selection_reports` folder contains some additional model comparisons that were done
