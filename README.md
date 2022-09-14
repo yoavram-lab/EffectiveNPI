@@ -3,7 +3,7 @@
 
 Repository for paper:
 
-> Kohanovski I, Obolski U, Ram Y. (2022) [Inferring the effective start dates of non-pharmaceutical interventions during COVID-19 outbreaks](https://doi.org/10.1016/j.ijid.2021.12.364). International Journal of Infectious Diseases. doi:10.1016/j.ijid.2021.12.364; also on [medRxiv](http://doi.org/10.1101/2020.05.24.20092817).
+> Kohanovski Ilia, Obolski Uri, Ram Yoav (2022) [Inferring the effective start dates of non-pharmaceutical interventions during COVID-19 outbreaks](https://doi.org/10.1016/j.ijid.2021.12.364). International Journal of Infectious Diseases. doi:10.1016/j.ijid.2021.12.364; also on [medRxiv](http://doi.org/10.1101/2020.05.24.20092817).
 
 # Data
 
@@ -36,51 +36,65 @@ Inference results (prior samples, reports) are saved to iCloud in the following 
 
 # Instructions
 
-To run mcmc, execute `inference.py`. Run `python inference.py -h` for usage.
-It uses the cases data from '../data' folder and persists the resulted mcmc chains at '../output-tmp/dir_name/inference/country_name.npz'
+To run the inference, run 
+```
+python src/inference.py
+```
+Run with the `-h` option for usage instructions
 
-To reproduce all the figures following scripts can be executed in the order:
-1. `make_report.ipynb` 
-- analyzes mcmc chains and persist summary csv and plots to ‘…dir_name/tables/’, and ‘…dir_name/figures/‘
-2. python `Fig_tau_summary.py` dir_name
-- uses csv report from the previous step and constructs Fig-tau-summary.pdf (Figure 1)
-3. python `Fig_tau_posterior.py` dir_name country/all -q
-- prepares country_τ_posterior.pdf figures (Figure 2)
-- ppc.sh can be used to run it for each country
-4. python `Fig_ppc.py` 7M country green/red
-- prepares country_ppc_long.pdf for Figure S4
-5. python `Table_estimated_params.py` dir_name
+The script uses the case data from `data` folder and persists the inferred chains to `output-tmp/dir_name/inference/country_name.npz`. `dir_name` is defined by the date of the execution and the provided '--ver-desc' option (short description of the version). `dir_name` is then passed as an argument for scripts described below.
+
+To reproduce all the figures, the following scripts are executed in order:
+1. `make_report.ipynb` - set the `dir_name` variable and execute all cells
+- analyzes inferred chains and persists summary table and plots to `dir_name/tables`, and `dir_name/figures`
+2. `python Fig_tau_summary.py dir_name`
+- uses summary report from the previous step and constructs `Fig-tau-summary.pdf` (Figures 1 and S5)
+3. `python Fig_tau_posterior.py dir_name country_name/all -q`
+- prepares `country_τ_posterior.pdf` figures (Figure 2)
+- `tau.sh` can be used to run it for all countries
+4. `python Fig_ppc.py dir_name country green/red/blue` - green/red/blue is the color of the plotted lines
+- prepares `country_ppc_long.pdf` for Figure S4
+- `ppc.sh` can be used to run it for all countries
+5. `python Table_estimated_params.py dir_name`
 - prepares Table 2
-6. python `Fig_trace_tau.py` dir_name country
-- prepares country_trace.pdf for Figure S3
-7. python `Fig-autocorr.py` dir_name
-- prepares Fig-autocorr.pdf for Figure S2
+6. `python Fig_trace_tau.py dir_name country_name`
+- prepares `country_trace.pdf` for Figure S3
+7. `python Fig-autocorr.py dir_name`
+- prepares `Fig-autocorr.pdf` for Figure S2
 8. `compare_posteriors.ipynb`
 - checks that different inference runs result in similar posterior
-9. python `Fig_joint_tau_lambda.py` dir_name country
-- produces country_joint.pdf for Figure S6.
-Notice, it has hardcoded number of burning steps (2M) and it removes one bad chain for Spain
-10. python `Re.py` dir_name country
-- prepare Re.csv file that is necessary for executing Re.ipynb (Figure S7 Fig_RE2.pdf) and Fig_Re.py (Figure 4)
-- Re.sh can be used to run for every country
-11. `Re.ipynb` 
-- prepares Fig_RE2.pdf for Figure S7
-12. python `Fig_Re.py`
-- prepares Fig_RE.pdf for Figure 4
+9. `python Fig_joint_tau_lambda.py dir_name country_name`
+- produces `country_joint.pdf` for Figure S6.
+- Notice, this has hardcoded number of burning steps (2M) and it removes one bad chain for Spain
+10. `python Re.py dir_name country_name`
+- prepare a `Re.csv` file that is necessary for executing `Re.ipynb` (Figure S7 Fig_RE2.pdf) and `Fig_Re.py` (Figure 4)
+- `Re.sh` can be used to run for every country
+11. `Re.ipynb` - change if needed the dir names (job_id_free, job_id_fixed) and run all cells
+- prepares `Fig_RE2.pdf` for Figure S7
+12. `python Fig_Re.py`
+- prepares `Fig_RE.pdf` for Figure 4
 13. `Table-WAIC.py`
 - prepares Table-WAIC.csv by comparing different models (Table S2)
-14. `Table-RMSE.p`
-- prepares Table-RMSE.csv (Table S1)
-15. `Fig1.ipynb`
-- prepares Figure 1 :)
-16. `Fig_NPI_dates.py`
+14. `Table-RMSE.py`
+- prepares `Table-RMSE.csv` (Table S1)
+15. `Fig_NPI_dates.py`
 - prepares Figure S1
 
 Other files:
-- `model` folder contains all the models, when NormalPriorModel is the main model and other models inherit from it.
-- `plot_utils.py` is the main file that is used for loading mcmc chains and preparing plots. See `make_report.ipynb` for it usage in jupyter
+- `model` folder contains all the models:
+  - `NormalPriorModel` is the main model and other models inherit from it.
+  - `NormalPriorModel` with truncanted normal distribution prior for τ. 
+  - `UniformPriorModel` with uniform distribution prior for τ.
+  - `FixedTauModel` with fixed τ defined by the official NPI date.
+  - `NoTauModel` assumes there were no transmission and reporting rate changes for all the period.
+  - `NormalPriorFreepModel` has additional parameters `Td1` and `Td2` with uniform prior that correspond to confirmation time in days before and after τ, respectively.
+  - `NormalPriorNegativeBinModel` uses Negative Binomial distribution instead of Poisson for drawing the number of daily confirmed cases.
+- `plot_utils.py` is the main file that is used for loading inferred chains and preparing plots. See `make_report.ipynb` for it usage in Jupyter
 - `model_selection_reports` folder contains some additional model comparisons that were done
 
 # License
 
-Source code and results released under CC-BY-SA 4.0 license.
+- Source code: MIT License.
+- Data: see original repositories.
+- Manuscript: see publisher.
+- Other content: <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
